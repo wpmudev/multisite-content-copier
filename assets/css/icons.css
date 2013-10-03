@@ -1,0 +1,15 @@
+#icon-origin {
+	background: transparent url( '../images/icon32.png' ) no-repeat ;
+}
+
+#toplevel_page_origin_main_page .wp-menu-image,
+#toplevel_page_origin_network_page .wp-menu-image {
+	background: transparent url( '../images/icons.png' ) no-repeat 0px -27px;
+}
+
+#toplevel_page_origin_main_page.wp-has-current-submenu .wp-menu-image,
+#toplevel_page_origin_main_page:hover .wp-menu-image,
+#toplevel_page_origin_network_page.wp-has-current-submenu .wp-menu-image,
+#toplevel_page_origin_network_page:hover .wp-menu-image {
+	background: transparent url( '../images/icons.png' ) no-repeat 0px -0px;
+}

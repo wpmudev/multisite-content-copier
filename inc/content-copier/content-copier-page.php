@@ -4,7 +4,6 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 	
 	private $pages_ids;
 	private $copy_images;
-	private $new_page_id;
 
 	public function __construct( $orig_blog_id, $args ) {
 		parent::__construct( $orig_blog_id );
@@ -31,7 +30,11 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 
 	public function copy() {
 		foreach( $this->pages_ids as $page_id ) {
-			$this->copy_post( $page_id );
+			$new_page_id = $this->copy_post( $page_id );
+
+			if ( $this->copy_images ) {
+				$this->copy_media( $post_id, $new_page_id );
+			}
 		}
 	}
 
@@ -46,19 +49,13 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 		$new_page_id = wp_insert_post( $postarr );
 
 		if ( $new_page_id ) {
-			$this->new_page_id = $new_page_id;
-
 			// Insert post meta
 			foreach ( $orig_post_meta as $post_meta ) {
-				update_post_meta( $this->new_page_id, $post_meta->meta_key, $post_meta->meta_value );
-			}
-
-			if ( $this->copy_images ) {
-				$this->copy_media( $post_id, $this->new_page_id );
-			}
+				update_post_meta( $new_page_id, $post_meta->meta_key, $post_meta->meta_value );
+			}			
 		}
-		
 
-		// Insert post meta in the new blog
+		return $new_page_id;
+		
 	}
 }

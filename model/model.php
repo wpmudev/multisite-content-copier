@@ -79,12 +79,12 @@ class Multisite_Content_Copier_Model {
 
 		$sql = "CREATE TABLE $this->queue_table_name (
               ID bigint(20) NOT NULL AUTO_INCREMENT,
-              blog_id bigint(20),
+              dest_blog_id bigint(20),
+              src_blog_id bigint(20),
               settings text DEFAULT '',
               PRIMARY KEY  (ID)
             )  ENGINE=MyISAM $this->db_charset_collate;";
        	
-       	// TODO: Uncomment this whenever you want to create the schema
         dbDelta($sql);
 	}
 
@@ -105,6 +105,16 @@ class Multisite_Content_Copier_Model {
 
 	public function deactivate_model() {
 		delete_site_option( $this->schema_created_option_slug );
+	}
+
+	public function get_queued_elements_for_blog( $blog_id ) {
+		global $wpdb;
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare( "SELECT * FROM $this->queue_table_name WHERE dest_blog_id = %d", $blog_id )
+		);
+
+		return $results;
 	}
 
 

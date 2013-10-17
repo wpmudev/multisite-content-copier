@@ -20,8 +20,7 @@ abstract class Multisite_Content_Copier_Copier {
 
 	abstract protected function get_defaults_args();
 
-	protected function copy_media( $post_id, $new_post_id ) {
-
+	public function get_all_media_in_post( $post_id ) {
 		switch_to_blog( $this->orig_blog_id );
 		$orig_post = get_post( $post_id );
 
@@ -81,29 +80,52 @@ abstract class Multisite_Content_Copier_Copier {
 
 		}
 
+		$attachments = array();
+		foreach ( $attachments_ids as $id ) {
+			$attachments[] = get_post( $id );
+		}
+
 		// 2. Now the thumbnail
 		$thumbnail = get_post( get_post_thumbnail_id( $orig_post->ID ) );
 		
 		// 3. Now we get all the images that are children of the post
-		$images = get_posts(
+		$images = get_children(
 			array(
 				'post_parent' => $orig_post->ID,
 				'post_type' => 'attachment',
 				'numberposts' => -1,
-				'orderby'        => 'title',
-				'order'           => 'ASC',
 				'post_mime_type' => 'image',
 				'exclude' => ! empty( $thumbnail->ID ) ? $thumbnail->ID : 0,
 			)
 		);
 
-		$orig_images = $images;
+		// We need to exclude those that are already in no_attachments
+		$orig_images = array();
+		foreach ( $images as $image ) {
+
+			$metadata = get_post_meta( $image->ID, '_wp_attached_file', true );
+
+			$found = false;
+			foreach ( $images_no_attachments as $no_attachment ) {
+				
+				if ( strpos( $metadata, $no_attachment['name'] ) > -1 ) {
+					$found = true;
+					break;
+				}
+			}
+
+			if ( ! $found )
+				$orig_images[] = $image;
+		}
+
 
 		if ( ! empty( $thumbnail ) ) {
 			$thumbnail->is_thumbnail = true;
 			// All of them joined
 			$orig_images = array_merge( array( $thumbnail ), $orig_images );
 		}
+
+		//var_dump($orig_images);
 
 		$already_found_attachments = array();
 		foreach ( $orig_images as $orig_image ) {
@@ -130,6 +152,36 @@ abstract class Multisite_Content_Copier_Copier {
 		// Now we have here all the attachments data. We can start to upload, attach and replace in the post
 		$images_as_attachments = array_merge( $orig_images, $images );		
 
+		restore_current_blog();
+
+		// Removing repeated attachments
+		$new_images_as_attachments = array();
+		$ids_arr = array();
+		foreach ( $images_as_attachments as $attachment ) {
+			if ( ! in_array( $attachment->ID, $ids_arr ) ) {
+				$ids_arr[] = $attachment->ID;
+				$new_images_as_attachments[] = $attachment;
+			}
+		}
+
+		$images_as_attachments = $new_images_as_attachments;
+
+		return array(
+			'attachments' => $images_as_attachments,
+			'no_attachments' => $images_no_attachments
+		);
+
+		
+	}
+
+	public function copy_media( $post_id, $new_post_id ) {
+
+		$all_media = $this->get_all_media_in_post( $post_id );
+
+		$images_as_attachments = $all_media['attachments'];
+		$images_as_no_attachments = $all_media['no_attachments'];
+
+		switch_to_blog( $this->orig_blog_id );
 		// Just adding some custom properties
 		foreach ( $images_as_attachments as $key => $image ) {
 			$dir = get_attached_file( $image->ID );
@@ -147,11 +199,21 @@ abstract class Multisite_Content_Copier_Copier {
 
 		}
 
+		$orig_upload_dir = wp_upload_dir();
+
+		$orig_upload_basedir = $orig_upload_dir['basedir'];
+		$orig_upload_baseurl = $orig_upload_dir['baseurl'];
 		restore_current_blog();
 
+		//var_dump($images_as_attachments);
 		// Now uploading the files
 		$upload_dir = wp_upload_dir();
+
 		$tmp_upload_dir = $upload_dir['basedir'];
+
+		// We'll need to change the images URLs in the post content
+		$new_post = get_post( $new_post_id );
+		$new_post_content = $new_post->post_content;
 
 		foreach ( $images_as_attachments as $image ) {
 
@@ -162,7 +224,7 @@ abstract class Multisite_Content_Copier_Copier {
 			$new_file = $upload_dir['path'] . "/$new_file_name";
 
 
-			if ( copy( $image->path, $new_file ) ) {
+			if ( @copy( $image->path, $new_file ) ) {
 
 				// Set correct file permissions
 				$stat = stat( dirname( $new_file ));
@@ -187,7 +249,6 @@ abstract class Multisite_Content_Copier_Copier {
 					'post_content' => '',
 					'post_status' => 'inherit'
 				);
-
 				$attach_id = wp_insert_attachment( $attachment, $new_file, $new_post_id );
 
 				// you must first include the image.php file
@@ -203,10 +264,7 @@ abstract class Multisite_Content_Copier_Copier {
 					update_post_meta( $new_post_id, '_thumbnail_id', $attach_id );
 				}
 				else {
-					// Now we need to change the images URLs in the post content
-					$new_post = get_post( $new_post_id );
-					$new_post_content = $new_post->post_content;
-
+					
 					// First we try with the plain file
 					$new_post_content = str_replace( $image->guid, $attachment['guid'], $new_post_content );
 					
@@ -220,14 +278,50 @@ abstract class Multisite_Content_Copier_Copier {
 						}
 					}
 
-					$new_post->post_content = $new_post_content;
-
-					// Updating the post
-					wp_insert_post( $new_post );
+					
 				}
 				
 			}
 		}
+		var_dump($images_as_no_attachments);
+		foreach ( $images_as_no_attachments as $image ) {
+
+			// Source dirs info
+			$orig_file = $orig_upload_basedir . '/' . dirname( $image['orig_upload_file'] ) . '/' . basename( $image['orig_src'] );
+			$orig_base_file = $orig_upload_basedir . '/' . $image['orig_upload_file'];
+
+			// Source src info
+			$orig_url_file = $orig_upload_baseurl . '/' . dirname( $image['orig_upload_file'] ) . '/' . basename( $image['orig_src'] );
+			$orig_url_base_file = $orig_upload_baseurl . '/' . $image['orig_upload_file'];
+
+			// New filenames
+			$new_file_name = basename( $image['orig_src'] );
+			$new_base_file_name = basename( $image['orig_upload_file'] );
+
+			// Destination dirs info
+			$dest_file = $upload_dir['path'] . '/' . $new_file_name;
+			$dest_base_file = $upload_dir['path'] . '/' . $new_base_file_name;
+
+			// Destination src info
+			$dest_url_file = $upload_dir['baseurl'] . '/' . dirname( $image['orig_upload_file'] ) . '/' . basename( $image['orig_src'] );
+			$dest_url_base_file = $upload_dir['baseurl'] . '/' . $image['orig_upload_file'];
+
+			// Copying the file with width and height in its name
+			if ( @copy( $orig_file, $dest_file ) ) {
+				$new_post_content = str_replace( $orig_url_file, $dest_url_file, $new_post_content );
+			}
+
+			// Copying the base file
+			if ( @copy( $orig_base_file, $dest_base_file ) ) {
+				$new_post_content = str_replace( $orig_url_base_file, $dest_url_base_file, $new_post_content );
+			}
+
+		}
+
+		$new_post->post_content = $new_post_content;
+
+		// Updating the post
+		wp_insert_post( $new_post );
 
 	}
 

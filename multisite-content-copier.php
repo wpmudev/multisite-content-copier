@@ -29,7 +29,7 @@ class Multisite_Content_Copier {
 
 		if ( ! is_multisite() ) {
 			add_action( 'all_admin_notices', array( &$this, 'display_not_multisite_notice' ) );
-			return;
+			return false;
 		}
 
 		$this->includes();
@@ -49,17 +49,8 @@ class Multisite_Content_Copier {
 		// we activate the plugin
 		register_deactivation_hook( __FILE__, array( &$this, 'deactivate' ) );
 
-		//add_action('init',array( &$this,'test'));
-
 	}
 
-	public function test() {
-		switch_to_blog( 83 );
-		
-		$copier = new Multisite_Content_Copier_Page_Copier( 27, array( 'pages_ids' => 103, 'copy_images' => true ) );
-		$copier->copy();
-		restore_current_blog();
-	}
 
 	public function display_not_multisite_notice() {
 		?>
@@ -193,4 +184,5 @@ class Multisite_Content_Copier {
 
 }
 
-new Multisite_Content_Copier();
+global $multisite_content_copier_plugin;
+$multisite_content_copier_plugin = new Multisite_Content_Copier();

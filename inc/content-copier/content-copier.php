@@ -125,7 +125,6 @@ abstract class Multisite_Content_Copier_Copier {
 			$orig_images = array_merge( array( $thumbnail ), $orig_images );
 		}
 
-		//var_dump($orig_images);
 
 		$already_found_attachments = array();
 		foreach ( $orig_images as $orig_image ) {
@@ -205,7 +204,6 @@ abstract class Multisite_Content_Copier_Copier {
 		$orig_upload_baseurl = $orig_upload_dir['baseurl'];
 		restore_current_blog();
 
-		//var_dump($images_as_attachments);
 		// Now uploading the files
 		$upload_dir = wp_upload_dir();
 
@@ -283,7 +281,7 @@ abstract class Multisite_Content_Copier_Copier {
 				
 			}
 		}
-		var_dump($images_as_no_attachments);
+
 		foreach ( $images_as_no_attachments as $image ) {
 
 			// Source dirs info
@@ -369,6 +367,7 @@ abstract class Multisite_Content_Copier_Copier {
 			'post_date_gmt' 			=> $post_object->post_date_gmt, // Update dates?
 			'post_content' 				=> $post_object->post_content,
 			'post_title' 				=> $post_object->post_title,
+			'post_name' 				=> $post_object->post_name,
 			'post_excerpt' 				=> $post_object->post_excerpt,
 			'post_status' 				=> $post_object->post_status,
 			'post_password' 			=> $post_object->post_password,
@@ -384,6 +383,97 @@ abstract class Multisite_Content_Copier_Copier {
 			'filter' 					=> $post_object->filter,
 			'format_content' 			=> $post_object->format_content,
 		);
+	}
+
+	public function get_orig_post_parent( $orig_post_id ) {
+		$orig_post = get_blog_post( $this->orig_blog_id, $orig_post_id );
+		return $orig_post->post_parent;
+	}
+
+	public function update_dest_post_parent( $dest_post_id, $dest_parent_post_id ) {
+		wp_update_post( array( 'ID' => $dest_post_id, 'post_parent' => $dest_parent_post_id ) );
+	}
+
+	public function update_post_date( $post_id, $date ) {
+		$date = apply_filters( 'mcc_update_copied_post_date', $date, $post_id );
+		wp_update_post( array( 'ID' => absint( $post_id ), 'post_date' => $date ) );
+	}
+
+	public function copy_comments( $post_id, $new_post_id ) {
+		switch_to_blog( $this->orig_blog_id );
+		// Source comments
+		$orig_comments = get_comments(
+			array(
+				'post_id' => $post_id
+			)
+		);
+
+		restore_current_blog();
+
+		$parent_children_rels = array();
+		$new_comments = array();
+		foreach( $orig_comments as $orig_comment ) {
+			$_orig_comment = $orig_comment;
+
+			// The source comment ID
+			$orig_comment_ID = $_orig_comment->comment_ID;
+
+			$_orig_comment->comment_post_ID = $new_post_id;
+			$_orig_comment = (array)$_orig_comment;
+
+			// We don't need the source ID for the new comment
+			unset( $_orig_comment['comment_ID'] );
+
+			$new_comment_ID = wp_insert_comment( $_orig_comment );
+
+			// Saving the comment data for the next loop
+			$new_comments[ $new_comment_ID ] = get_comment( $new_comment_ID );
+
+			// Parent-child relatioship
+			$parent_children_rels[ $orig_comment_ID ] = $new_comment_ID; 
+
+			do_action( 'mcc_copied_comment', $new_comment_ID );
+
+			// Now the comment meta
+			global $wpdb;
+
+			switch_to_blog( $this->orig_blog_id );
+			$comment_meta = $wpdb->get_results( "SELECT meta_key, meta_value FROM $wpdb->commentmeta WHERE comment_id = $orig_comment_ID" );
+			restore_current_blog();
+
+			if ( ! empty( $comment_meta ) ) {
+				$insert_array = array();
+				foreach ( $comment_meta as $metadata ) {
+					$_metadata = array(
+						'meta_key' => $metadata->meta_key,
+						'meta_value' => $metadata->meta_value
+					);
+					$_metadata = apply_filters( 'mcc_copy_comment_meta', $_metadata, $new_comment_ID );
+					update_comment_meta( $new_comment_ID, $_metadata['meta_key'], $_metadata['meta_value'] );
+				}
+			}
+
+			do_action( 'mcc_copied_comment_meta', $new_comment_ID );
+
+			
+
+		}
+
+		// Setting the new parents correctly
+		foreach ( $new_comments as $new_comment ) {
+			if ( $new_comment->comment_parent > 0 ) {
+				$_new_comment = $new_comment;
+				$_new_comment->comment_parent = $parent_children_rels[ $new_comment->comment_parent ];
+				$_new_comment = (array)$_new_comment;
+				wp_update_comment( $_new_comment );
+
+				do_action( 'mcc_set_comment_parent_children_rel', $_new_comment->comment_ID );
+			}
+
+
+		}
+
+
 	}
 
 }

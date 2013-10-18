@@ -14,6 +14,9 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 
 		$this->pages_ids = is_array( $pages_ids ) ? $pages_ids : array( $pages_ids );
 		$this->copy_images = $copy_images;
+		$this->copy_parents = $copy_parents;
+		$this->update_date = $update_date;
+		$this->copy_comments = $copy_comments;
 
 	}
 
@@ -28,14 +31,53 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 		);
 	}
 
-	public function copy() {
+	public function execute() {
 		foreach( $this->pages_ids as $page_id ) {
-			$new_page_id = $this->copy_post( $page_id );
+			$this->copy( $page_id );
+		}
+	}
 
-			if ( $this->copy_images ) {
-				$this->copy_media( $post_id, $new_page_id );
+	public function copy( $page_id ) {
+		$new_page_id = $this->copy_post( $page_id );
+		$new_parent_page_id = false;
+
+		if ( $this->copy_parents ) {
+			$parent_page_id = $this->get_orig_post_parent( $page_id );
+
+			if ( $parent_page_id ) {
+				$new_parent_page_id = $this->copy_post( $parent_page_id );
+				$this->update_dest_post_parent( $new_page_id, $new_parent_page_id );
 			}
 		}
+
+		if ( $this->copy_images ) {
+			$this->copy_media( $page_id, $new_page_id );
+
+			if ( absint( $new_parent_page_id ) ) {
+				$this->copy_media( $parent_page_id, $new_parent_page_id );
+			}
+		}
+
+		if ( $this->update_date ) {
+			$this->update_post_date( $new_page_id, current_time( 'mysql' ) );
+
+			if ( absint( $new_parent_page_id ) ) {
+				$this->update_post_date( $new_parent_page_id, current_time( 'mysql' ) );
+			}
+		}
+
+		if ( $this->copy_comments ) {
+			$this->copy_comments( $page_id, $new_page_id );
+
+			if ( absint( $new_parent_page_id ) ) {
+				$this->copy_comments( $parent_page_id, $new_parent_page_id );
+			}
+		}
+
+		return array(
+			'new_page_id' => $new_page_id,
+			'new_parent_page_id' => $new_parent_page_id
+		);
 	}
 
 	public function copy_post( $post_id ) {

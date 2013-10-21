@@ -79,8 +79,8 @@ class Multisite_Content_Copier_Model {
 
 		$sql = "CREATE TABLE $this->queue_table_name (
               ID bigint(20) NOT NULL AUTO_INCREMENT,
-              dest_blog_id bigint(20),
               src_blog_id bigint(20),
+              dest_blog_id bigint(20),
               settings text DEFAULT '',
               PRIMARY KEY  (ID)
             )  ENGINE=MyISAM $this->db_charset_collate;";
@@ -115,6 +115,26 @@ class Multisite_Content_Copier_Model {
 		);
 
 		return $results;
+	}
+
+	public function insert_queue_item( $src_blog_id, $dest_blog_id, $settings ) {
+		global $wpdb;
+
+		$wpdb->insert(
+			$this->queue_table_name,
+			array( 
+				'src_blog_id' => $src_blog_id,
+				'dest_blog_id' => $dest_blog_id,
+				'settings' => maybe_serialize( $settings )
+			),
+			array( '%d', '%d', '%s' )
+		);
+	}
+
+	public function delete_queue_item( $id ) {
+		global $wpdb;
+
+		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->queue_table_name WHERE ID = %d", $id ) );
 	}
 
 

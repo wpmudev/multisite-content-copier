@@ -38,3 +38,18 @@ function mcc_is_error() {
 function mcc_show_errors() {
 	Multisite_Content_Copier_Errors_Handler::show_errors_notice();
 }
+
+function mcc_get_queue_for_blog( $blog_id = 0 ) {
+	$model = mcc_get_model();
+
+	if ( ! $blog_id )
+		$blog_id = get_current_blog_id();
+
+	$results = $model->get_queued_elements_for_blog( $blog_id );
+
+	for ( $i = 0; $i < count( $results ); $i++ ) {
+		$results[ $i ]->settings = maybe_unserialize( $results[ $i ]->settings );
+	}
+
+	return $results;
+}

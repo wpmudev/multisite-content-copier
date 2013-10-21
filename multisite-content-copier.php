@@ -38,6 +38,8 @@ class Multisite_Content_Copier {
 
 		add_action( 'init', array( &$this, 'init_plugin' ) );
 
+		add_action( 'init', array( &$this, 'maybe_copy_content' ) );
+
 		add_action( 'plugins_loaded', array( &$this, 'load_text_domain' ) );
 
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
@@ -110,6 +112,7 @@ class Multisite_Content_Copier {
 		// The copier
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
 
 		// Settings Handler
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'settings-handler.php' );
@@ -180,6 +183,28 @@ class Multisite_Content_Copier {
 			'screen_icon_slug' => 'bbu'
 		);
 		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
+	}
+
+	public function maybe_copy_content() {
+
+		if ( ! is_network_admin() && ! get_option( 'mcc_copying' ) ) {
+			update_option( 'mcc_copying', true );
+			$queue = mcc_get_queue_for_blog();
+			foreach ( $queue as $item ) {
+				$settings = $item->settings;
+				$class = $settings['class'];
+
+				$copier = new $class( $item->src_blog_id, $settings );
+				$a = 'aa';
+				$copier->execute();
+
+				$model = mcc_get_model();
+				$model->delete_queue_item( $item->ID );
+
+			}
+			delete_option( 'mcc_copying' );
+		}
+		
 	}
 
 }

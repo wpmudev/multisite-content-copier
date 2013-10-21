@@ -1,9 +1,9 @@
 <?php
 
-class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copier implements Multisite_Content_Copier_Post {
+class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copier {
 	
-	private $pages_ids;
-	private $copy_images;
+	protected $post_ids;
+	protected $copy_images;
 
 	public function __construct( $orig_blog_id, $args ) {
 		parent::__construct( $orig_blog_id );
@@ -12,7 +12,7 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 
 		extract( $settings );
 
-		$this->pages_ids = is_array( $pages_ids ) ? $pages_ids : array( $pages_ids );
+		$this->post_ids = is_array( $post_ids ) ? $post_ids : array( $post_ids );
 		$this->copy_images = $copy_images;
 		$this->copy_parents = $copy_parents;
 		$this->update_date = $update_date;
@@ -23,7 +23,7 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 	protected function get_defaults_args() {
 		return array(
 			'copy_images' => false,
-			'pages_ids' => array(),
+			'post_ids' => array(),
 			'keep_user' => true,
 			'update_date' => false,
 			'copy_parents' => false,
@@ -32,51 +32,51 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 	}
 
 	public function execute() {
-		foreach( $this->pages_ids as $page_id ) {
-			$this->copy( $page_id );
+		foreach( $this->post_ids as $post_id ) {
+			$this->copy( $post_id );
 		}
 	}
 
-	public function copy( $page_id ) {
-		$new_page_id = $this->copy_post( $page_id );
-		$new_parent_page_id = false;
+	public function copy( $post_id ) {
+		$new_post_id = $this->copy_post( $post_id );
+		$new_parent_post_id = false;
 
 		if ( $this->copy_parents ) {
-			$parent_page_id = $this->get_orig_post_parent( $page_id );
+			$parent_post_id = $this->get_orig_post_parent( $post_id );
 
-			if ( $parent_page_id ) {
-				$new_parent_page_id = $this->copy_post( $parent_page_id );
-				$this->update_dest_post_parent( $new_page_id, $new_parent_page_id );
+			if ( $parent_post_id ) {
+				$new_parent_post_id = $this->copy_post( $parent_post_id );
+				$this->update_dest_post_parent( $new_post_id, $new_parent_post_id );
 			}
 		}
 
 		if ( $this->copy_images ) {
-			$this->copy_media( $page_id, $new_page_id );
+			$this->copy_media( $post_id, $new_post_id );
 
-			if ( absint( $new_parent_page_id ) ) {
-				$this->copy_media( $parent_page_id, $new_parent_page_id );
+			if ( absint( $new_parent_post_id ) ) {
+				$this->copy_media( $parent_post_id, $new_parent_post_id );
 			}
 		}
 
 		if ( $this->update_date ) {
-			$this->update_post_date( $new_page_id, current_time( 'mysql' ) );
+			$this->update_post_date( $new_post_id, current_time( 'mysql' ) );
 
-			if ( absint( $new_parent_page_id ) ) {
-				$this->update_post_date( $new_parent_page_id, current_time( 'mysql' ) );
+			if ( absint( $new_parent_post_id ) ) {
+				$this->update_post_date( $new_parent_post_id, current_time( 'mysql' ) );
 			}
 		}
 
 		if ( $this->copy_comments ) {
-			$this->copy_comments( $page_id, $new_page_id );
+			$this->copy_comments( $post_id, $new_post_id );
 
-			if ( absint( $new_parent_page_id ) ) {
-				$this->copy_comments( $parent_page_id, $new_parent_page_id );
+			if ( absint( $new_parent_post_id ) ) {
+				$this->copy_comments( $parent_post_id, $new_parent_post_id );
 			}
 		}
 
 		return array(
-			'new_page_id' => $new_page_id,
-			'new_parent_page_id' => $new_parent_page_id
+			'new_post_id' => $new_post_id,
+			'new_parent_post_id' => $new_parent_post_id
 		);
 	}
 
@@ -88,16 +88,16 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 
 		// Insert post in the new blog ( we should be currently on it)
 		$postarr = $this->get_postarr( $orig_post );
-		$new_page_id = wp_insert_post( $postarr );
+		$new_post_id = wp_insert_post( $postarr );
 
-		if ( $new_page_id ) {
+		if ( $new_post_id ) {
 			// Insert post meta
 			foreach ( $orig_post_meta as $post_meta ) {
-				update_post_meta( $new_page_id, $post_meta->meta_key, $post_meta->meta_value );
+				update_post_meta( $new_post_id, $post_meta->meta_key, $post_meta->meta_value );
 			}			
 		}
 
-		return $new_page_id;
+		return $new_post_id;
 		
 	}
 }

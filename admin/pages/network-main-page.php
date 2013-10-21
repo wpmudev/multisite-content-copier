@@ -4,7 +4,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  	
  	public function __construct( $menu_slug, $capability, $args ) {
  		parent::__construct( $menu_slug, $capability, $args );
- 		$this->steps = array( 1,2,3,4 );
+ 		$this->steps = array( 1,2,3,4, 5 );
 
  		add_action( 'admin_init', array( &$this, 'validate_form' ) );
 
@@ -79,6 +79,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	public function render_content() {
 		$step = $this->get_current_step();
 		$this->render_before_step();
+
 		call_user_func( array( &$this, 'render_step_' . $step ) );
 		$this->render_after_step();
 	}
@@ -115,6 +116,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				<?php wp_nonce_field( 'step_1' ); ?>
 				<ul class="wizardoptions">
 					<li><label><input type="radio" name="action" value="add-page" checked="checked"> <?php _e( 'Add a page', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+					<li><label><input type="radio" name="action" value="add-post"> <?php _e( 'Add a post', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
 				</ul>
 				<p class="submit">
 					<input type="submit" name="submit_step_1" class="button button-primary button-hero alignleft" value="<?php _e( 'Next Step &raquo;', MULTISTE_CC_LANG_DOMAIN ); ?>">
@@ -131,10 +133,12 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				<?php wp_nonce_field( 'step_2' ); ?>
 				<?php
 					switch ( $action ) {
-						case 'add-page': {
+						case 'add-page': 
+						case 'add-post': {
 							$this->render_blog_selector();
 							break;
 						}
+						
 					}
 				?>
 				<p class="submit">
@@ -197,7 +201,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			<hr/>
 			<h3><?php _e( 'Additional options', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 			<ul>
-				<li><label><input type="checkbox" name="copy_images"> <?php _e( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+				<li><label><input type="checkbox" name="settings[copy_images]"> <?php _e( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+				<li><label><input type="checkbox" name="settings[update_date]"> <?php _e( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+				<li><label><input type="checkbox" name="settings[copy_parents]"> <?php _e( 'Copy page/post parents', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+				<li><label><input type="checkbox" name="settings[copy_comments]"> <?php _e( 'Copy comments', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
 			</ul>
 
 		<?php
@@ -206,7 +213,38 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 
 	private function render_step_4() {
+		
+
+		?>
+			<form action="" method="post">
+				<h3><?php _e( 'Select the destination blog ID', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+				<?php wp_nonce_field( 'step_4' ); ?>
+				Blog ID: <input type="text" name="dest_blog_id" value="">
+
+				<p class="submit">
+					<input type="submit" name="submit_step_4" class="button button-primary button-hero alignleft" value="<?php _e( 'Next Step &raquo;', MULTISTE_CC_LANG_DOMAIN ); ?>">
+				</p>
+			</form>
+		<?php
+
+	}
+
+	public function render_step_5() {
 		$pages = $_GET['pages'];
+		$settings = $_GET['settings'];
+
+		if ( 'false' == $settings )
+			$settings = array();
+
+		$settings['class'] = 'Multisite_Content_Copier_Page_Copier';
+		$settings['post_ids'] = $pages;
+
+		$src_blog_id = $_GET['blog_id'];
+		$dest_blog_id = $_GET['dest_blog_id'];
+
+		$model = mcc_get_model();
+		$model->insert_queue_item( $src_blog_id, $dest_blog_id, $settings );
+
 	}
 
 	public function validate_form() {
@@ -265,6 +303,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				if ( empty( $_POST['pages'] ) )
  					mcc_add_error( 'select-page', __( 'You must select at least one page', MULTISTE_CC_LANG_DOMAIN ) );
 
+
  				if ( ! mcc_is_error() ) {
  					$url = add_query_arg(
 	 					array(
@@ -272,14 +311,35 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	 						'action' => $_POST['action'],
 	 						'blog_id' => absint( $_POST['blog_id'] ),
 	 						'pages' => $_POST['pages'],
-	 						'copy_images' => isset( $_POST['copy_images'] ) ? 'true' : 'false'
+	 						'settings' => isset( $_POST['settings'] ) ? $_POST['settings'] : 'false'
 	 					),
 	 					$this->get_permalink()
 	 				);
+
  					wp_redirect( $url );
  				}
  			}
- 		}
+
+ 			if ( 4 == $step && isset( $_POST['submit_step_4'] ) ) {
+ 				if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'step_4' ) )
+ 					return false;
+
+ 				if ( ! isset( $_POST['dest_blog_id'] ) || ! $blog_details = get_blog_details( absint( $_POST['dest_blog_id'] ) ) )
+ 					mcc_add_error( 'blog-id', __( 'The Blog ID does not exist', MULTISTE_CC_LANG_DOMAIN ) );
+
+ 				if ( ! mcc_is_error() ) {
+						$url = add_query_arg(
+							array(
+								'step' => 5,
+								'dest_blog_id' => absint( $_POST['dest_blog_id'] )
+							)
+						);
+						wp_redirect( $url );
+					}
+		 		}
+ 			}
+
+ 			
 	}
 
 }

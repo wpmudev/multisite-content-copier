@@ -198,7 +198,10 @@ abstract class Multisite_Content_Copier_Copier {
 
 		}
 
+		// When switching between blogs, wp_upload_dir function
+		add_filter( 'upload_dir', array( &$this, 'set_correct_upload_url' ) );
 		$orig_upload_dir = wp_upload_dir();
+		remove_filter( 'upload_dir', array( &$this, 'set_correct_upload_url' ) );
 
 		$orig_upload_basedir = $orig_upload_dir['basedir'];
 		$orig_upload_baseurl = $orig_upload_dir['baseurl'];
@@ -223,7 +226,6 @@ abstract class Multisite_Content_Copier_Copier {
 
 
 			if ( @copy( $image->path, $new_file ) ) {
-
 				// Set correct file permissions
 				$stat = stat( dirname( $new_file ));
 				$perms = $stat['mode'] & 0000666;
@@ -259,7 +261,7 @@ abstract class Multisite_Content_Copier_Copier {
 
 				// If the image is a thumbnail we'll need to update the post meta
 				if ( $image->is_thumbnail ) {
-					update_post_meta( $new_post_id, '_thumbnail_id', $attach_id );
+					set_post_thumbnail( $new_post_id, $attach_id );
 				}
 				else {
 					
@@ -301,7 +303,7 @@ abstract class Multisite_Content_Copier_Copier {
 			$dest_base_file = $upload_dir['path'] . '/' . $new_base_file_name;
 
 			// Destination src info
-			$dest_url_file = $upload_dir['baseurl'] . '/' . dirname( $image['orig_upload_file'] ) . '/' . basename( $image['orig_src'] );
+			$dest_url_file = $upload_dir['baseurl'] . $upload_dir['subdir'] . '/' . basename( $image['orig_src'] );
 			$dest_url_base_file = $upload_dir['baseurl'] . '/' . $image['orig_upload_file'];
 
 			// Copying the file with width and height in its name
@@ -321,6 +323,89 @@ abstract class Multisite_Content_Copier_Copier {
 		// Updating the post
 		wp_insert_post( $new_post );
 
+	}
+
+	/**
+	 * When switching between blogs wp_upload_dir()
+	 * may return an incorrect URL for images
+	 * This code is directly copied from WP core but with minor changes
+	 * 
+	 * @return Array
+	 */
+	public function set_correct_upload_url( $upload_dir ) {
+		$siteurl = get_option( 'siteurl' );
+		$upload_path = trim( get_option( 'upload_path' ) );
+
+		if ( empty( $upload_path ) || 'wp-content/uploads' == $upload_path ) {
+			$dir = WP_CONTENT_DIR . '/uploads';
+		} elseif ( 0 !== strpos( $upload_path, ABSPATH ) ) {
+			// $dir is absolute, $upload_path is (maybe) relative to ABSPATH
+			$dir = path_join( ABSPATH, $upload_path );
+		} else {
+			$dir = $upload_path;
+		}
+
+		if ( !$url = get_option( 'upload_url_path' ) ) {
+			if ( empty($upload_path) || ( 'wp-content/uploads' == $upload_path ) || ( $upload_path == $dir ) ) {
+				$url = get_option('siteurl') . '/wp-content/uploads';
+				if ( ! ( is_main_site() && defined( 'MULTISITE' ) ) ) {
+					if ( ! get_site_option( 'ms_files_rewriting' ) ) {
+						// If ms-files rewriting is disabled (networks created post-3.5), it is fairly straightforward:
+						// Append sites/%d if we're not on the main site (for post-MU networks). (The extra directory
+						// prevents a four-digit ID from conflicting with a year-based directory for the main site.
+						// But if a MU-era network has disabled ms-files rewriting manually, they don't need the extra
+						// directory, as they never had wp-content/uploads for the main site.)
+
+						if ( defined( 'MULTISITE' ) )
+							$ms_dir = '/sites/' . get_current_blog_id();
+						else
+							$ms_dir = '/' . get_current_blog_id();
+
+						$dir .= $ms_dir;
+						$url .= $ms_dir;
+
+					} elseif ( defined( 'UPLOADS' ) && ! ms_is_switched() ) {
+						// Handle the old-form ms-files.php rewriting if the network still has that enabled.
+						// When ms-files rewriting is enabled, then we only listen to UPLOADS when:
+						//   1) we are not on the main site in a post-MU network,
+						//      as wp-content/uploads is used there, and
+						//   2) we are not switched, as ms_upload_constants() hardcodes
+						//      these constants to reflect the original blog ID.
+						//
+						// Rather than UPLOADS, we actually use BLOGUPLOADDIR if it is set, as it is absolute.
+						// (And it will be set, see ms_upload_constants().) Otherwise, UPLOADS can be used, as
+						// as it is relative to ABSPATH. For the final piece: when UPLOADS is used with ms-files
+						// rewriting in multisite, the resulting URL is /files. (#WP22702 for background.)
+
+						if ( defined( 'BLOGUPLOADDIR' ) )
+							$dir = untrailingslashit( BLOGUPLOADDIR );
+						else
+							$dir = ABSPATH . UPLOADS;
+						$url = trailingslashit( $siteurl ) . 'files';
+					}
+				}
+
+				$baseurl = $url;
+
+				$subdir = '';
+				if ( get_option( 'uploads_use_yearmonth_folders' ) ) {
+					// Generate the yearly and monthly dirs
+					$time = current_time( 'mysql' );
+					$y = substr( $time, 0, 4 );
+					$m = substr( $time, 5, 2 );
+					$subdir = "/$y/$m";
+				}
+
+				$url .= $subdir;
+
+				$upload_dir['url'] = $url;
+				$upload_dir['baseurl'] = $baseurl;
+			}
+				
+		}
+
+		return $upload_dir;
+		
 	}
 
 	protected function get_orig_blog_post( $post_id ) {
@@ -346,15 +431,6 @@ abstract class Multisite_Content_Copier_Copier {
 
 		return $post_meta;
 
-	}
-
-	protected function get_orig_blog_post_terms( $post_id ) {
-
-		switch_to_blog( $this->orig_blog_id );
-
-		$post_terms = wp_get_object_terms( $post_id, array( 'category', 'post_tag' ), array( 'fields' => 'all' ) );
-
-		restore_current_blog();
 	}
 
 	protected function get_postarr( $post_object ) {
@@ -467,7 +543,7 @@ abstract class Multisite_Content_Copier_Copier {
 				$_new_comment = (array)$_new_comment;
 				wp_update_comment( $_new_comment );
 
-				do_action( 'mcc_set_comment_parent_children_rel', $_new_comment->comment_ID );
+				do_action( 'mcc_set_comment_parent_children_rel', $_new_comment['comment_ID'] );
 			}
 
 
@@ -478,7 +554,4 @@ abstract class Multisite_Content_Copier_Copier {
 
 }
 
-interface Multisite_Content_Copier_Post {
-	public function copy_post( $post_id );
-}
 

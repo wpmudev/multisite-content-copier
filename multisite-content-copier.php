@@ -180,9 +180,10 @@ class Multisite_Content_Copier {
 			'menu_title' => __( 'Content Copier', MULTISTE_CC_LANG_DOMAIN ),
 			'page_title' => __( 'Multisite Content Copier', MULTISTE_CC_LANG_DOMAIN ),
 			'network_menu' => true,
-			'screen_icon_slug' => 'bbu'
+			'screen_icon_slug' => 'mcc'
 		);
 		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
+
 	}
 
 	public function maybe_copy_content() {

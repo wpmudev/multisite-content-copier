@@ -119,6 +119,7 @@ class Multisite_Content_Copier {
 
 		// Admin Pages
 		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-main-page.php' );
+		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-blogs-groups.php' );
 	}
 
 	/**
@@ -183,6 +184,18 @@ class Multisite_Content_Copier {
 			'screen_icon_slug' => 'mcc'
 		);
 		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
+
+		$args = array(
+			'menu_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
+			'page_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
+			'network_menu' => true,
+			'parent' => 'mcc_network_page',
+			'tabs' => array(
+				'groups' => __( 'Groups', MULTISTE_CC_LANG_DOMAIN ),
+				'sites' => __( 'Sites', MULTISTE_CC_LANG_DOMAIN )
+			)
+		);
+		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_blogs_groups_page', 'manage_network', $args );
 
 	}
 

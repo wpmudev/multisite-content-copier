@@ -53,3 +53,14 @@ function mcc_get_queue_for_blog( $blog_id = 0 ) {
 
 	return $results;
 }
+
+function mcc_get_groups_dropdown( $selected = '' ) {
+	$model = mcc_get_model();
+	$groups = $model->get_blogs_groups();
+	?>
+		<option value=""><?php _e( 'Select a group', MULTISTE_CC_LANG_DOMAIN ); ?></option>
+	    <?php foreach ( $groups as $group ): ?>
+	    	<option value="<?php echo $group['ID']; ?>"><?php echo $group['group_name']; ?></option>
+		<?php endforeach; ?>
+	<?php
+}

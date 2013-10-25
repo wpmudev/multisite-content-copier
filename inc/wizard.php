@@ -16,13 +16,14 @@ class MCC_Wizard {
 		$this->steps = $steps;
 		$this->baseurl = $url;
 
-		if ( isset( $_REQUEST['step'] ) && in_array( $_REQUEST['step'], $steps ) ) {
+
+
+		if ( isset( $_REQUEST['step'] ) && in_array( $_REQUEST['step'], $steps ) )
 			$this->current_step = $_REQUEST['step'];
-		}
-		else {
+		else
 			$this->current_step = isset( $steps[0] ) ? $steps[0] : '';
-			$_SESSION['mcc_wizard']['step'] = $this->current_step;
-		}
+
+		$this->set_value( 'step',$this->current_step );
 
 	}
 
@@ -72,5 +73,9 @@ class MCC_Wizard {
 			$this->set_value( 'step', $step );
 			wp_redirect( add_query_arg( 'step', $step, $this->baseurl ) );
 		}
+	}
+
+	public function debug() {
+		var_dump( $_SESSION['mcc_wizard'] );
 	}
 }

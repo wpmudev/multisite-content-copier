@@ -79,17 +79,57 @@ jQuery(document).ready(function($) {
 			}).done(function( data ) {
 				if ( data !== '' ) {
 					$( '#posts-list' ).append( data );
-
 					current_posts[ data.post_id ] = data.post_id;
-					$( '.mcc-remove-post' ).click( function(e)  {
-						e.preventDefault();
-						var post_id = $(this).data('post-id');
-						$('#post-' + post_id ).remove(); 
-					});
+					update_post_click_event();
 				}
 			});
 		}
 	});
+
+	var current_blogs = {};
+	$( '#add-blog' ).click( function( e ) { 
+		e.preventDefault();
+
+		var blog_id = $( '#blog_id' ).val().trim();
+
+		blog_id = parseInt( blog_id );
+
+		if ( ! isNaN( blog_id ) && blog_id !== 0 ) {
+			var data = {
+				action: 'mcc_retrieve_single_blog_data',
+				blog_id: $('#blog_id').val()
+			};
+			$.ajax({
+				url: ajaxurl,
+				data: data,
+				type: 'post',
+			}).done(function( data ) {
+				if ( data !== '' ) {
+					$( '#blogs-list' ).append( data );
+					current_blogs[ data.blog_id ] = data.blog_id;
+					update_blog_click_event();
+				}
+			});
+		}
+	});
+
+	update_blog_click_event();
+	function update_blog_click_event() {
+		$( '.mcc-remove-blog' ).click( function(e)  {
+			e.preventDefault();
+			var blog_id = $(this).data('blog-id');
+			$('#blog-' + blog_id ).remove(); 
+		});
+	}
+
+	update_post_click_event();
+	function update_post_click_event() {
+		$( '.mcc-remove-post' ).click( function(e)  {
+			e.preventDefault();
+			var post_id = $(this).data('post-id');
+			$('#post-' + post_id ).remove(); 
+		});
+	}
 
 
 

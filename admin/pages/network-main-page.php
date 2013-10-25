@@ -13,17 +13,54 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  		add_action( 'admin_init', array( &$this, 'validate_form' ) );
 
         add_action( 'admin_enqueue_scripts', array( $this, 'add_javascript' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'add_styles' ) );
 
         add_action( 'wp_ajax_mcc_get_sites_search', array( &$this, 'get_sites_search' ) );
         add_action( 'wp_ajax_mcc_get_posts_search', array( &$this, 'get_posts_search' ) );
-        add_action( 'wp_ajax_mcc_retrieve_single_post_data', array( &$this, 'mcc_retrieve_single_post_data' ) );
+        add_action( 'wp_ajax_mcc_retrieve_single_post_data', array( &$this, 'retrieve_single_post_data' ) );
+        add_action( 'wp_ajax_mcc_retrieve_single_blog_data', array( &$this, 'retrieve_single_blog_data' ) );
+        add_action( 'wp_ajax_mcc_insert_all_blogs_queue', array( &$this, 'insert_all_blogs_queue' ) );
  	}
 
  	public function init_wizard() {
+
  		$this->wizard = new MCC_Wizard(
- 			array( 1,2,3,4,5 ),
+ 			array( '1','2','3','4','5', '6' ),
  			$this->get_permalink()
  		);
+ 	}
+
+ 	public function insert_all_blogs_queue() {
+ 		global $wpdb, $current_site;
+
+ 		$current_site_id = ! empty ( $current_site ) ? $current_site->id : 1;
+
+ 		$offset = $_POST['offset'];
+ 		$interval = $_POST['interval'];
+
+ 		$results = $wpdb->get_col(
+ 			$wpdb->prepare(
+ 				"SELECT blog_id FROM $wpdb->blogs 
+ 				WHERE site_id = %d
+ 				AND blog_id != %d
+ 				ORDER BY blog_id
+ 				LIMIT %d, %d",
+ 				$current_site_id,
+ 				$this->wizard->get_value( 'content_blog_id' ),
+ 				$offset,
+ 				$interval
+ 			)
+ 		);
+
+ 		if ( ! empty( $results ) ) {
+ 			$model = mcc_get_model();
+			foreach ( $results as $dest_blog_id ) {
+				$model->insert_queue_item( $this->wizard->get_value( 'content_blog_id' ), $dest_blog_id, $this->wizard->get_value( 'settings' ) );	
+			}
+ 		}
+
+ 		die();
+ 		
  	}
 
  	public function add_javascript() {
@@ -34,7 +71,21 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	    		wp_enqueue_script( 'jquery-ui-autocomplete' );
 	 			wp_enqueue_style( 'mcc-jquery-ui-styles', MULTISTE_CC_ASSETS_URL . 'css/jquery-ui.css' );
 	 		}
+	 		if ( 5 == $this->wizard->get_current_step() ) {
+	 			wp_enqueue_script( 'jquery-ui-progressbar', MULTISTE_CC_ASSETS_URL . 'jquery-ui/jquery.ui.progressbar.js', array( 'jquery-ui-core', 'jquery-ui-widget' ) );
+	 		}
     	}
+ 	}
+
+ 	public function add_styles() {
+ 		if ( get_current_screen()->id == $this->page_id . '-network' ) {
+ 			wp_enqueue_style( 'mcc-wizard-css', MULTISTE_CC_ASSETS_URL . 'css/wizard.css' );
+
+ 			if ( 5 == $this->wizard->get_current_step() ) {
+				wp_enqueue_style( 'jquery-ui-batchcreate', MULTISTE_CC_ASSETS_URL . 'jquery-ui/jquery-ui-1.10.3.custom.min.css', array() );
+	 		}
+    	}
+
  	}
 
  	public function get_sites_search() {
@@ -121,6 +172,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 	}
 
+
 	public function set_wp_query_filter( $where = '' ) {
 		global $wpdb;
 		$s = $_POST['term'];
@@ -129,7 +181,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		return $where;
 	}
 
-	public function mcc_retrieve_single_post_data() {
+	public function retrieve_single_post_data() {
 		$blog_id = absint( $_POST['blog_id'] );
 		$post_id = absint( $_POST['post_id'] );
 
@@ -137,13 +189,29 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 		$returning = '';
 		if ( ! empty( $post ) ) {
-			$returning .= $this->get_post_row( $post->ID, $post->post_title );
+			$returning .= $this->get_row_list( 'post', $post->ID, $post->post_title );
 		}
 
 		echo $returning;
 
 		die();
 			
+	}
+
+	public function retrieve_single_blog_data() {
+		$blog_id = absint( $_POST['blog_id'] );
+
+		$details = get_blog_details( $blog_id );
+
+		$returning = '';
+		if ( ! empty( $details ) ) {
+			$returning .= $this->get_row_list( 'blog', $blog_id, $details->blogname );
+		}
+
+		echo $returning;
+
+		die();
+
 	}
 	
 
@@ -263,7 +331,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		$pages = get_pages();
 		restore_current_blog();
 
-		$current_selected_pages = $this->wizard->get_value( 'pages' );
+		$current_selected_pages = $this->wizard->get_value( 'posts_ids' );
 		if ( ! is_array( $current_selected_pages ) )
 			$current_selected_pages = array();
 
@@ -333,26 +401,62 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		<?php
 	}
 
-	public function get_post_row( $id, $title ) {
-		ob_start();
-		?>
-			<li id="<?php echo $id; ?>">
-				<?php echo $id; ?> - <?php echo $title; ?> [<a class="mcc-remove-post" href="" data-post-id="<?php echo $id; ?>"><?php _e( 'Remove', MULTISTE_CC_LANG_DOMAIN ); ?></a>]
-				<input type="hidden" name="posts_ids[]" value="<?php echo $id; ?>"></input>
-			</li>
-		<?php
-		return ob_get_clean();
-	}
-
 
 	private function render_step_4() {
 		
 
 		?>
 			<form action="" method="post">
-				<h3><?php _e( 'Select the destination blog ID', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+				<h3><?php _e( 'Select the destination blog/s', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 				<?php wp_nonce_field( 'step_4' ); ?>
-				Blog ID: <input type="text" name="dest_blog_id" value="">
+				<p>
+					<label>
+						<input type="radio" name="dest_blog_type" value="all" <?php checked( $this->wizard->get_value( 'dest_blog_type' ), 'all' ); ?>> 
+						<?php _e( 'All of them', MULTISTE_CC_LANG_DOMAIN ); ?>
+					</label>
+				</p>
+				<p>
+					<label>
+						<input type="radio" name="dest_blog_type" value="list" <?php checked( $this->wizard->get_value( 'dest_blog_type' ), 'list' ); ?>>
+						<?php _e( 'Select by blog ID', MULTISTE_CC_LANG_DOMAIN ); ?>
+					</label>
+				</p>
+				<div id="blogs-list-wrap">
+					<input name="blog_id" type="text" id="blog_id" class="small-text" placeholder="<?php _e( 'Blog ID', MULTISTE_CC_LANG_DOMAIN ); ?>"/>
+		            <div style="display:inline-block"class="ui-widget">
+		                <label for="search_for_blog"> <?php _e( 'Or search by blog path', MULTISTE_CC_LANG_DOMAIN ); ?> 
+							<input type="text" id="autocomplete" data-type="sites" class="medium-text">
+							<input type="button" class="button-secondary" name="add-blog" id="add-blog" value="<?php _e( 'Add blog', MULTISTE_CC_LANG_DOMAIN ); ?>"></input>
+		                </label>
+		            </div>
+
+		            <div id="blogs-list">
+		            	<?php 
+		            		$blogs_ids = $this->wizard->get_value( 'dest_blogs_ids' );
+		            		if ( ! empty( $blogs_ids ) && is_array( $blogs_ids ) ) {
+		            			foreach ( $blogs_ids as $blog_id ) {
+		            				$blog_details = get_blog_details( $blog_id );
+		            				if ( ! empty( $blog_details ) )
+		            					echo $this->get_row_list( 'blog', $blog_id, $blog_details->blogname );
+		            			}
+		            		}	
+		            	?>
+
+		            </div>
+		        </div>
+
+		        <p>
+					<label>
+						<input type="radio" name="dest_blog_type" value="group" <?php checked( $this->wizard->get_value( 'dest_blog_type' ), 'group' ); ?>>
+						<?php _e( 'Select by blogs group', MULTISTE_CC_LANG_DOMAIN ); ?>
+					</label>
+				</p>
+				<select name="group">
+					<?php mcc_get_groups_dropdown(); ?>
+				</select>
+
+				
+				
 
 				<p class="submit">
 					<input type="submit" name="submit_step_4" class="button button-primary button-hero alignleft" value="<?php _e( 'Next Step &raquo;', MULTISTE_CC_LANG_DOMAIN ); ?>">
@@ -362,24 +466,129 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 	}
 
-	public function render_step_5() {
-		$pages = $this->wizard->get_value( 'pages' );
+	public function get_row_list( $slug, $id, $title ) {
+		ob_start();
+		?>
+			<li id="<?php echo $slug; ?>-<?php echo $id; ?>">
+				<span class="id-box"><?php echo $id; ?></span> <span class="title-box"><?php echo $title; ?></span> <span class="remove-box"><a class="mcc-remove-<?php echo $slug; ?>" href="" data-<?php echo $slug; ?>-id="<?php echo $id; ?>">X</a></span>
+				<input type="hidden" name="<?php echo $slug; ?>s_ids[]" value="<?php echo $id; ?>"></input>
+			</li>
+		<?php
+		return ob_get_clean();
+	}
+
+	public function render_step_5() {		
+
+		$src_blog_id = $this->wizard->get_value( 'content_blog_id' );
+		$dest_blog_type = $this->wizard->get_value( 'dest_blog_type' );
 		$settings = $this->wizard->get_value( 'settings' );
+		$dest_blogs_ids = $this->wizard->get_value( 'dest_blogs_ids' );
+		$posts_ids = $this->wizard->get_value( 'posts_ids' );
 
 		if ( empty( $settings ) )
 			$settings = array();
 
-		$settings['class'] = 'Multisite_Content_Copier_Page_Copier';
-		$settings['post_ids'] = $pages;
+		$action = $this->wizard->get_value( 'mcc_action' );
 
-		$src_blog_id = $this->wizard->get_value( 'content_blog_id' );
-		$dest_blog_id = $this->wizard->get_value( 'dest_blog_id' );
+		if ( 'add-page' == $action ) {
+			$settings['class'] = 'Multisite_Content_Copier_Page_Copier';
+			$settings['post_ids'] = $posts_ids;
+		}
+		if ( 'add-post' == $action ) {
+			$settings['class'] = 'Multisite_Content_Copier_Post_Copier';
+			$settings['post_ids'] = $posts_ids;
+		}
+		
+		if ( 'all' != $dest_blog_type ) {
+			$model = mcc_get_model();
+			foreach ( $dest_blogs_ids as $dest_blog_id ) {
+				$model->insert_queue_item( $src_blog_id, $dest_blog_id, $settings );	
+			}
 
-		$model = mcc_get_model();
-		$model->insert_queue_item( $src_blog_id, $dest_blog_id, $settings );
+			$this->wizard->clean();
 
-		echo "THANKS";
+			?>
+			<p>
+				<?php _e( 'All good', MULTISTE_CC_LANG_DOMAIN ); ?>
+			</p>
+			<?php
+		}
+		else {
+			$this->wizard->set_value( 'settings', $settings );
+			$blogs_count = get_blog_count();
+			?>
+				<div class="processing_result">
+				</div>
+			<?php
+			$this->render_progressbar_js( $blogs_count );
+
+			?>
+			<p>
+				<?php _e( 'Enqueueing all blogs, please do not close or refresh this window', MULTISTE_CC_LANG_DOMAIN ); ?>
+			</p>
+			<?php
+		}
+		
 	}
+
+	public function render_step_6() {
+		$this->wizard->clean();
+		?>
+		<p>
+			<?php _e( 'All good', MULTISTE_CC_LANG_DOMAIN ); ?>
+		</p>
+		<?php
+	}
+
+	private function render_progressbar_js( $items_count ) {
+		?>
+		<script type="text/javascript" >
+			jQuery(function($) {
+
+				var rt_count = 0;
+				var interval = 1;
+				var rt_total = <?php echo $items_count; ?>;
+				var label = 0;
+
+				$('.processing_result')
+					.html('<div id="progressbar" style="margin-top:20px"><div class="progress-label">' + label +'%</div></div>')
+
+				$('#progressbar').progressbar({
+					"value": 0
+				});
+
+				// Initialize processing
+				process_item();
+
+				function process_item () {
+					if ( rt_count >= rt_total ) 
+						return false;
+
+					$.post(
+						ajaxurl, 
+						{
+							"action": "mcc_insert_all_blogs_queue",
+							'offset': rt_count,
+							'interval': interval
+						}, 
+						function(response) {
+							rt_count = rt_count + interval;
+							label = Math.ceil( (rt_count / rt_total) * 100 );
+							if ( label > 100 )
+								label = 100;
+
+							$( '#progressbar' ).progressbar( 'value', label );
+							$( '.progress-label' ).text( label + '%' );
+							process_item();
+							
+						}
+					);
+				}
+			});
+		</script>
+		<?php
+	}
+
 
 	public function validate_form() {
 		if ( isset( $_GET['page'] ) && $this->get_menu_slug() == $_GET['page'] ) {
@@ -438,11 +647,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				if ( ! mcc_is_error() ) {
 
  					if ( 'add-page' == $this->wizard->get_value( 'mcc_action' ) ) {
-	 					$pages = array();
+	 					$posts_ids = array();
 	 					foreach ( $_POST['pages'] as $page_id ) {
-	 						$pages[] = absint( $page_id );
+	 						$posts_ids[] = absint( $page_id );
 	 					} 
-	 					$this->wizard->set_value( 'pages', $pages );
+	 					$this->wizard->set_value( 'posts_ids', $posts_ids );
 	 				}
 
 	 				if ( 'add-post' == $this->wizard->get_value( 'mcc_action' ) ) {
@@ -462,12 +671,63 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'step_4' ) )
  					return false;
 
- 				if ( ! isset( $_POST['dest_blog_id'] ) || ! $blog_details = get_blog_details( absint( $_POST['dest_blog_id'] ) ) )
- 					mcc_add_error( 'blog-id', __( 'The Blog ID does not exist', MULTISTE_CC_LANG_DOMAIN ) );
+ 				$type = '';
+ 				if ( ! isset( $_POST['dest_blog_type'] ) || ! in_array( $_POST['dest_blog_type'], array( 'all', 'list', 'group' ) ) ) {
+ 					mcc_add_error( 'blog-type', __( 'Please, select an option', MULTISTE_CC_LANG_DOMAIN ) );
+ 				}
+ 				else {
+ 					$type = $_POST['dest_blog_type'];
+ 				}
+
+ 				$this->wizard->set_value( 'dest_blog_type', $type );
+
+ 				// saving just in case the error deletes all the data
+ 				if ( isset( $_POST['blogs_ids'] ) && is_array( $_POST['blogs_ids'] ) ) {
+ 					$blogs_ids = array();
+ 					$src_blog_id = $this->wizard->get_value( 'content_blog_id' );
+ 					foreach ( $_POST['blogs_ids'] as $blog_id ) {
+ 						if ( ! in_array( $blog_id, $blogs_ids ) && $src_blog_id != $blog_id )
+ 							$blogs_ids[] = $blog_id;
+ 					}
+ 					$this->wizard->set_value( 'dest_blogs_ids', $blogs_ids );
+ 				}
+ 				
+ 				if ( 'list' == $type ) {
+ 					if ( ! isset( $_POST['blogs_ids'] ) || ! is_array( $_POST['blogs_ids'] ) ) {
+ 						mcc_add_error( 'blog-id', __( 'You have not selected any blog', MULTISTE_CC_LANG_DOMAIN ) );
+ 						return;
+ 					}
+ 					$this->wizard->set_value( 'dest_blogs_ids', $_POST['blogs_ids'] );
+ 				}
+
+ 				if ( 'group' == $type ) {
+ 					if ( empty( $_POST['group'] ) ) {
+ 						mcc_add_error( 'blog-group', __( 'You have not selected any group', MULTISTE_CC_LANG_DOMAIN ) );
+ 						return;
+ 					}
+
+ 					$group = absint ( $_POST['group'] );
+
+ 					$model = mcc_get_model();
+ 					if ( ! $model->is_group( $group ) )
+ 						mcc_add_error( 'wrong-group', __( 'You have selected a wrong group', MULTISTE_CC_LANG_DOMAIN ) );
+
+ 					$blogs = $model->get_blogs_from_group( $group );
+
+ 					if ( empty( $blogs ) ) {
+ 						mcc_add_error( 'wrong-group', __( 'There are no blogs attached to that group.', MULTISTE_CC_LANG_DOMAIN ) );
+ 					}
+ 					else {
+ 						$ids = array();
+ 						foreach ( $blogs as $blog ) {
+ 							$ids[] = $blog->blog_id;
+ 						}
+ 						$this->wizard->set_value( 'dest_blogs_ids', $ids );
+ 					}
+
+ 				}
 
  				if ( ! mcc_is_error() ) {
-					$this->wizard->set_value( 'dest_blog_id', absint( $_POST['dest_blog_id'] ) );
-
 					$this->wizard->go_to_step( '5' );
 		 		}
  			}

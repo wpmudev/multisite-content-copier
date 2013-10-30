@@ -38,7 +38,7 @@ class Multisite_Content_Copier {
 
 		add_action( 'init', array( &$this, 'init_plugin' ) );
 
-		add_action( 'init', array( &$this, 'maybe_copy_content' ) );
+		add_action( 'plugins_loaded', array( &$this, 'maybe_copy_content' ) );
 
 		add_action( 'plugins_loaded', array( &$this, 'load_text_domain' ) );
 
@@ -113,6 +113,7 @@ class Multisite_Content_Copier {
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-plugin.php' );
 
 		// Settings Handler
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'settings-handler.php' );
@@ -201,22 +202,21 @@ class Multisite_Content_Copier {
 
 	public function maybe_copy_content() {
 
-		if ( ! is_network_admin() && ! get_option( 'mcc_copying' ) ) {
-			update_option( 'mcc_copying', true );
+		if ( ! is_network_admin() && ! get_transient( 'mcc_copying' ) ) {
+			set_transient( 'mcc_copying', true, 900 );
 			$queue = mcc_get_queue_for_blog();
 			foreach ( $queue as $item ) {
 				$settings = $item->settings;
 				$class = $settings['class'];
 
 				$copier = new $class( $item->src_blog_id, $settings );
-				$a = 'aa';
 				$copier->execute();
 
 				$model = mcc_get_model();
 				$model->delete_queue_item( $item->ID );
 
 			}
-			delete_option( 'mcc_copying' );
+			delete_transient( 'mcc_copying' );
 		}
 		
 	}

@@ -27,15 +27,20 @@ class MCC_Wizard {
 
 	}
 
+	public function is_initialized() {
+		return isset( $_SESSION['mcc_wizard'] );
+	}
+
+
 	public function get_current_step() {
 		return $this->current_step;
 	}
 
-	public function get_value( $key ) {
+	public function get_value( $key, $default = '' ) {
 		if ( isset( $_SESSION['mcc_wizard'][ $key ] ) )
 			return $_SESSION['mcc_wizard'][ $key ];	
 
-		return '';
+		return $default;
 	}
 
 	public function set_value( $key, $value ) {
@@ -71,7 +76,13 @@ class MCC_Wizard {
 	public function go_to_step( $step ) {
 		if ( in_array( $step, $this->steps ) ) {
 			$this->set_value( 'step', $step );
-			wp_redirect( add_query_arg( 'step', $step, $this->baseurl ) );
+			wp_redirect( $this->get_step_url( $step ) );
+		}
+	}
+
+	public function get_step_url( $step ) {
+		if ( in_array( $step, $this->steps ) ) {
+			return add_query_arg( 'step', $step, $this->baseurl );
 		}
 	}
 

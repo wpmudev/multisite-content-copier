@@ -9,8 +9,9 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  	public function __construct( $menu_slug, $capability, $args ) {
  		parent::__construct( $menu_slug, $capability, $args );
 
- 		add_action( 'admin_init', array( &$this, 'init_wizard' ) );
+ 		add_action( 'admin_init', array( &$this, 'init_wizard' ), 10 );
  		add_action( 'admin_init', array( &$this, 'validate_form' ) );
+ 		
 
         add_action( 'admin_enqueue_scripts', array( $this, 'add_javascript' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'add_styles' ) );
@@ -22,12 +23,16 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
         add_action( 'wp_ajax_mcc_insert_all_blogs_queue', array( &$this, 'insert_all_blogs_queue' ) );
  	}
 
- 	public function init_wizard() {
 
+ 	public function init_wizard() {
  		$this->wizard = new MCC_Wizard(
  			array( '1','2','3','4','5', '6' ),
  			$this->get_permalink()
  		);
+
+ 		$action = $this->wizard->get_value( 'mcc_action' );
+ 		if ( '1' !== $this->wizard->get_current_step() && empty( $action ) )
+ 			echo "HHH";
  	}
 
  	public function insert_all_blogs_queue() {
@@ -251,8 +256,9 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			<form action="" method="post" name="wizardform" id="wizardform">
 				<?php wp_nonce_field( 'step_1' ); ?>
 				<ul class="wizardoptions">
-					<li><label><input type="radio" name="mcc_action" value="add-page" <?php checked( $current_action == 'add-page' || empty( $current_action ) ); ?>> <?php _e( 'Add a page', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-					<li><label><input type="radio" name="mcc_action" value="add-post" <?php checked( $current_action == 'add-post' ); ?>> <?php _e( 'Add a post', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+					<li><label><input type="radio" name="mcc_action" value="add-page" <?php checked( $current_action == 'add-page' || empty( $current_action ) ); ?>> <?php _e( 'Copy pages', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+					<li><label><input type="radio" name="mcc_action" value="add-post" <?php checked( $current_action == 'add-post' ); ?>> <?php _e( 'Copy posts', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+					<li><label><input type="radio" name="mcc_action" value="activate-plugin" <?php checked( $current_action == 'activate-plugin' ); ?>> <?php _e( 'Activate plugins', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
 				</ul>
 				<p class="submit">
 					<input type="submit" name="submit_step_1" class="button button-primary button-hero alignleft" value="<?php _e( 'Next Step &raquo;', MULTISTE_CC_LANG_DOMAIN ); ?>">
@@ -317,6 +323,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 							$this->render_post_selector( $content_blog_id );
 							break;
 						}
+						case 'activate-plugin': {
+							$this->render_plugin_selector();
+							break;
+						}
+
 					}
 				?>
 				<p class="submit">
@@ -401,6 +412,30 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		<?php
 	}
 
+	private function render_plugin_selector() {
+		$current_selected_plugins = $this->wizard->get_value( 'plugins' );
+
+		if ( ! is_array( $current_selected_plugins ) )
+			$current_selected_plugins = array();
+
+		?>
+			<h3><?php _e( 'Select the plugins you want to activate', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+			<p><?php _e( 'Network only or already network activated plugins are not displayed in the list', MULTISTE_CC_LANG_DOMAIN ); ?>
+			<ul id="plugins-list">
+				<?php 
+					$all_plugins = get_plugins();
+					foreach ( $all_plugins as $plugin_file => $plugin ) {
+						if ( ! is_network_only_plugin( $plugin_file ) && ! is_plugin_active_for_network( $plugin_file ) ) {
+							?>
+								<li><label><input type="checkbox" name="plugins[]" value="<?php echo esc_attr( $plugin_file ); ?>" <?php checked( in_array( $plugin_file, $current_selected_plugins ) ); ?>> <?php echo $plugin['Name']; ?></label></li>
+							<?php
+						}
+					} 
+				?>
+			</ul>
+		<?php
+	}
+
 
 	private function render_step_4() {
 		
@@ -409,12 +444,15 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			<form action="" method="post">
 				<h3><?php _e( 'Select the destination blog/s', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 				<?php wp_nonce_field( 'step_4' ); ?>
-				<p>
-					<label>
-						<input type="radio" name="dest_blog_type" value="all" <?php checked( $this->wizard->get_value( 'dest_blog_type' ), 'all' ); ?>> 
-						<?php _e( 'All of them', MULTISTE_CC_LANG_DOMAIN ); ?>
-					</label>
-				</p>
+
+				<?php if ( $this->wizard->get_value( 'mcc_action' ) !== 'activate-plugin' ): ?>
+					<p>
+						<label>
+							<input type="radio" name="dest_blog_type" value="all" <?php checked( $this->wizard->get_value( 'dest_blog_type' ), 'all' ); ?>> 
+							<?php _e( 'All of them', MULTISTE_CC_LANG_DOMAIN ); ?>
+						</label>
+					</p>
+				<?php endif; ?>
 				<p>
 					<label>
 						<input type="radio" name="dest_blog_type" value="list" <?php checked( $this->wizard->get_value( 'dest_blog_type' ), 'list' ); ?>>
@@ -484,6 +522,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		$settings = $this->wizard->get_value( 'settings' );
 		$dest_blogs_ids = $this->wizard->get_value( 'dest_blogs_ids' );
 		$posts_ids = $this->wizard->get_value( 'posts_ids' );
+		$posts_ids = $this->wizard->get_value( 'plugins' );
 
 		if ( empty( $settings ) )
 			$settings = array();
@@ -497,6 +536,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		if ( 'add-post' == $action ) {
 			$settings['class'] = 'Multisite_Content_Copier_Post_Copier';
 			$settings['post_ids'] = $posts_ids;
+		}
+		if ( 'activate-plugin' == $action ) {
+			$settings['class'] = 'Multisite_Content_Copier_Plugins_Activator';
+			$settings['plugins'] = $posts_ids;
+			$src_blog_id = 0;
 		}
 		
 		if ( 'all' != $dest_blog_type ) {
@@ -554,7 +598,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 					.html('<div id="progressbar" style="margin-top:20px"><div class="progress-label">' + label +'%</div></div>')
 
 				$('#progressbar').progressbar({
-					"value": 0
+					"value": 0,
+					complete: function( event, ui ) {
+						window.location = 'http://localhost/wpmudev2/wp-admin/network/admin.php?page=mcc_network_page&step=6';
+					}
 				});
 
 				// Initialize processing
@@ -580,7 +627,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 							$( '#progressbar' ).progressbar( 'value', label );
 							$( '.progress-label' ).text( label + '%' );
 							process_item();
-							
 						}
 					);
 				}
@@ -604,7 +650,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  				if ( ! mcc_is_error() ) {
  					$this->wizard->set_value( 'mcc_action', $_POST['mcc_action'] );
- 					$this->wizard->go_to_step( '2' );
+ 					if ( 'activate-plugin' == $_POST['mcc_action'] )
+ 						$this->wizard->go_to_step( '3' );
+ 					else 
+ 						$this->wizard->go_to_step( '2' );
+
  					return;
  				}
  			}
@@ -634,15 +684,17 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				if ( 'add-page' == $this->wizard->get_value( 'mcc_action' ) && empty( $_POST['pages'] ) )
  					mcc_add_error( 'select-page', __( 'You must select at least one page', MULTISTE_CC_LANG_DOMAIN ) );
 
+ 				if ( 'activate-plugin' == $this->wizard->get_value( 'mcc_action' ) && empty( $_POST['plugins'] ) )
+ 					mcc_add_error( 'select-plugin', __( 'You must select at least one plugin', MULTISTE_CC_LANG_DOMAIN ) );
+
  				if ( isset( $_POST['settings'] ) && is_array( $_POST['settings'] ) ) {
  					$settings = array();
  					foreach ( $_POST['settings'] as $setting => $value ) {
- 						$settings[] = $setting;
+ 						$settings[ $setting ] = true;
  					}
  					$this->wizard->set_value( 'settings', $settings );
  				}
  					
-
 
  				if ( ! mcc_is_error() ) {
 
@@ -660,6 +712,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	 						$posts_ids[] = absint( $post_id );
 	 					} 
 	 					$this->wizard->set_value( 'posts_ids', $posts_ids );
+	 				}
+
+	 				if ( 'activate-plugin' == $this->wizard->get_value( 'mcc_action' ) ) {
+	 					$plugins = $_POST['plugins'];
+	 					$this->wizard->set_value( 'plugins', $plugins );
 	 				}
 
  					

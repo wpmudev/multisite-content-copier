@@ -44,19 +44,29 @@ class Multisite_Content_Copier_Post_Copier extends Multisite_Content_Copier_Page
 		$terms = $this->get_orig_blog_post_terms( $post_id, 'category' );
 		$term_ids = array();
 		foreach ( $terms as $term ) {
-			$term = wp_insert_term( $term->name, 'category', array( 'description' => $term->description ) );
-			$term_ids[] = absint( $term['term_id'] );
+			$term = get_term_by( 'name', $term->name, 'category', ARRAY_A );
+			if ( ! $term )
+				$term = wp_insert_term( $term->name, 'category', array( 'description' => $term->description ) );
+
+			if ( ! is_wp_error( $term ) )
+				$term_ids[] = absint( $term['term_id'] );
 		}
-		wp_set_object_terms( $new_post_id, $term_ids, 'category' );
+		if ( ! empty( $term_ids ) )
+			wp_set_object_terms( $new_post_id, $term_ids, 'category' );
 
 		// Tags
 		$terms = $this->get_orig_blog_post_terms( $post_id, 'post_tag' );
 		$term_ids = array();
 		foreach ( $terms as $term ) {
-			$term = wp_insert_term( $term->name, 'post_tag', array( 'description' => $term->description ) );
-			$term_ids[] = absint( $term['term_id'] );
+			$term = get_term_by( 'name', $term->name, 'post_tag', ARRAY_A );
+			if ( ! $term )
+				$term = wp_insert_term( $term->name, 'post_tag', array( 'description' => $term->description ) );
+
+			if ( ! is_wp_error( $term ) )
+				$term_ids[] = absint( $term['term_id'] );
 		}
-		wp_set_object_terms( $new_post_id, $term_ids, 'post_tag' );
+		if ( ! empty( $term_ids ) )
+			wp_set_object_terms( $new_post_id, $term_ids, 'post_tag' );
 
 
 	}

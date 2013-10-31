@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: 
 Description: Does nothing at all
 Author: igmoweb
-Version:0.1
+Version: 0.1
 Author URI:
 Text Domain: mcc
 Network:true

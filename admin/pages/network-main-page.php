@@ -600,7 +600,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				$('#progressbar').progressbar({
 					"value": 0,
 					complete: function( event, ui ) {
-						window.location = 'http://localhost/wpmudev2/wp-admin/network/admin.php?page=mcc_network_page&step=6';
+						window.location = <?php echo '"' . $this->wizard->get_step_url( '6' ) . '"' ?>;
 					}
 				});
 

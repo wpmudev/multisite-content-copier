@@ -216,6 +216,7 @@ abstract class Multisite_Content_Copier_Copier {
 		$new_post = get_post( $new_post_id );
 		$new_post_content = $new_post->post_content;
 
+
 		foreach ( $images_as_attachments as $image ) {
 
 			$info = pathinfo( $image->path );
@@ -321,7 +322,7 @@ abstract class Multisite_Content_Copier_Copier {
 		$new_post->post_content = $new_post_content;
 
 		// Updating the post
-		wp_insert_post( $new_post );
+		$post_id = wp_insert_post( $new_post );
 
 	}
 

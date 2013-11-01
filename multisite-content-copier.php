@@ -22,6 +22,8 @@ class Multisite_Content_Copier {
 	// Admin pages. THey could be accesed from other points
 	// So they're statics
 	static $network_main_menu_page;
+	static $network_blog_groups_menu_page;
+	static $network_permanent_assignments_menu_page;
 
 	public function __construct() {
 
@@ -76,7 +78,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '0.1' );
+		define( 'MULTISTE_CC_VERSION', '0.2' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -121,30 +123,26 @@ class Multisite_Content_Copier {
 		// Admin Pages
 		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-main-page.php' );
 		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-blogs-groups.php' );
+		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-permanent-assignments.php' );
 	}
 
 	/**
 	 * Upgrade the plugin when a new version is uploaded
 	 */
 	public function maybe_upgrade() {
-		//$current_version = get_option( self::$version_option_slug );
-//
-		//if ( ! $current_version )
-		//	$current_version = '0.2'; // This is the first version that includes some upgradings
-//
-		//// For the second version, we're just saving the version in DB
-		//if ( version_compare( $current_version, '0.2', '<=' ) ) {
-		//	require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
-		//	// Call upgrade functions here
-		//}
-//
-		//// This is the third version (still not released)
-		//if ( version_compare( $current_version, '0.3', '<' ) ) {
-		//	require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
-		//	// Call upgrade functions here	
-		//}
-//
-		//update_option( self::$version_option_slug, MULTISTE_CC_VERSION );
+		$current_version = get_option( self::$version_option_slug );
+
+		if ( ! $current_version )
+			$current_version = '0.1'; // This is the first version that includes some upgradings
+
+		// For the second version, we're just saving the version in DB
+		if ( version_compare( $current_version, '0.2', '<' ) ) {
+			$model = mcc_get_model();
+			$model->create_schema();
+			// Call upgrade functions here
+		}
+
+		update_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 	}
 
 
@@ -177,26 +175,34 @@ class Multisite_Content_Copier {
 	 */
 	public function init_plugin() {
 
-		// A network menu
-		$args = array(
-			'menu_title' => __( 'Content Copier', MULTISTE_CC_LANG_DOMAIN ),
-			'page_title' => __( 'Multisite Content Copier', MULTISTE_CC_LANG_DOMAIN ),
-			'network_menu' => true,
-			'screen_icon_slug' => 'mcc'
-		);
-		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
+			// A network menu
+			$args = array(
+				'menu_title' => __( 'Content Copier', MULTISTE_CC_LANG_DOMAIN ),
+				'page_title' => __( 'Multisite Content Copier', MULTISTE_CC_LANG_DOMAIN ),
+				'network_menu' => true,
+				'screen_icon_slug' => 'mcc'
+			);
+			self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
 
-		$args = array(
-			'menu_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
-			'page_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
-			'network_menu' => true,
-			'parent' => 'mcc_network_page',
-			'tabs' => array(
-				'groups' => __( 'Groups', MULTISTE_CC_LANG_DOMAIN ),
-				'sites' => __( 'Sites', MULTISTE_CC_LANG_DOMAIN )
-			)
-		);
-		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_blogs_groups_page', 'manage_network', $args );
+			$args = array(
+				'menu_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
+				'page_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
+				'network_menu' => true,
+				'parent' => 'mcc_network_page',
+				'tabs' => array(
+					'groups' => __( 'Groups', MULTISTE_CC_LANG_DOMAIN ),
+					'sites' => __( 'Sites', MULTISTE_CC_LANG_DOMAIN )
+				)
+			);
+			self::$network_blog_groups_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_blogs_groups_page', 'manage_network', $args );
+
+			$args = array(
+				'menu_title' => __( 'Permanent Assignments', MULTISTE_CC_LANG_DOMAIN ),
+				'page_title' => __( 'Permanent Assignments', MULTISTE_CC_LANG_DOMAIN ),
+				'network_menu' => true,
+				'parent' => 'mcc_network_page'
+			);
+			self::$network_permanent_assignments_menu_page = new Multisite_Content_Copier_Network_Permanent_Assignments_Menu( 'mcc_permanent_assignments_page', 'manage_network', $args );
 
 	}
 

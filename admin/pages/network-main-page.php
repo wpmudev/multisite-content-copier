@@ -2,6 +2,7 @@
 
 require_once( MULTISTE_CC_INCLUDES_DIR . 'wizard.php' );
 
+
 class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copier_Admin_Page {
  	
  	private $wizard;
@@ -358,11 +359,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			</ul>
 			<hr/>
 			<h3><?php _e( 'Additional options', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+			<?php $options = mcc_get_page_additional_settings(); ?>
 			<ul>
-				<li><label><input type="checkbox" name="settings[copy_images]" <?php checked( in_array( 'copy_images', $current_selected_settings ) ); ?>> <?php _e( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-				<li><label><input type="checkbox" name="settings[update_date]" <?php checked( in_array( 'update_date', $current_selected_settings ) ); ?>> <?php _e( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-				<li><label><input type="checkbox" name="settings[copy_parents]" <?php checked( in_array( 'copy_parents', $current_selected_settings ) ); ?>> <?php _e( 'Copy page/post parents', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-				<li><label><input type="checkbox" name="settings[copy_comments]" <?php checked( in_array( 'copy_comments', $current_selected_settings ) ); ?>> <?php _e( 'Copy comments', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+				<?php foreach( $options as $option_slug => $label ): ?>
+					<li><label><input type="checkbox" name="settings[<?php echo $option_slug; ?>]" <?php checked( array_key_exists( $option_slug, $current_selected_settings ) ); ?>> <?php echo $label; ?></label></li>
+				<?php endforeach; ?>
 			</ul>
 
 		<?php
@@ -402,12 +403,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
             </ul>
 
             <h3><?php _e( 'Additional options', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+            <?php $options = mcc_get_post_additional_settings(); ?>
 			<ul>
-				<li><label><input type="checkbox" name="settings[copy_images]" <?php checked( in_array( 'copy_images', $current_selected_settings ) ); ?>> <?php _e( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-				<li><label><input type="checkbox" name="settings[update_date]" <?php checked( in_array( 'update_date', $current_selected_settings ) ); ?>> <?php _e( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-				<li><label><input type="checkbox" name="settings[copy_parents]" <?php checked( in_array( 'copy_parents', $current_selected_settings ) ); ?>> <?php _e( 'Copy page/post parents', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-				<li><label><input type="checkbox" name="settings[copy_comments]" <?php checked( in_array( 'copy_comments', $current_selected_settings ) ); ?>> <?php _e( 'Copy comments', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-				<li><label><input type="checkbox" name="settings[copy_terms]" <?php checked( in_array( 'copy_terms', $current_selected_settings ) ); ?>> <?php _e( 'Copy terms', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+				<?php foreach( $options as $option_slug => $label ): ?>
+					<li><label><input type="checkbox" name="settings[<?php echo $option_slug; ?>]" <?php checked( array_key_exists( $option_slug, $current_selected_settings ) ); ?>> <?php echo $label; ?></label></li>
+				<?php endforeach; ?>
 			</ul>
 		<?php
 	}

@@ -64,3 +64,13 @@ function mcc_get_groups_dropdown( $selected = '' ) {
 		<?php endforeach; ?>
 	<?php
 }
+
+function mcc_get_post_additional_settings() {
+	$settings_handler = mcc_get_settings_handler();
+	return $settings_handler->get_additional_settings( 'post' );
+}
+
+function mcc_get_page_additional_settings() {
+	$settings_handler = mcc_get_settings_handler();
+	return $settings_handler->get_additional_settings( 'page' );
+}

@@ -18,6 +18,25 @@ class Multisite_Content_Copier_Settings_Handler {
 	// Settings for the plugin
 	private $settings = array();
 
+	private $additional_settings = array();
+
+	public function __construct() {
+		$this->additional_settings = array(
+			'post' => array(
+				'copy_images'	=> __( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ),
+				'update_date'	=> __( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_parents'	=> __( 'Copy page/post parents', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_terms' 	=> __( 'Copy terms', MULTISTE_CC_LANG_DOMAIN )
+			),
+			'page' => array(
+				'copy_images'	=> __( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ),
+				'update_date'	=> __( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_parents'	=> __( 'Copy page/post parents', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN )
+			)
+		);
+	}
 	/**
 	 * Get the default settings
 	 * 
@@ -82,6 +101,13 @@ class Multisite_Content_Copier_Settings_Handler {
 	 */
 	public function get_settings_slug() {
 		return $this->settings_slug;
+	}
+
+	public function get_additional_settings( $type ) {
+		if ( ! isset( $this->additional_settings[ $type ] ) )
+			return array();
+		else
+			return $this->additional_settings[ $type ];
 	}
 
 

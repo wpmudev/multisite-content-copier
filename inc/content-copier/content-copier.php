@@ -40,11 +40,12 @@ abstract class Multisite_Content_Copier_Copier {
 		$pattern = "/<img.*?src=[\"'](.+?)[\"'].*?>/";
 		preg_match_all( $pattern, $orig_post_content, $matches );
 
+		$images = array();
+		$attachments_ids = array();
 		if ( ! empty( $matches[1] ) ) {
-			$images = array();
+			
 			$model = mcc_get_copier_model();
-			$attachments_ids = array();
-
+			
 			foreach ( $matches[1] as $match ) {
 				// Getting info about each image
 				$file = basename( $match );
@@ -81,6 +82,7 @@ abstract class Multisite_Content_Copier_Copier {
 		}
 
 		$attachments = array();
+
 		foreach ( $attachments_ids as $id ) {
 			$attachments[] = get_post( $id );
 		}
@@ -295,6 +297,7 @@ abstract class Multisite_Content_Copier_Copier {
 			$orig_url_file = $orig_upload_baseurl . '/' . dirname( $image['orig_upload_file'] ) . '/' . basename( $image['orig_src'] );
 			$orig_url_base_file = $orig_upload_baseurl . '/' . $image['orig_upload_file'];
 
+
 			// New filenames
 			$new_file_name = basename( $image['orig_src'] );
 			$new_base_file_name = basename( $image['orig_upload_file'] );
@@ -305,7 +308,7 @@ abstract class Multisite_Content_Copier_Copier {
 
 			// Destination src info
 			$dest_url_file = $upload_dir['baseurl'] . $upload_dir['subdir'] . '/' . basename( $image['orig_src'] );
-			$dest_url_base_file = $upload_dir['baseurl'] . '/' . $image['orig_upload_file'];
+			$dest_url_base_file = $upload_dir['baseurl'] . $upload_dir['subdir'] . '/' . basename( $image['orig_upload_file'] );
 
 			// Copying the file with width and height in its name
 			if ( @copy( $orig_file, $dest_file ) ) {
@@ -316,6 +319,7 @@ abstract class Multisite_Content_Copier_Copier {
 			if ( @copy( $orig_base_file, $dest_base_file ) ) {
 				$new_post_content = str_replace( $orig_url_base_file, $dest_url_base_file, $new_post_content );
 			}
+
 
 		}
 

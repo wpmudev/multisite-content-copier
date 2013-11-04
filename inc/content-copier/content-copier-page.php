@@ -34,11 +34,16 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 	public function execute() {
 		foreach( $this->post_ids as $post_id ) {
 			$this->copy( $post_id );
+			update_post_meta( $post_id, 'mcc_copied', true );
 		}
 	}
 
 	public function copy( $post_id ) {
 		$new_post_id = $this->copy_post( $post_id );
+		
+		if ( ! $new_post_id )
+			return false;
+
 		$new_parent_post_id = false;
 
 		if ( $this->copy_parents ) {
@@ -84,6 +89,10 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 
 		// Getting original post data
 		$orig_post = $this->get_orig_blog_post( $post_id );
+
+		if ( empty( $orig_post ) )
+			return false;
+
 		$orig_post_meta = $this->get_orig_blog_post_meta( $post_id );
 
 		// Insert post in the new blog ( we should be currently on it)

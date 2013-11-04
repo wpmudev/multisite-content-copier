@@ -23,7 +23,6 @@ class Multisite_Content_Copier {
 	// So they're statics
 	static $network_main_menu_page;
 	static $network_blog_groups_menu_page;
-	static $network_permanent_assignments_menu_page;
 
 	public function __construct() {
 
@@ -40,7 +39,7 @@ class Multisite_Content_Copier {
 
 		add_action( 'init', array( &$this, 'init_plugin' ) );
 
-		add_action( 'plugins_loaded', array( &$this, 'maybe_copy_content' ) );
+		add_action( 'wp_loaded', array( &$this, 'maybe_copy_content' ) );
 
 		add_action( 'plugins_loaded', array( &$this, 'load_text_domain' ) );
 
@@ -123,7 +122,11 @@ class Multisite_Content_Copier {
 		// Admin Pages
 		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-main-page.php' );
 		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-blogs-groups.php' );
-		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-permanent-assignments.php' );
+
+		if ( is_admin() ) {
+			require_once( MULTISTE_CC_ADMIN_DIR . 'post-meta-box.php' );
+			require_once( MULTISTE_CC_INCLUDES_DIR . 'ajax.php' );
+		}
 	}
 
 	/**
@@ -196,13 +199,8 @@ class Multisite_Content_Copier {
 			);
 			self::$network_blog_groups_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_blogs_groups_page', 'manage_network', $args );
 
-			$args = array(
-				'menu_title' => __( 'Permanent Assignments', MULTISTE_CC_LANG_DOMAIN ),
-				'page_title' => __( 'Permanent Assignments', MULTISTE_CC_LANG_DOMAIN ),
-				'network_menu' => true,
-				'parent' => 'mcc_network_page'
-			);
-			self::$network_permanent_assignments_menu_page = new Multisite_Content_Copier_Network_Permanent_Assignments_Menu( 'mcc_permanent_assignments_page', 'manage_network', $args );
+			if ( is_admin() )
+				new MCC_Post_Meta_Box();
 
 	}
 

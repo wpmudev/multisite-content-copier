@@ -58,7 +58,6 @@ class Multisite_Content_Copier_Model {
 		$this->queue_table = $wpdb->base_prefix . 'mcc_queue';
 		$this->blogs_groups_table = $wpdb->base_prefix . 'mcc_blogs_groups';
 		$this->blogs_groups_relationship_table = $wpdb->base_prefix . 'mcc_blogs_groups_relationship';
-		$this->permanent_assignments_table = $wpdb->base_prefix . 'mcc_permanent_assignments';
 
 		if ( ! get_site_option( $this->schema_created_option_slug, false ) ) {
 			$this->create_schema();
@@ -75,7 +74,6 @@ class Multisite_Content_Copier_Model {
 		$this->create_queue_table();
 		$this->create_blogs_groups_table();
 		$this->create_blogs_groups_relationship_table();
-		$this->create_permanent_assignments_table();
 	}
 
 	/**
@@ -132,19 +130,6 @@ class Multisite_Content_Copier_Model {
         dbDelta($sql);
 	}
 
-	private function create_permanent_assignments_table() {
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-
-		$sql = "CREATE TABLE $this->permanent_assignments_table (
-              ID bigint(20) NOT NULL AUTO_INCREMENT,
-              src_blog_id bigint(20),
-              blog_group_id bigint(20),
-              settings text DEFAULT '',
-              PRIMARY KEY  (ID)
-            )  ENGINE=MyISAM $this->db_charset_collate;";
-       	
-        dbDelta($sql);
-	}
 
 	/**
 	 * Upgrades for the 0.2 version schema
@@ -282,41 +267,6 @@ class Multisite_Content_Copier_Model {
 			$wpdb->query( $wpdb->prepare( "UPDATE $this->blogs_groups_table SET bcount = bcount + 1 WHERE ID = %d", $group_id ) );
 
 	}
-
-
-	public function get_permanent_assigments( $args ) {
-		global $wpdb;
-
-		$defaults = array(
-			'page' => 1,
-			'per_page' => 10
-		);
-		$args = wp_parse_args( $args, $defaults );
-
-		extract( $args );
-
-		$upper_limit = absint( $per_page );
-		$offset = ( absint( $page ) - 1 ) * $upper_limit;
-
-		$limit = "LIMIT $offset, $upper_limit";
-
-		return $wpdb->get_results( "SELECT * FROM $this->permanent_assignments_table $limit" );
-	}
-
-	public function get_permanent_assignment( $id ) {
-		global $wpdb;
-
-		$results = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $this->permanent_assignments_table WHERE ID = %d", $id ) );
-
-		if ( ! empty( $results ) )
-			$results->settings = maybe_unserialize( $results->settings );
-		else
-			$results = false;
-
-		return $results;
-
-	}
-
 
 
 }

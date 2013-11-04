@@ -17,11 +17,9 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
         add_action( 'admin_enqueue_scripts', array( $this, 'add_javascript' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'add_styles' ) );
 
-        add_action( 'wp_ajax_mcc_get_sites_search', array( &$this, 'get_sites_search' ) );
-        add_action( 'wp_ajax_mcc_get_posts_search', array( &$this, 'get_posts_search' ) );
+       
         add_action( 'wp_ajax_mcc_retrieve_single_post_data', array( &$this, 'retrieve_single_post_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_single_blog_data', array( &$this, 'retrieve_single_blog_data' ) );
-        add_action( 'wp_ajax_mcc_insert_all_blogs_queue', array( &$this, 'insert_all_blogs_queue' ) );
  	}
 
 
@@ -31,49 +29,91 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  			$this->get_permalink()
  		);
 
- 		$action = $this->wizard->get_value( 'mcc_action' );
- 		if ( '1' !== $this->wizard->get_current_step() && empty( $action ) )
- 			echo "HHH";
- 	}
 
- 	public function insert_all_blogs_queue() {
- 		global $wpdb, $current_site;
+ 		if ( isset( $_GET['mcc_action'] ) && 'mcc_submit_metabox' == $_GET['mcc_action'] && wp_verify_nonce( $_GET['_wpnonce'], 'mcc_submit_meta_box' ) ) {
+ 			// The user has submitted the meta box in the post editor
 
- 		$current_site_id = ! empty ( $current_site ) ? $current_site->id : 1;
+ 			$content_blog_id = absint( $_GET['content_blog'] );
+ 			if ( ! get_blog_details( $content_blog_id ) )
+ 				return false;
 
- 		$offset = $_POST['offset'];
- 		$interval = $_POST['interval'];
+ 			$src_post_id = absint( $_GET['post_id'] );
+ 			if ( ! $post = get_blog_post( $content_blog_id, $src_post_id ) )
+ 				return false;
 
- 		$results = $wpdb->get_col(
- 			$wpdb->prepare(
- 				"SELECT blog_id FROM $wpdb->blogs 
- 				WHERE site_id = %d
- 				AND blog_id != %d
- 				ORDER BY blog_id
- 				LIMIT %d, %d",
- 				$current_site_id,
- 				$this->wizard->get_value( 'content_blog_id' ),
- 				$offset,
- 				$interval
- 			)
- 		);
+ 			// Post type
+ 			if ( 'post' == $post->post_type ) {
+ 				$action = 'add-post';
+ 				$additional_options = mcc_get_post_additional_settings();
+ 			}
+ 			elseif ( 'page' == $post->post_type ) {
+ 				$action = 'add-page';
+ 				$additional_options = mcc_get_page_additional_settings();
+ 			}
+ 			else {
+ 				return false;
+ 			}
 
- 		if ( ! empty( $results ) ) {
+ 			// Additional settings
+ 			$settings = array();
+ 			foreach ( $additional_options as $option_slug => $label ) {
+ 				if ( isset( $_GET[ $option_slug ] ) )
+ 					$settings[ $option_slug ] = true;
+ 			}
+
+ 			// Group or all?
+ 			if ( ! in_array( $_GET['dest_blog_type'], array( 'group', 'all' ) ) )
+ 				return false;
+
+ 			/// Resetting the wizard and redirecting
+ 			$this->wizard->clean();
+ 			$this->wizard = new MCC_Wizard(
+	 			array( '1','2','3','4','5', '6' ),
+	 			$this->get_permalink()
+	 		);
+
+ 			$dest_blog_type = $_GET['dest_blog_type'];
  			$model = mcc_get_model();
-			foreach ( $results as $dest_blog_id ) {
-				$model->insert_queue_item( $this->wizard->get_value( 'content_blog_id' ), $dest_blog_id, $this->wizard->get_value( 'settings' ) );	
+ 			if ( $dest_blog_type == 'group' && ! $model->is_group( absint( $_GET['group'] ) ) ) {
+				return false;
 			}
- 		}
+			elseif ( $dest_blog_type == 'group' ) {
+				// If is a group, we'll need the blogs IDs
+				$group =  absint( $_GET['group'] );
+				$blogs = $model->get_blogs_from_group( $group );
 
- 		die();
- 		
+				if ( empty( $blogs ) )
+					return false;
+
+				$ids = array();
+				foreach ( $blogs as $blog ) {
+					$ids[] = $blog->blog_id;
+				}
+
+				$this->wizard->set_value( 'dest_blogs_ids', $ids );
+			}
+			
+			
+
+ 			$this->wizard->set_value( 'mcc_action', $action );
+ 			$this->wizard->set_value( 'content_blog_id', $content_blog_id );
+ 			$this->wizard->set_value( 'dest_blog_type', $dest_blog_type );
+ 			$this->wizard->set_value( 'settings', $settings );
+ 			$this->wizard->set_value( 'posts_ids', array( $src_post_id ) );
+
+ 			$this->wizard->go_to_step( '5' );
+
+ 		}
  	}
+
+ 	
 
  	public function add_javascript() {
  		if ( get_current_screen()->id == $this->page_id . '-network' ) {
 
  			if ( 2 == $this->wizard->get_current_step() || 3 == $this->wizard->get_current_step() || 4 == $this->wizard->get_current_step() ) {
 	    		wp_enqueue_script( 'mcc-wizard-js', MULTISTE_CC_ASSETS_URL . 'js/wizard.js', array( 'jquery' ) );
+	    		wp_enqueue_script( 'mcc-autocomplete', MULTISTE_CC_ASSETS_URL . 'js/autocomplete.js', array( 'jquery' ) );
 	    		wp_enqueue_script( 'jquery-ui-autocomplete' );
 	 			wp_enqueue_style( 'mcc-jquery-ui-styles', MULTISTE_CC_ASSETS_URL . 'css/jquery-ui.css' );
 	 		}
@@ -94,98 +134,8 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  	}
 
- 	public function get_sites_search() {
-		global $wpdb, $current_site;
 
-		if ( ! empty( $_POST['term'] ) ) 
-			$term = $_REQUEST['term'];
-		else
-			echo json_encode( array() );
-
-		$s = isset( $_REQUEST['term'] ) ? stripslashes( trim( $_REQUEST[ 'term' ] ) ) : '';
-		$wild = '%';
-		if ( false !== strpos($s, '*') ) {
-			$wild = '%';
-			$s = trim($s, '*');
-		}
-
-		$like_s = esc_sql( like_escape( $s ) );
-		$query = "SELECT * FROM {$wpdb->blogs} WHERE site_id = '{$wpdb->siteid}' ";
-
-		if ( is_subdomain_install() ) {
-			$blog_s = $wild . $like_s . $wild;
-			$query .= " AND  ( {$wpdb->blogs}.domain LIKE '$blog_s' ) LIMIT 10";
-		}
-		else {
-			if ( $like_s != trim('/', $current_site->path) )
-				$blog_s = $current_site->path . $like_s . $wild . '/';
-			else
-				$blog_s = $like_s;	
-
-			$query .= " AND  ( {$wpdb->blogs}.path LIKE '$blog_s' ) LIMIT 10";
-		}
-				
-		$results = $wpdb->get_results( $query );
-
-		$returning = array();
-		if ( ! empty( $results ) ) {
-			foreach ( $results as $row ) {
-				$details = get_blog_details( $row->blog_id );
-				$returning[] = array( 
-					'blog_name' => $details->blogname,
-					'path' => $row->path, 
-					'blog_id' => $row->blog_id 
-				);
-			}
-		}
-
-		echo json_encode( $returning );
-
-		die();
-	}
-
-	public function get_posts_search() {
-		$blog_id = absint( $_POST['blog_id'] );
-
-		switch_to_blog( $blog_id );
-		add_filter( 'posts_where', array( &$this, 'set_wp_query_filter' ) );
-		$query = new WP_Query(
-			array(
-				'post_type' => 'post',
-				'posts_per_page' => 10,
-				'status' => 'publish'
-			)
-		);
-		remove_filter( 'posts_where', array( &$this, 'set_wp_query_filter' ) );
-		restore_current_blog();
-
-		$returning = array();
-		if ( $query->have_posts() ) {
-			while ( $query->have_posts() ) { 
-				$query->the_post();
-				$returning[] = array(
-					'the_title' => get_the_title(),
-					'the_id'	=> get_the_ID()
-				);
-			}
-
-			wp_reset_postdata();
-		}
-
-		echo json_encode( $returning );
-
-		die();
-
-	}
-
-
-	public function set_wp_query_filter( $where = '' ) {
-		global $wpdb;
-		$s = $_POST['term'];
-		$where .= $wpdb->prepare( " AND post_title LIKE %s", '%' . $s . '%' );
-
-		return $where;
-	}
+	
 
 	public function retrieve_single_post_data() {
 		$blog_id = absint( $_POST['blog_id'] );
@@ -521,8 +471,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		$dest_blog_type = $this->wizard->get_value( 'dest_blog_type' );
 		$settings = $this->wizard->get_value( 'settings' );
 		$dest_blogs_ids = $this->wizard->get_value( 'dest_blogs_ids' );
-		$posts_ids = $this->wizard->get_value( 'posts_ids' );
-		$posts_ids = $this->wizard->get_value( 'plugins' );
 
 		if ( empty( $settings ) )
 			$settings = array();
@@ -530,23 +478,27 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		$action = $this->wizard->get_value( 'mcc_action' );
 
 		if ( 'add-page' == $action ) {
+			$posts_ids = $this->wizard->get_value( 'posts_ids' );
 			$settings['class'] = 'Multisite_Content_Copier_Page_Copier';
 			$settings['post_ids'] = $posts_ids;
 		}
 		if ( 'add-post' == $action ) {
+			$posts_ids = $this->wizard->get_value( 'posts_ids' );
 			$settings['class'] = 'Multisite_Content_Copier_Post_Copier';
 			$settings['post_ids'] = $posts_ids;
 		}
 		if ( 'activate-plugin' == $action ) {
+			$plugins_ids = $this->wizard->get_value( 'plugins' );
 			$settings['class'] = 'Multisite_Content_Copier_Plugins_Activator';
-			$settings['plugins'] = $posts_ids;
+			$settings['plugins'] = $plugins_ids;
 			$src_blog_id = 0;
 		}
 		
 		if ( 'all' != $dest_blog_type ) {
 			$model = mcc_get_model();
 			foreach ( $dest_blogs_ids as $dest_blog_id ) {
-				$model->insert_queue_item( $src_blog_id, $dest_blog_id, $settings );	
+				if ( $dest_blog_id != $src_blog_id )
+					$model->insert_queue_item( $src_blog_id, $dest_blog_id, $settings );	
 			}
 
 			$this->wizard->clean();
@@ -585,6 +537,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	}
 
 	private function render_progressbar_js( $items_count ) {
+		$settings = $this->wizard->get_value( 'settings' );
 		?>
 		<script type="text/javascript" >
 			jQuery(function($) {
@@ -616,7 +569,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 						{
 							"action": "mcc_insert_all_blogs_queue",
 							'offset': rt_count,
-							'interval': interval
+							'interval': interval,
+							'content_blog_id': <?php echo $this->wizard->get_value( 'content_blog_id' ); ?>,
+							'settings': <?php echo json_encode( $settings ); ?>,
+							dataType: 'json'
 						}, 
 						function(response) {
 							rt_count = rt_count + interval;

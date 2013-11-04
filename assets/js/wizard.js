@@ -64,11 +64,14 @@ jQuery(document).ready(function($) {
 	$( '#add-post' ).click( function( e ) { 
 		e.preventDefault();
 
+		
+
 		var post_id = $( '#post_id' ).val().trim();
 
 		post_id = parseInt( post_id );
 
 		if ( ! isNaN( post_id ) && post_id !== 0 ) {
+			$('.spinner').show();
 			var data = {
 				action: 'mcc_retrieve_single_post_data',
 				post_id: $('#post_id').val(),
@@ -79,7 +82,9 @@ jQuery(document).ready(function($) {
 				data: data,
 				type: 'post',
 			}).done(function( data ) {
+				$('.spinner').hide();
 				if ( data !== '' ) {
+					
 					$( '#posts-list' ).append( data );
 					current_posts[ data.post_id ] = data.post_id;
 					update_post_click_event();

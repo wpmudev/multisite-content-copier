@@ -340,14 +340,15 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 		?>
 			<h3><?php _e( 'Add posts by ID or search by name', MULTISTE_CC_LANG_DOMAIN ); ?></h3><br/>
-			<input name="post_id" type="text" id="post_id" class="small-text" placeholder="<?php _e( 'Post ID', MULTISTE_CC_LANG_DOMAIN ); ?>"/>
+			<input name="post_id" type="text" id="post_id" class="small-text" style="float: left; margin-right: 10px;" placeholder="<?php _e( 'Post ID', MULTISTE_CC_LANG_DOMAIN ); ?>"/>
 			<input type="hidden" id="src_blog_id" name="src_blog_id" value="<?php echo $blog_id; ?>">
             <div style="display:inline-block"class="ui-widget">
                 <label for="search_for_post"> <?php _e( 'Or search by post title', MULTISTE_CC_LANG_DOMAIN ); ?> 
 					<input type="text" id="autocomplete" data-type="posts" class="medium-text">
-					<input type="button" class="button-secondary" name="add-post" id="add-post" value="<?php _e( 'Add post', MULTISTE_CC_LANG_DOMAIN ); ?>"></input>
+					<span class="spinner"></span> <input type="button" class="button-secondary" name="add-post" id="add-post" value="<?php _e( 'Add post', MULTISTE_CC_LANG_DOMAIN ); ?>"></input> 
                 </label>
             </div>
+            <div class="clear"></div>
             <ul id="posts-list">
             	<?php echo $posts_list; ?>
             </ul>
@@ -365,31 +366,22 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	private function render_plugin_selector() {
 		$current_selected_plugins = $this->wizard->get_value( 'plugins' );
 
+		require_once( MULTISTE_CC_ADMIN_DIR . 'tables/network-plugins-list.php' );
+		$table = new MCC_Plugins_List_Table();
+		$table->prepare_items( $current_selected_plugins );
+		
 		if ( ! is_array( $current_selected_plugins ) )
 			$current_selected_plugins = array();
 
 		?>
 			<h3><?php _e( 'Select the plugins you want to activate', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 			<p><?php _e( 'Network only or already network activated plugins are not displayed in the list', MULTISTE_CC_LANG_DOMAIN ); ?>
-			<ul id="plugins-list">
-				<?php 
-					$all_plugins = get_plugins();
-					foreach ( $all_plugins as $plugin_file => $plugin ) {
-						if ( ! is_network_only_plugin( $plugin_file ) && ! is_plugin_active_for_network( $plugin_file ) ) {
-							?>
-								<li><label><input type="checkbox" name="plugins[]" value="<?php echo esc_attr( $plugin_file ); ?>" <?php checked( in_array( $plugin_file, $current_selected_plugins ) ); ?>> <?php echo $plugin['Name']; ?></label></li>
-							<?php
-						}
-					} 
-				?>
-			</ul>
-		<?php
+
+		<?php $table->display();
 	}
 
 
 	private function render_step_4() {
-		
-
 		?>
 			<form action="" method="post">
 				<h3><?php _e( 'Select the destination blog/s', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
@@ -410,14 +402,14 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 					</label>
 				</p>
 				<div id="blogs-list-wrap">
-					<input name="blog_id" type="text" id="blog_id" class="small-text" placeholder="<?php _e( 'Blog ID', MULTISTE_CC_LANG_DOMAIN ); ?>"/>
+					<input name="blog_id" type="text" id="blog_id" class="small-text" style="float: left; margin-right: 10px;" placeholder="<?php _e( 'Blog ID', MULTISTE_CC_LANG_DOMAIN ); ?>"/>
 		            <div style="display:inline-block"class="ui-widget">
 		                <label for="search_for_blog"> <?php _e( 'Or search by blog path', MULTISTE_CC_LANG_DOMAIN ); ?> 
 							<input type="text" id="autocomplete" data-type="sites" class="medium-text">
-							<input type="button" class="button-secondary" name="add-blog" id="add-blog" value="<?php _e( 'Add blog', MULTISTE_CC_LANG_DOMAIN ); ?>"></input>
+							<span class="spinner"></span> <input type="button" class="button-secondary" name="add-blog" id="add-blog" value="<?php _e( 'Add blog', MULTISTE_CC_LANG_DOMAIN ); ?>"></input>
 		                </label>
 		            </div>
-
+					<div class="clear"></div>
 		            <div id="blogs-list">
 		            	<?php 
 		            		$blogs_ids = $this->wizard->get_value( 'dest_blogs_ids' );

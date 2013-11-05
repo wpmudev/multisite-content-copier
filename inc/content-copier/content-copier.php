@@ -289,6 +289,11 @@ abstract class Multisite_Content_Copier_Copier {
 
 		foreach ( $images_as_no_attachments as $image ) {
 
+			$network_url = get_site_option( 'siteurl' );
+			$orig_blog_details = get_blog_details( $this->orig_blog_id );
+			$orig_blog_path = $orig_blog_details->siteurl;
+			$orig_alt_upload_basedir = str_replace( $orig_blog_path, $network_url, $orig_upload_baseurl );
+
 			// Source dirs info
 			$orig_file = $orig_upload_basedir . '/' . dirname( $image['orig_upload_file'] ) . '/' . basename( $image['orig_src'] );
 			$orig_base_file = $orig_upload_basedir . '/' . $image['orig_upload_file'];
@@ -296,6 +301,9 @@ abstract class Multisite_Content_Copier_Copier {
 			// Source src info
 			$orig_url_file = $orig_upload_baseurl . '/' . dirname( $image['orig_upload_file'] ) . '/' . basename( $image['orig_src'] );
 			$orig_url_base_file = $orig_upload_baseurl . '/' . $image['orig_upload_file'];
+
+			$orig_alt_url_file = $orig_alt_upload_basedir . '/' . dirname( $image['orig_upload_file'] ) . '/' . basename( $image['orig_src'] );
+			$orig_alt_url_base_file = $orig_alt_upload_basedir . '/' . $image['orig_upload_file'];
 
 
 			// New filenames
@@ -313,11 +321,13 @@ abstract class Multisite_Content_Copier_Copier {
 			// Copying the file with width and height in its name
 			if ( @copy( $orig_file, $dest_file ) ) {
 				$new_post_content = str_replace( $orig_url_file, $dest_url_file, $new_post_content );
+				$new_post_content = str_replace( $orig_alt_url_file, $dest_url_file, $new_post_content );
 			}
 
 			// Copying the base file
 			if ( @copy( $orig_base_file, $dest_base_file ) ) {
 				$new_post_content = str_replace( $orig_url_base_file, $dest_url_base_file, $new_post_content );
+				$new_post_content = str_replace( $orig_alt_url_base_file, $dest_url_base_file, $new_post_content );
 			}
 
 
@@ -352,7 +362,7 @@ abstract class Multisite_Content_Copier_Copier {
 
 		if ( !$url = get_option( 'upload_url_path' ) ) {
 			if ( empty($upload_path) || ( 'wp-content/uploads' == $upload_path ) || ( $upload_path == $dir ) ) {
-				$url = get_option('siteurl') . '/wp-content/uploads';
+				$url = get_option('siteurl') . 'wp-content/uploads';
 				if ( ! ( is_main_site() && defined( 'MULTISITE' ) ) ) {
 					if ( ! get_site_option( 'ms_files_rewriting' ) ) {
 						// If ms-files rewriting is disabled (networks created post-3.5), it is fairly straightforward:

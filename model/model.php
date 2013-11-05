@@ -180,6 +180,12 @@ class Multisite_Content_Copier_Model {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->queue_table WHERE ID = %d", $id ) );
 	}
 
+	public function delete_queue_for_blog( $blog_id ) {
+		global $wpdb;
+
+		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->queue_table WHERE dest_blog_id = %d OR src_blog_id = %d", $blog_id, $blog_id ) );	
+	}
+
 	public function get_blog_groups( $blog_id ) {
 		global $wpdb;
 

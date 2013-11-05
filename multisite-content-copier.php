@@ -46,6 +46,8 @@ class Multisite_Content_Copier {
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_styles' ) );
 
+		add_action( 'delete_blog', array( &$this, 'delete_blog' ) );
+
 		// We don't use the activation hook here
 		// As sometimes is not very helpful and
 		// we would need to check stuff to install not only when
@@ -223,6 +225,16 @@ class Multisite_Content_Copier {
 			delete_transient( 'mcc_copying' );
 		}
 		
+	}
+
+	/**
+	 * Delete the queue for a blog when it is deleted
+	 * 
+	 * @param Integer $blog_id Deleted Blog ID
+	 */
+	public function delete_blog( $blog_id ) {
+		$model = mcc_get_model();
+		$model->delete_queue_for_blog( $blog_id );
 	}
 
 }

@@ -93,8 +93,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				$this->wizard->set_value( 'dest_blogs_ids', $ids );
 			}
 			
-			
-
  			$this->wizard->set_value( 'mcc_action', $action );
  			$this->wizard->set_value( 'content_blog_id', $content_blog_id );
  			$this->wizard->set_value( 'dest_blog_type', $dest_blog_type );
@@ -503,6 +501,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		}
 		else {
 			$this->wizard->set_value( 'settings', $settings );
+			wp_update_network_counts();
 			$blogs_count = get_blog_count();
 			?>
 				<div class="processing_result">
@@ -539,6 +538,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				var rt_total = <?php echo $items_count; ?>;
 				var label = 0;
 
+				console.log(rt_total);
 				$('.processing_result')
 					.html('<div id="progressbar" style="margin-top:20px"><div class="progress-label">' + label +'%</div></div>')
 
@@ -568,6 +568,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 						}, 
 						function(response) {
 							rt_count = rt_count + interval;
+							console.log(rt_count);
 							label = Math.ceil( (rt_count / rt_total) * 100 );
 							if ( label > 100 )
 								label = 100;

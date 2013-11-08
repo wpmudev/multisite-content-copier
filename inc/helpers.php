@@ -17,6 +17,11 @@ function mcc_get_settings() {
 	return $settings_handler->get_settings();
 }
 
+function mcc_get_settings_slug() {
+	$settings_handler = mcc_get_settings_handler();
+	return $settings_handler->get_settings_slug();
+}
+
 function mcc_get_default_settings() {
 	$settings_handler = mcc_get_settings_handler();
 	return $settings_handler->get_default_settings();
@@ -73,4 +78,24 @@ function mcc_get_post_additional_settings() {
 function mcc_get_page_additional_settings() {
 	$settings_handler = mcc_get_settings_handler();
 	return $settings_handler->get_additional_settings( 'page' );
+}
+
+function mcc_get_nbt_model() {
+	return Multisite_Content_Copier_NBT_Model::get_instance();
+}
+
+function mcc_get_nbt_groups_dropdown( $selected = '' ) {
+	if ( ! function_exists( 'nbt_get_model' ) )
+		$groups = array();
+	else {
+		$model = nbt_get_model();
+		$groups = $model->get_templates();
+	}
+
+	?>
+		<option value=""><?php _e( 'Select a group', MULTISTE_CC_LANG_DOMAIN ); ?></option>
+	    <?php foreach ( $groups as $group ): ?>
+	    	<option value="<?php echo $group['ID']; ?>"><?php echo $group['name']; ?></option>
+		<?php endforeach; ?>
+	<?php
 }

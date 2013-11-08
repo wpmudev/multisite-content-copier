@@ -22,6 +22,27 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 			?></form><?php
  		}
 
+ 		if ( 'nbt' == $this->get_current_tab() ) {
+ 			$settings = mcc_get_settings();
+ 			if ( ! $settings['blog_templates_integration'] )
+ 				return;
+
+ 			require_once( MULTISTE_CC_ADMIN_DIR . 'tables/network-nbt-groups-list.php' );
+ 			$wp_list_table = new MCC_NBT_Groups_List_Table();
+ 			$wp_list_table->prepare_items();
+ 			?>
+ 			<br/>
+			<form action="<?php echo esc_url( add_query_arg( 'tab', 'nbt', $this->get_permalink() ) ); ?>" method="post" id="template-search">
+				<?php $wp_list_table->search_box( __( 'Search by template name', MULTISTE_CC_LANG_DOMAIN ), 'template' ); ?>
+				<input type="hidden" name="action" value="templates" />
+			</form>
+
+			<?php
+				
+			$wp_list_table->display();
+
+ 		}
+
  		
  	}
 
@@ -35,7 +56,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 
  		if ( isset( $_GET['added'] ) ) {
  			?>
-				<div class="updated"><p><?php _e( 'The group has been added', MULTISTE_CC_ADMIN_DIR ); ?></p></div>
+				<div class="updated"><p><?php _e( 'The group has been added', MULTISTE_CC_LANG_DOMAIN ); ?></p></div>
  			<?php
  		}
 
@@ -54,14 +75,14 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 				<div id="col-left">
 					<div class="col-wrap">
 						<div class="form-wrap">
-							<h3><?php _e( 'Add new group', MULTISTE_CC_ADMIN_DIR ); ?></h3>
+							<h3><?php _e( 'Add new group', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 							<form id="mcc-groups-table-form" action="" method="post">
 								<?php wp_nonce_field( 'add-mcc-group' ); ?>
 								<div class="form-field">
-									<label for="group_name"><?php _e( 'Group Name', MULTISTE_CC_ADMIN_DIR ); ?></label>
+									<label for="group_name"><?php _e( 'Group Name', MULTISTE_CC_LANG_DOMAIN ); ?></label>
 									<input name="group_name" id="group_name" type="text" value="<?php echo $group_name; ?>" size="40" aria-required="true"><br/>
 								</div>
-								<p class="submit"><input type="submit" name="submit_new_group" id="submit_new_group" class="button button-primary" value="<?php _e( 'Add New Group', MULTISTE_CC_ADMIN_DIR ); ?>"></p>
+								<p class="submit"><input type="submit" name="submit_new_group" id="submit_new_group" class="button button-primary" value="<?php _e( 'Add New Group', MULTISTE_CC_LANG_DOMAIN ); ?>"></p>
 							</form>
 						</div>
 					</div>

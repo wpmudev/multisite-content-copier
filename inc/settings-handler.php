@@ -44,8 +44,7 @@ class Multisite_Content_Copier_Settings_Handler {
 	 */
 	public function get_default_settings() {
 		return array(
-			'a_setting' => 12,
-			'a_style_setting' => false
+			'blog_templates_integration' => false
 		);
 	}
 
@@ -80,7 +79,10 @@ class Multisite_Content_Copier_Settings_Handler {
 	 */
 	public function update_settings( $new_settings ) {
 		$this->settings = $new_settings;
-		update_option( $this->settings_slug, $new_settings );
+		if ( ! get_option( $this->settings_slug ) )
+			add_option( $this->settings_slug, $new_settings, '', 'no' );
+		else
+			update_option( $this->settings_slug, $new_settings );
 	}
 
 	/**

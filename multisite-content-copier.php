@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: 
 Description: Does nothing at all
 Author: igmoweb
-Version: 0.1
+Version: 0.2
 Author URI:
 Text Domain: mcc
 Network:true
@@ -23,6 +23,9 @@ class Multisite_Content_Copier {
 	// So they're statics
 	static $network_main_menu_page;
 	static $network_blog_groups_menu_page;
+	static $network_settings_menu_page;
+
+	public $nbt_integrator;
 
 	public function __construct() {
 
@@ -47,6 +50,8 @@ class Multisite_Content_Copier {
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_styles' ) );
 
 		add_action( 'delete_blog', array( &$this, 'delete_blog' ) );
+
+		$this->nbt_integrator = new MCC_NBT_Integrator();
 
 		// We don't use the activation hook here
 		// As sometimes is not very helpful and
@@ -105,6 +110,7 @@ class Multisite_Content_Copier {
 		// Model
 		require_once( MULTISTE_CC_MODEL_DIR . 'model.php' );
 		require_once( MULTISTE_CC_MODEL_DIR . 'copier-model.php' );
+		require_once( MULTISTE_CC_MODEL_DIR . 'nbt-model.php' );
 
 		// Libraries
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'admin-page.php' );
@@ -117,6 +123,10 @@ class Multisite_Content_Copier {
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-plugin.php' );
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-user.php' );
+
+		//Integrations
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'integration/nbt-integration.php' );
 
 		// Settings Handler
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'settings-handler.php' );
@@ -124,6 +134,7 @@ class Multisite_Content_Copier {
 		// Admin Pages
 		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-main-page.php' );
 		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-blogs-groups.php' );
+		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-settings-page.php' );
 
 		if ( is_admin() ) {
 			require_once( MULTISTE_CC_ADMIN_DIR . 'post-meta-box.php' );
@@ -180,29 +191,42 @@ class Multisite_Content_Copier {
 	 */
 	public function init_plugin() {
 
-			// A network menu
-			$args = array(
-				'menu_title' => __( 'Content Copier', MULTISTE_CC_LANG_DOMAIN ),
-				'page_title' => __( 'Multisite Content Copier', MULTISTE_CC_LANG_DOMAIN ),
-				'network_menu' => true,
-				'screen_icon_slug' => 'mcc'
-			);
-			self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
+		// A network menu
+		$args = array(
+			'menu_title' => __( 'Content Copier', MULTISTE_CC_LANG_DOMAIN ),
+			'page_title' => __( 'Multisite Content Copier', MULTISTE_CC_LANG_DOMAIN ),
+			'network_menu' => true,
+			'screen_icon_slug' => 'mcc'
+		);
+		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
 
-			$args = array(
-				'menu_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
-				'page_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
-				'network_menu' => true,
-				'parent' => 'mcc_network_page',
-				'tabs' => array(
-					'groups' => __( 'Groups', MULTISTE_CC_LANG_DOMAIN ),
-					'sites' => __( 'Sites', MULTISTE_CC_LANG_DOMAIN )
-				)
-			);
-			self::$network_blog_groups_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_blogs_groups_page', 'manage_network', $args );
+		$args = array(
+			'menu_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
+			'page_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
+			'network_menu' => true,
+			'parent' => 'mcc_network_page',
+			'tabs' => array(
+				'groups' => __( 'Groups', MULTISTE_CC_LANG_DOMAIN ),
+				'sites' => __( 'Sites', MULTISTE_CC_LANG_DOMAIN )
+			)
+		);
 
-			if ( is_admin() )
-				new MCC_Post_Meta_Box();
+		$settings = mcc_get_settings();
+		if ( $settings['blog_templates_integration'] )
+			$args['tabs']['nbt'] = __( 'New Blog Templates', MULTISTE_CC_LANG_DOMAIN );
+
+		self::$network_blog_groups_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_blogs_groups_page', 'manage_network', $args );
+
+		$args = array(
+			'menu_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
+			'page_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
+			'network_menu' => true,
+			'parent' => 'mcc_network_page'
+		);
+		self::$network_settings_menu_page = new Multisite_Content_Copier_Network_Settings_Menu( 'mcc_settings_page', 'manage_network', $args );
+
+		if ( is_admin() )
+			new MCC_Post_Meta_Box();
 
 	}
 

@@ -52,6 +52,9 @@ class MCC_Plugins_List_Table extends WP_List_Table {
 
     function prepare_items( $selected ) {
 
+        if ( empty( $selected ) )
+            $selected = array();
+        
         $all_plugins = get_plugins();
 
         $per_page = 10000;

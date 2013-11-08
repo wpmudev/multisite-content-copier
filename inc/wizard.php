@@ -89,4 +89,28 @@ class MCC_Wizard {
 	public function debug() {
 		var_dump( $_SESSION['mcc_wizard'] );
 	}
+
+	public function breadcrumb_class( $step ) {
+		$current_step = $this->get_current_step();
+		if ( $current_step == $step ) {
+			echo "current";
+		}
+		elseif ( $step > $this->current_step ) {
+			echo "disabled";
+		}
+
+
+		foreach ( $this->steps as $_step ) {
+
+		}
+	}
+
+	public function get_breadcrumb_href( $step ) {
+		$current_step = $this->get_current_step();
+		if ( $step > $this->current_step ) {
+			return '';
+		}
+
+		return 'href="' . $this->get_step_url( $step ) . '"';
+	}
 }

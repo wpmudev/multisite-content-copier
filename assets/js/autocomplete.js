@@ -17,7 +17,7 @@ jQuery(document).ready(function($) {
 			term: request.term
 		};
 
-		if ( 'posts' == type ) {
+		if ( 'posts' == type || 'users' == type ) {
 			data.blog_id = $('#src_blog_id').val()
 		}
 
@@ -47,6 +47,12 @@ jQuery(document).ready(function($) {
 		  		ui.content[i].value = ui.content[i].the_title;
 		  	}
 		}
+		if ( 'users' == type ) {
+			for ( var i = 0; i < ui.content.length; i++ ) {
+		  		ui.content[i].label = ui.content[i].username + ' [' + ui.content[i].user_id + ']';
+		  		ui.content[i].value = ui.content[i].username;
+		  	}
+		}
 	  	
 	  },
 	  select: function ( event, ui ) {
@@ -55,6 +61,9 @@ jQuery(document).ready(function($) {
 		}
 		if ( 'posts' == type ) {
 			$( '#post_id' ).val( ui.item.the_id );
+		}
+		if ( 'users' == type ) {
+			$( '#user_id' ).val( ui.item.user_id );
 		}
 	  }
 	});

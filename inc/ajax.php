@@ -87,6 +87,39 @@ function mcc_get_posts_search() {
 
 }
 
+add_action( 'wp_ajax_mcc_get_users_search', 'mcc_get_users_search' );
+function mcc_get_users_search() {
+	$blog_id = absint( $_POST['blog_id'] );
+	$usersearch = isset( $_POST['term'] ) ? trim( $_POST['term'] ) : '';
+
+	switch_to_blog( $blog_id );
+	$args = array(
+		'number' => 10,
+		'offset' => 0,
+		'search' => '*' . $usersearch . '*',
+		'fields' => 'all_with_meta'
+	);
+
+	// Query the user IDs for this page
+	$wp_user_search = new WP_User_Query( $args );
+
+	$results = $wp_user_search->get_results();
+	restore_current_blog();
+
+	$returning = array();
+	foreach ( $results as $user_id => $user ) {
+		$returning[] = array(
+			'username' => $user->data->user_login,
+			'user_id'	=> $user_id
+		);
+	}
+
+	echo json_encode( $returning );
+
+	die();
+
+}
+
 
 function mcc_set_wp_query_filter( $where = '' ) {
 	global $wpdb;

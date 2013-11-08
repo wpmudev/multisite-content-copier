@@ -120,6 +120,35 @@ jQuery(document).ready(function($) {
 		}
 	});
 
+	var current_users = {};
+	$( '#add-user' ).click( function( e ) { 
+		e.preventDefault();
+
+		var user_id = $( '#user_id' ).val().trim();
+
+		user_id = parseInt( user_id );
+
+		if ( ! isNaN( user_id ) && user_id !== 0 ) {
+			$('.spinner').show();
+			var data = {
+				action: 'mcc_retrieve_single_user_data',
+				user_id: $('#user_id').val()
+			};
+			$.ajax({
+				url: ajaxurl,
+				data: data,
+				type: 'post',
+			}).done(function( data ) {
+				$('.spinner').hide();
+				if ( data !== '' ) {
+					$( '#users-list' ).append( data );
+					current_blogs[ data.user_id ] = data.user_id;
+					update_user_click_event();
+				}
+			});
+		}
+	});
+
 	update_blog_click_event();
 	function update_blog_click_event() {
 		$( '.mcc-remove-blog' ).click( function(e)  {
@@ -135,6 +164,15 @@ jQuery(document).ready(function($) {
 			e.preventDefault();
 			var post_id = $(this).data('post-id');
 			$('#post-' + post_id ).remove(); 
+		});
+	}
+
+	update_user_click_event();
+	function update_user_click_event() {
+		$( '.mcc-remove-user' ).click( function(e)  {
+			e.preventDefault();
+			var user_id = $(this).data('user-id');
+			$('#user-' + user_id ).remove(); 
 		});
 	}
 

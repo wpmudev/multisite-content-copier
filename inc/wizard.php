@@ -7,6 +7,7 @@ class MCC_Wizard {
 	private $current_step;
 	private $action;
 	private $steps;
+	private $initialized = false;
 
 	public function __construct( $steps = array(), $url ) {
 
@@ -23,12 +24,10 @@ class MCC_Wizard {
 		else
 			$this->current_step = isset( $steps[0] ) ? $steps[0] : '';
 
-		$this->set_value( 'step',$this->current_step );
-
 	}
 
 	public function is_initialized() {
-		return isset( $_SESSION['mcc_wizard'] );
+		return $this->initialized;
 	}
 
 
@@ -44,10 +43,12 @@ class MCC_Wizard {
 	}
 
 	public function set_value( $key, $value ) {
+		$this->initialized = true;
 		$_SESSION['mcc_wizard'][ $key ] = $value;
 	}
 
 	public function clean() {
+		$this->initialized = false;
 		unset( $_SESSION['mcc_wizard'] );
 	}
 

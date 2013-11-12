@@ -5,7 +5,7 @@ require_once( MULTISTE_CC_INCLUDES_DIR . 'wizard.php' );
 
 class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copier_Admin_Page {
  	
- 	private $wizard;
+ 	private $wizard = null;
 
  	public function __construct( $menu_slug, $capability, $args ) {
  		parent::__construct( $menu_slug, $capability, $args );
@@ -30,6 +30,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  			$wizard_steps,
  			$this->get_permalink()
  		);
+
+ 		if ( ! $this->wizard->is_initialized() && $this->wizard->get_current_step() != '1' ) {
+ 			$this->wizard->go_to_step( '1' );
+ 		}
 
 
  		if ( isset( $_GET['mcc_action'] ) && 'mcc_submit_metabox' == $_GET['mcc_action'] && wp_verify_nonce( $_GET['_wpnonce'], 'mcc_submit_meta_box' ) ) {
@@ -63,8 +67,8 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					$settings[ $option_slug ] = true;
  			}
 
- 			// Group or all?
- 			if ( ! in_array( $_GET['dest_blog_type'], array( 'group', 'all' ) ) )
+ 			// Group, NBT Group or all?
+ 			if ( ! in_array( $_GET['dest_blog_type'], array( 'group', 'all', 'nbt_group' ) ) )
  				return false;
 
  			/// Resetting the wizard and redirecting
@@ -76,6 +80,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  			$dest_blog_type = $_GET['dest_blog_type'];
  			$model = mcc_get_model();
+ 			$nbt_model = mcc_get_nbt_model();
  			if ( $dest_blog_type == 'group' && ! $model->is_group( absint( $_GET['group'] ) ) ) {
 				return false;
 			}
@@ -94,12 +99,33 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 				$this->wizard->set_value( 'dest_blogs_ids', $ids );
 			}
+			elseif ( $dest_blog_type == 'nbt_group' && ! $nbt_model->is_template( absint( $_GET['nbt_group'] ) ) ) {
+				return false;
+			}
+			elseif ( $dest_blog_type == 'nbt_group' ) {
+				// If is a group, we'll need the blogs IDs
+				$template =  absint( $_GET['nbt_group'] );
+				$blogs = $nbt_model->get_template_blogs( $template );
+
+				if ( empty( $blogs ) )
+					return false;
+
+				$ids = array();
+				foreach ( $blogs as $blog ) {
+					$ids[] = $blog->blog_id;
+				}
+
+				$this->wizard->set_value( 'dest_blogs_ids', $ids );
+			}
 			
  			$this->wizard->set_value( 'mcc_action', $action );
  			$this->wizard->set_value( 'content_blog_id', $content_blog_id );
  			$this->wizard->set_value( 'dest_blog_type', $dest_blog_type );
  			$this->wizard->set_value( 'settings', $settings );
  			$this->wizard->set_value( 'posts_ids', array( $src_post_id ) );
+
+ 			if ( $redirect = wp_get_referer() )
+ 				$this->wizard->set_value( 'redirect_to', $redirect );
 
  			$this->wizard->go_to_step( '5' );
 
@@ -589,13 +615,15 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 					$model->insert_queue_item( $src_blog_id, $dest_blog_id, $settings );	
 			}
 
-			$this->wizard->clean();
-
 			?>
 			<p>
 				<?php _e( 'All good', MULTISTE_CC_LANG_DOMAIN ); ?>
 			</p>
 			<?php
+
+			$this->show_redirect_notice();
+
+			$this->wizard->clean();
 		}
 		else {
 			$this->wizard->set_value( 'settings', $settings );
@@ -617,12 +645,30 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	}
 
 	public function render_step_6() {
-		$this->wizard->clean();
+		
 		?>
 		<p>
 			<?php _e( 'All good', MULTISTE_CC_LANG_DOMAIN ); ?>
 		</p>
-		<?php
+		<?php 
+		$this->show_redirect_notice();
+
+		$this->wizard->clean();
+
+	}
+
+	private function show_redirect_notice() {
+		$redirect_url = false;
+		if ( $this->wizard->get_value( 'redirect_to' ) )
+			$redirect_url = $this->wizard->get_value( 'redirect_to' );
+
+		if ( ! empty( $redirect_url ) ) {
+			?>
+			<p>
+				<?php printf( __( 'Click <a href="%s">here</a> to go back to what you were doing.', MULTISTE_CC_LANG_DOMAIN ), esc_url( $redirect_url ) ); ?>
+			</p>
+			<?php
+		}
 	}
 
 	private function render_progressbar_js( $items_count ) {

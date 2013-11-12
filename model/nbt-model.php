@@ -186,6 +186,18 @@ class Multisite_Content_Copier_NBT_Model {
 		return $wpdb->get_col( $query );
 	}
 
+	public function is_template( $template_id ) {
+		global $wpdb;
+
+		$results = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $this->templates_table WHERE ID = %d", $template_id ) );
+
+		if ( empty( $results ) )
+			return false;
+
+		return true;
+
+	}
+
 
 	public function drop_nbt_relationships_table() {			
 	}

@@ -9,6 +9,7 @@ jQuery(document).ready(function($) {
 
 		var selected = $('input[name=mcc_dest_blog_type]:checked').val();
 		var group = $('#mcc_group').val();
+		var nbt_group = $('#mcc_nbt_group').val();
 
 		if ( ! selected ) {
 			alert( mcc_meta_texts.select_an_option );
@@ -25,6 +26,14 @@ jQuery(document).ready(function($) {
 		else if ( selected == 'group' && group ) {
 			additional_options['dest_blog_type'] = selected;
 			additional_options['group'] = group;
+		}
+		else if ( selected == 'nbt_group' && ! nbt_group ) {
+			alert( mcc_meta_texts.select_a_group );
+			return false;
+		}
+		else if ( selected == 'nbt_group' && nbt_group ) {
+			additional_options['dest_blog_type'] = selected;
+			additional_options['nbt_group'] = nbt_group;
 		}
 
 		

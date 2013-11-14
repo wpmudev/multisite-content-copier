@@ -38,11 +38,14 @@ function mcc_get_sites_search() {
 	if ( ! empty( $results ) ) {
 		foreach ( $results as $row ) {
 			$details = get_blog_details( $row->blog_id );
+			$ajax_url = get_admin_url( $row->blog_id , 'admin-ajax.php' );
 			$returning[] = array( 
 				'blog_name' => $details->blogname,
 				'path' => $row->path, 
-				'blog_id' => $row->blog_id 
+				'blog_id' => $row->blog_id,
+				'ajax_url' => esc_url( $ajax_url )
 			);
+			
 		}
 	}
 

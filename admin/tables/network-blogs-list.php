@@ -139,7 +139,7 @@ class MCC_Sites_List_Table extends WP_List_Table {
                     <select name="group_selected">
                     	<?php mcc_get_groups_dropdown(); ?>
                     </select>
-                    <input type="submit" name="mcc-assign-group" id="mcc-assign-group" class="button" value="<?php _e( 'Assign a group', INCSUB_SUPPORT_LANG_DOMAIN ); ?>">
+                    <input type="submit" name="mcc-assign-group" id="mcc-assign-group" class="button" value="<?php _e( 'Assign a group', MULTISTE_CC_LANG_DOMAIN ); ?>">
                 </div>
             <?php
                 

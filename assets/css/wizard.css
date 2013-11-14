@@ -173,5 +173,9 @@
   content: normal;  
 }
 
+#mcc-posts-list table .column-date {
+	width:20%;
+}
+
 
 

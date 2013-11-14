@@ -10,10 +10,16 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
  	public function render_content() {
 
  		if ( 'groups' == $this->get_current_tab() ) {
- 			$this->render_groups_screen();
+ 			if ( isset( $_GET['action'] ) && 'edit' == $_GET['action'] && isset( $_GET['group'] ) ) {
+ 				$this->render_group_edit_screen();
+ 			}
+ 			else {
+ 				$this->render_groups_screen();
+ 			}
  		}
 
  		if ( 'sites' == $this->get_current_tab() ) {
+ 			
  			?><form method="post"><?php
  			require_once( MULTISTE_CC_ADMIN_DIR . 'tables/network-blogs-list.php' );
 	 		$wp_list_table = new MCC_Sites_List_Table();
@@ -42,8 +48,64 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 			$wp_list_table->display();
 
  		}
+ 		
+ 	}
+
+ 	public function add_help_tabs() {
+ 		$screen = get_current_screen();
+
+        $screen->add_help_tab( array(
+	        'id'	=> 'mcc_groups_help_tab',
+	        'title'	=> __( 'Sites Groups', MULTISTE_CC_LANG_DOMAIN ),
+	        'content'	=> '<h4>' . __( 'What\'s a Site Group?', MULTISTE_CC_LANG_DOMAIN ) . '</h4>',
+	    ) );
+ 	}
+
+ 	public function render_group_edit_screen() {
+
+ 		$group_id = absint( $_GET['group'] );
+ 		$model = mcc_get_model();
+ 		$group = $model->get_blog_group( $group_id );
+
+ 		if ( empty( $group ) ) {
+ 			?>
+				<p><?php _e( 'The group does not exist', MULTISTE_CC_LANG_DOMAIN ); ?></p>
+ 			<?php
+ 		}
+ 		else {
+ 			if ( isset( $_GET['updated'] ) ) {
+	 			?>
+					<div class="updated"><p><?php _e( 'The group has been updated.', MULTISTE_CC_LANG_DOMAIN ); ?> <a href="<?php echo esc_url( $this->get_permalink() ); ?>"><?php _e( 'Back to groups list', MULTISTE_CC_LANG_DOMAIN ); ?></a></p></div>
+	 			<?php
+	 		}
+	 		elseif ( mcc_is_error() ) {
+	 			mcc_show_errors();
+	 		}
+ 			?>
+ 				<form action="" method="post">
+					<table class="form-table">
+						<?php $this->render_row( __( 'Group name', MULTISTE_CC_LANG_DOMAIN ), array( &$this, 'render_group_name_field' ) ); ?>
+					</table>
+					<p class="submit">
+						<input type="hidden" name="group_id" value="<?php echo $group_id; ?>">
+						<?php wp_nonce_field( 'edit-mcc-group', '_wpnonce' ); ?>
+						<?php submit_button( __( 'Save changes', MULTISTE_CC_LANG_DOMAIN ), 'primary', 'submit_edit_group', false ); ?>
+						<a href="<?php echo esc_url( $this->get_permalink() ); ?>" class="button-secondary"><?php _e( 'Cancel', MULTISTE_CC_LANG_DOMAIN ); ?></a>
+					</p>
+				</form>
+	 		<?php
+ 		}
 
  		
+ 	}
+
+ 	public function render_group_name_field() {
+ 		$group_id = absint( $_GET['group'] );
+ 		$model = mcc_get_model();
+ 		$group = $model->get_blog_group( $group_id );
+ 		?>
+			<input type="text" name="group_name" value="<?php echo esc_attr( $group->group_name ); ?>">
+ 		<?php
  	}
 
  	public function render_groups_screen() {
@@ -58,6 +120,9 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
  			?>
 				<div class="updated"><p><?php _e( 'The group has been added', MULTISTE_CC_LANG_DOMAIN ); ?></p></div>
  			<?php
+ 		}
+ 		elseif ( mcc_is_error() ) {
+ 			mcc_show_errors();
  		}
 
  		?>
@@ -99,10 +164,49 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 
  			$group_name = stripslashes_deep( $_POST['group_name'] );
 
- 			$model = mcc_get_model();
- 			$model->add_new_blog_group( $group_name );
+ 			if ( empty( $group_name ) )
+ 				mcc_add_error( 'empty-group-name', __( 'Group name cannot be empty', MULTISTE_CC_LANG_DOMAIN ) );
 
- 			wp_redirect( add_query_arg( 'added', 'true', $this->get_permalink() ) );
+ 			if ( ! mcc_is_error() ) {
+	 			$model = mcc_get_model();
+	 			$model->add_new_blog_group( $group_name );
+
+	 			wp_redirect( add_query_arg( 'added', 'true', $this->get_permalink() ) );
+	 		}
+ 		}
+
+ 		if ( isset( $_POST['submit_edit_group'] ) ) {
+
+ 			if ( ! check_admin_referer( 'edit-mcc-group' ) )
+ 				return;
+
+ 			$group_id = absint( $_POST['group_id'] );
+ 			$group_name = stripslashes_deep( $_POST['group_name'] );
+
+ 			if ( empty( $group_name ) )
+ 				mcc_add_error( 'empty-group-name', __( 'Group name cannot be empty', MULTISTE_CC_LANG_DOMAIN ) );
+
+ 			
+ 			if ( ! mcc_is_error() ) {
+	 			$model = mcc_get_model();
+
+	 			$args = array(
+	 				'group_name' => stripslashes_deep( $_POST['group_name'] )
+	 			);
+	 			$model->update_group( $group_id, $args );
+
+	 			wp_redirect( 
+	 				add_query_arg( 
+	 					array( 
+	 						'updated' => 'true', 
+	 						'action' => 'edit',
+	 						'group' => $group_id
+	 					),
+	 					$this->get_permalink() 
+	 				) 
+	 			);
+	 		}
+
  		}
  	}
 }

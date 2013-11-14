@@ -1,96 +1,71 @@
 jQuery(document).ready(function($) {
-	var mcc_cache = {};
-	var type = '';
-	$( "#autocomplete" ).autocomplete({
-	  minLength: 2,
-	  source: function( request, response ) {
-	    var term = request.term;
-	    if ( term in mcc_cache ) {
-	      response( mcc_cache[ term ] );
-	      return;
-	    }
 
+	$( '#mcc-refresh-post-types' ).on( 'click', function(e) {
+		e.preventDefault();
 
-	    type = $('#autocomplete').data('type');
+		var blog_id = $('#blog_id').val();
+		var _ajaxurl = $('#blog_ajax_url').val();
+
+		if ( blog_id == '' || blog_id == 0 )
+			return false;
+
+		$( '.spinner' ).show();
+
+		$( '#mcc-cpt-list-wrap ul li' ).remove();
 
 		var data = {
-			action: 'mcc_get_' + type + '_search',
-			term: request.term
+			action: 'mcc_retrieve_cpt_selectors_data',
+			blog_id: $('#blog_id').val()
 		};
 
-		if ( 'posts' == type ) {
-			data.blog_id = $('#src_blog_id').val()
-		}
-
-	    $.ajax({
-			url: ajaxurl,
+		$.ajax({
+			url: _ajaxurl,
 			data: data,
 			type: 'post',
-			dataType: 'json'
 		}).done(function( data ) {
-			mcc_cache[ term ] = data;
-			response( data );
-		}).fail( function(data) {
-			console.log(data);
+			$('.spinner').hide();
+			if ( data !== '' ) {
+				$( '#mcc-cpt-list-wrap ul' ).append( data );
+			}
 		});
-
-	  },
-	  response: function( event, ui ) {
-	  	if ( 'sites' == type ) {
-			for ( var i = 0; i < ui.content.length; i++ ) {
-		  		ui.content[i].label = ui.content[i].path + ' [' + ui.content[i].blog_name + ']';
-		  		ui.content[i].value = ui.content[i].blog_name;
-		  	}
-		}
-		if ( 'posts' == type ) {
-			for ( var i = 0; i < ui.content.length; i++ ) {
-		  		ui.content[i].label = ui.content[i].the_title + ' [' + ui.content[i].the_id + ']';
-		  		ui.content[i].value = ui.content[i].the_title;
-		  	}
-		}
-	  	
-	  },
-	  select: function ( event, ui ) {
-	  	if ( 'sites' == type ) {
-			$( '#blog_id' ).val( ui.item.blog_id );
-		}
-		if ( 'posts' == type ) {
-			$( '#post_id' ).val( ui.item.the_id );
-		}
-	  }
 	});
 
 	var current_posts = {};
-	$( '#add-post' ).click( function( e ) { 
+	$( '#mcc-posts-list #doaction' ).click( function( e ) { 
 		e.preventDefault();
 
-		
+		if ( $('#mcc-posts-list select[name=action]').val() != 'add' )
+			return;
 
-		var post_id = $( '#post_id' ).val().trim();
+		var post_ids_selected = $( 'input.post_id:checked' );
+		var post_ids = [];
+		post_ids_selected.each( function (i, element) {
+			var value = parseInt($(this).val());
+			post_ids[i] = value;
+		} );
 
-		post_id = parseInt( post_id );
+		if ( post_ids.length == 0 )
+			return;
 
-		if ( ! isNaN( post_id ) && post_id !== 0 ) {
-			$('.spinner').show();
-			var data = {
-				action: 'mcc_retrieve_single_post_data',
-				post_id: $('#post_id').val(),
-				blog_id: $('#src_blog_id').val(),
-			};
-			$.ajax({
-				url: ajaxurl,
-				data: data,
-				type: 'post',
-			}).done(function( data ) {
-				$('.spinner').hide();
-				if ( data !== '' ) {
-					
-					$( '#posts-list' ).append( data );
-					current_posts[ data.post_id ] = data.post_id;
-					update_post_click_event();
-				}
-			});
-		}
+
+		$('.spinner').show();
+		var data = {
+			action: 'mcc_retrieve_single_post_data',
+			post_ids: post_ids,
+			blog_id: $('#src_blog_id').val(),
+			current_posts: current_posts
+		};
+		$.ajax({
+			url: ajaxurl,
+			data: data,
+			type: 'post',
+		}).done(function( data ) {
+			$('.spinner').hide();
+			if ( data !== '' ) {
+				$( '#posts-list' ).append( data );
+				update_post_click_event();
+			}
+		});
 	});
 
 	var current_blogs = {};

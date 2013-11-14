@@ -12,6 +12,8 @@ class MCC_NBT_Integrator {
 
 		add_action( 'delete_blog', array( &$this, 'delete_blog_relationships' ), 10, 1 );
 
+		add_action('switch_theme', array( &$this, 'delete_blog_relationships_on_switch_theme' ), 10, 1 );
+
 	}
 
 	public function init() {
@@ -66,5 +68,10 @@ class MCC_NBT_Integrator {
 	public function delete_blog_relationships( $blog_id ) {
 		$nbt_model = mcc_get_nbt_model();
 		$nbt_model->delete_relationships( 'blog_id', $blog_id );
+	}
+
+	public function delete_blog_relationships_on_switch_theme( $new_theme ) {
+		$nbt_model = mcc_get_nbt_model();
+		$nbt_model->delete_relationships( 'blog_id', get_current_blog_id() );
 	}
 }

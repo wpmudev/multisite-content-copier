@@ -27,7 +27,7 @@ class MCC_Wizard {
 	}
 
 	public function is_initialized() {
-		return $this->initialized;
+		return isset( $_SERVER['mcc_wizard']['initialized'] );
 	}
 
 
@@ -43,7 +43,6 @@ class MCC_Wizard {
 	}
 
 	public function set_value( $key, $value ) {
-		$this->initialized = true;
 		$_SESSION['mcc_wizard'][ $key ] = $value;
 	}
 

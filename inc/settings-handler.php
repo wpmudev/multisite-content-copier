@@ -34,6 +34,12 @@ class Multisite_Content_Copier_Settings_Handler {
 				'update_date'	=> __( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_parents'	=> __( 'Copy page/post parents', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN )
+			),
+			'cpt' => array(
+				'copy_images'	=> __( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ),
+				'update_date'	=> __( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_parents'	=> __( 'Copy parents', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN )
 			)
 		);
 	}

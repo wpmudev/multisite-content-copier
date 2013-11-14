@@ -66,7 +66,8 @@ abstract class Multisite_Content_Copier_Admin_Page {
 			'network_menu' => false,
 			'enqueue_scripts' => false,
 			'enqueue_styles' => false,
-			'forbidden_message' => 'You do not have enough permissions to access to this page'
+			'forbidden_message' => 'You do not have enough permissions to access to this page',
+			'on_load' => array()
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -84,6 +85,7 @@ abstract class Multisite_Content_Copier_Admin_Page {
 		$this->capability = $capability;
 		$this->screen_icon_slug = $screen_icon_slug;
 		$this->network_menu = $network_menu;
+		$this->on_load = $on_load;
 
 		// Network menu?
 		if ( ! $network_menu )
@@ -176,7 +178,17 @@ abstract class Multisite_Content_Copier_Admin_Page {
 				'div'
 			);
 		}
+
+		add_action( 'load-' . $this->page_id, array( $this, 'add_help_tabs' ) );
+
+		if ( ! empty( $this->on_load ) ) {
+			foreach( $this->on_load as $callback ) {
+				add_action( 'load-' . $this->page_id, array( &$this, $callback ) );
+			}
+		}
 	}
+
+	public function add_help_tabs() {}
 
 
 	/**

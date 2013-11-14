@@ -70,6 +70,10 @@ function mcc_get_groups_dropdown( $selected = '' ) {
 	<?php
 }
 
+function mcc_get_additional_settings( $type ) {
+	return call_user_func( 'mcc_get_' . $type . '_additional_settings' );
+}
+
 function mcc_get_post_additional_settings() {
 	$settings_handler = mcc_get_settings_handler();
 	return $settings_handler->get_additional_settings( 'post' );
@@ -78,6 +82,11 @@ function mcc_get_post_additional_settings() {
 function mcc_get_page_additional_settings() {
 	$settings_handler = mcc_get_settings_handler();
 	return $settings_handler->get_additional_settings( 'page' );
+}
+
+function mcc_get_cpt_additional_settings() {
+	$settings_handler = mcc_get_settings_handler();
+	return $settings_handler->get_additional_settings( 'cpt' );
 }
 
 function mcc_get_nbt_model() {

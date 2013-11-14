@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: 
 Description: Does nothing at all
 Author: igmoweb
-Version: 0.2
+Version: 0.3
 Author URI:
 Text Domain: mcc
 Network:true
@@ -117,13 +117,7 @@ class Multisite_Content_Copier {
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'errors-handler.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'helpers.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
-
-		// The copier
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-plugin.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-user.php' );
+		
 
 		//Integrations
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'integration/nbt-integration.php' );
@@ -201,8 +195,8 @@ class Multisite_Content_Copier {
 		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
 
 		$args = array(
-			'menu_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
-			'page_title' => __( 'Blogs groups', MULTISTE_CC_LANG_DOMAIN ),
+			'menu_title' => __( 'Sites groups', MULTISTE_CC_LANG_DOMAIN ),
+			'page_title' => __( 'Sites groups', MULTISTE_CC_LANG_DOMAIN ),
 			'network_menu' => true,
 			'parent' => 'mcc_network_page',
 			'tabs' => array(
@@ -215,7 +209,7 @@ class Multisite_Content_Copier {
 		if ( $settings['blog_templates_integration'] )
 			$args['tabs']['nbt'] = __( 'New Blog Templates', MULTISTE_CC_LANG_DOMAIN );
 
-		self::$network_blog_groups_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_blogs_groups_page', 'manage_network', $args );
+		self::$network_blog_groups_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_sites_groups_page', 'manage_network', $args );
 
 		$args = array(
 			'menu_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
@@ -236,6 +230,14 @@ class Multisite_Content_Copier {
 			set_transient( 'mcc_copying', true, 900 );
 			$queue = mcc_get_queue_for_blog();
 			foreach ( $queue as $item ) {
+				
+				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier.php' );
+				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
+				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
+				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-plugin.php' );
+				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-user.php' );
+				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-cpt.php' );
+
 				$settings = $item->settings;
 				$class = $settings['class'];
 

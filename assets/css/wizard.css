@@ -25,7 +25,8 @@
 #blogs-list li span.id-box {
 	border-right:1px solid #CCC;
 	min-width: 20px;
-	width: 20px;
+	background:#E2E2E2;
+	width: 60px;
 }
 
 #posts-list li span.remove-box,
@@ -34,6 +35,8 @@
 	float: right;
 	border-left: 1px solid #CCC;
 	font-size: 17px;
+	background:#E2E2E2;
+	text-shadow:1px 1px 1px white;
 }
 
 #posts-list li span.remove-box a,

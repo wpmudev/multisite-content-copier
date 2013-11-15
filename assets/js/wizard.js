@@ -1,5 +1,6 @@
 jQuery(document).ready(function($) {
 
+	// REFRESH CPTs
 	$( '#mcc-refresh-post-types' ).on( 'click', function(e) {
 		e.preventDefault();
 
@@ -30,6 +31,7 @@ jQuery(document).ready(function($) {
 		});
 	});
 
+	// POSTS/PAGES/CPTs SELECTION
 	var current_posts = {};
 	$( '#mcc-posts-list #doaction' ).click( function( e ) { 
 		e.preventDefault();
@@ -68,6 +70,58 @@ jQuery(document).ready(function($) {
 		});
 	});
 
+	// USERS SELECTION
+	$('input[name=users_selection]').change(function( element ) {
+		var value = $(this).val();
+		if ( 'all' == value ) {
+			$('#mcc-users-list input[type=checkbox]').attr('disabled', true).attr('checked',false);
+		}
+		else {
+			$('#mcc-users-list input[type=checkbox]').attr('disabled', false);
+		}
+	});
+
+	var current_users = [];
+	$( '#mcc-users-list #doaction' ).click( function( e ) { 
+		e.preventDefault();
+
+		if ( $('#mcc-users-list select[name=action]').val() != 'add' )
+			return false;
+
+		var user_ids_selected = $( 'input.user_id:checked' );
+		var user_ids = [];
+		user_ids_selected.each( function (i, element) {
+			var value = parseInt($(this).val());
+			if ( ! current_users[value] ) {
+				current_users[value] = true;
+				user_ids[i] = value;
+			}
+		} );
+
+		if ( user_ids.length == 0 )
+			return;
+
+
+		$('.spinner').show();
+		var data = {
+			action: 'mcc_retrieve_single_user_data',
+			user_ids: user_ids,
+			current_posts: current_posts
+		};
+		$.ajax({
+			url: ajaxurl,
+			data: data,
+			type: 'post',
+		}).done(function( data ) {
+			$('.spinner').hide();
+			if ( data !== '' ) {
+				$( '#users-list' ).append( data );
+				update_user_click_event();
+			}
+		});
+	});
+
+	// BLOGS SELECTIONS
 	var current_blogs = {};
 	$( '#add-blog' ).click( function( e ) { 
 		e.preventDefault();
@@ -95,34 +149,6 @@ jQuery(document).ready(function($) {
 		}
 	});
 
-	var current_users = {};
-	$( '#add-user' ).click( function( e ) { 
-		e.preventDefault();
-
-		var user_id = $( '#user_id' ).val().trim();
-
-		user_id = parseInt( user_id );
-
-		if ( ! isNaN( user_id ) && user_id !== 0 ) {
-			$('.spinner').show();
-			var data = {
-				action: 'mcc_retrieve_single_user_data',
-				user_id: $('#user_id').val()
-			};
-			$.ajax({
-				url: ajaxurl,
-				data: data,
-				type: 'post',
-			}).done(function( data ) {
-				$('.spinner').hide();
-				if ( data !== '' ) {
-					$( '#users-list' ).append( data );
-					current_blogs[ data.user_id ] = data.user_id;
-					update_user_click_event();
-				}
-			});
-		}
-	});
 
 	update_blog_click_event();
 	function update_blog_click_event() {
@@ -138,6 +164,7 @@ jQuery(document).ready(function($) {
 		$( '.mcc-remove-post' ).click( function(e)  {
 			e.preventDefault();
 			var post_id = $(this).data('post-id');
+			update_items_ids(post_id);
 			$('#post-' + post_id ).remove(); 
 		});
 	}
@@ -147,7 +174,16 @@ jQuery(document).ready(function($) {
 		$( '.mcc-remove-user' ).click( function(e)  {
 			e.preventDefault();
 			var user_id = $(this).data('user-id');
+			update_items_ids( user_id );
 			$('#user-' + user_id ).remove(); 
+		});
+	}
+
+	function update_items_ids( item_id ) {
+		$.ajax({
+			url: ajaxurl,
+			type: 'post',
+			data: {action: 'mcc_remove_item_id_from_list', item_id: item_id},
 		});
 	}
 

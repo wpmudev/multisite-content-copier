@@ -32,16 +32,20 @@ class MCC_Posts_List_Table extends WP_List_Table {
         $current_page = $this->get_pagenum();
         
         switch_to_blog( $this->blog_id );
-		$wp_query = new WP_Query(
-			array(
-				'post_status' => 'publish',
-				'post_type' => $this->post_type,
-				'posts_per_page ' => $per_page,
-				'paged' => $current_page,
-				'order' => 'DESC',
-				'orderby' => 'date'
-			)
+		
+		$args = array(
+			'post_status' => 'publish',
+			'post_type' => $this->post_type,
+			'posts_per_page ' => $per_page,
+			'paged' => $current_page,
+			'order' => 'DESC',
+			'orderby' => 'date'
 		);
+
+		if ( ! empty( $_REQUEST['s'] ) )
+			$args['s'] = $_REQUEST['s'];
+
+		$wp_query = new WP_Query( $args );
 		restore_current_blog();
 
 		$this->items = $wp_query->posts;
@@ -54,20 +58,22 @@ class MCC_Posts_List_Table extends WP_List_Table {
 	}
 
 	function display_tablenav( $which ) {
-?>
-	<div class="tablenav <?php echo esc_attr( $which ); ?>">
+		if ( 'top' == $which ) {
+			?>
+				<div class="tablenav <?php echo esc_attr( $which ); ?>">
 
-		<div class="alignleft actions">
-			<?php $this->bulk_actions(); ?>
-		</div>
-<?php
-		$this->extra_tablenav( $which );
-		$this->pagination( $which );
-?>
+					<div class="alignleft actions">
+						<?php $this->bulk_actions(); ?>
+					</div>
+			<?php
+					$this->extra_tablenav( $which );
+					$this->pagination( $which );
+			?>
 
-		<br class="clear" />
-	</div>
-<?php
+					<br class="clear" />
+				</div>
+			<?php
+		}
 	}
 
 	function get_columns() {

@@ -22,20 +22,24 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
         add_action( 'wp_ajax_mcc_retrieve_single_blog_data', array( &$this, 'retrieve_single_blog_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_single_user_data', array( &$this, 'retrieve_single_user_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_cpt_selectors_data', array( &$this, 'retrieve_cpt_selectors_data' ) );
+        add_action( 'wp_ajax_mcc_remove_item_id_from_list', array( &$this, 'remove_item_id_from_list' ) );
  	}
 
+ 	public function wizard_start() {
+ 		$wizard_steps = array( '1','2','3','4','5', '6' );
+ 		$this->wizard = new MCC_Wizard(
+ 			$wizard_steps,
+ 			$this->get_permalink()
+ 		);
+ 	}
 
  	public function init_wizard() {
 
  		if ( ! isset( $_GET['page'] ) || ( isset( $_GET['page'] ) && $_GET['page'] != $this->get_menu_slug() ) )
  			return;
 
- 		$wizard_steps = array( '1','2','3','4','5', '6' );
- 		$this->wizard = new MCC_Wizard(
- 			$wizard_steps,
- 			$this->get_permalink()
- 		);
-
+ 		$this->wizard_start();
+ 		
  		$action = $this->wizard->get_value( 'mcc_action' );
  		if ( $this->wizard->get_current_step() != '1' && empty( $action ) ) {
  			$this->wizard->go_to_step( '1' );
@@ -79,10 +83,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  			/// Resetting the wizard and redirecting
  			$this->wizard->clean();
- 			$this->wizard = new MCC_Wizard(
-	 			$wizard_steps,
-	 			$this->get_permalink()
-	 		);
+ 			$this->wizard_start();
 
  			$dest_blog_type = $_GET['dest_blog_type'];
  			$model = mcc_get_model();
@@ -173,6 +174,9 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		if ( ! is_array( $_POST['post_ids'] ) )
 			die();
 
+		$this->wizard_start();
+		$current_posts = $this->wizard->get_value( 'posts_ids', array() );
+
 		$blog_id = absint( $_POST['blog_id'] );
 		$post_ids = $_POST['post_ids'];
 
@@ -182,8 +186,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			$post = get_blog_post( $blog_id, absint( $post_id ) );
 			if ( ! empty( $post ) ) {
 				$returning .= $this->get_row_list( 'post', $post->ID, $post->post_title );
+				$current_posts[] = $post->ID;
 			}
 		}
+
+		$current_posts = $this->wizard->set_value( 'posts_ids', $current_posts );
 
 		echo $returning;
 
@@ -208,14 +215,25 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	}
 
 	public function retrieve_single_user_data() {
-		$user_id = absint( $_POST['user_id'] );
-
-		$details = get_userdata( $user_id );
+		if ( ! is_array( $_POST['user_ids'] ) )
+			die();
+		
+		$this->wizard_start();
 
 		$returning = '';
-		if ( ! empty( $details ) ) {
-			$returning .= $this->get_row_list( 'user', $user_id, $details->data->user_login );
+		$current_users = $this->wizard->get_value( 'posts_ids', array() );
+		if ( ! is_array( $current_users ) )
+			$current_users = array();
+		
+		foreach ( $_POST['user_ids'] as $user_id ) {
+			$details = get_userdata( $user_id );
+			if ( ! empty( $details ) ) {
+				$returning .= $this->get_row_list( 'user', $details->data->ID,  $details->data->user_login );
+				$current_users[] = $details->data->ID;
+			}
 		}
+
+		$this->wizard->set_value( 'posts_ids', $current_users );
 
 		echo $returning;
 
@@ -242,6 +260,26 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		restore_current_blog();
 
 		echo $returning;
+
+		die();
+	}
+
+	public function remove_item_id_from_list() {
+		if ( empty( $_POST['item_id'] ) )
+			die();
+
+		$item_id = absint( $_POST['item_id'] );
+
+		$this->wizard_start();
+		$current_items = $this->wizard->get_value( 'posts_ids', array() );
+
+		$key = array_search( $item_id, $current_items );
+
+		if ( $key !== false ) {
+			unset( $current_items[ $key ] );
+		}
+
+		$this->wizard->set_value( 'posts_ids', $current_items );
 
 		die();
 	}
@@ -479,6 +517,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			</div>
 			<div class="alignright" id="mcc-posts-list" style="width:60%;">
 				<input type="hidden" id="src_blog_id" name="src_blog_id" value="<?php echo $blog_id; ?>">
+				<?php $posts_table->search_box( __( 'Search', INCSUB_SBE_LANG_DOMAIN ), 'search' ); ?><br/><br/>
 				<?php $posts_table->display(); ?>
 			</div>
 			<div class="clear"></div>
@@ -519,31 +558,41 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			}
 		}
 
+		$user_selection = $this->wizard->get_value( 'users_selection' );
+		if ( empty( $user_selection ) )
+			$user_selection = 'ids';
+
+		require_once( MULTISTE_CC_ADMIN_DIR . 'tables/network-users-list.php' );
+		$args = array(
+			'blog_id' => $this->wizard->get_value( 'content_blog_id' ),
+			'selected' => is_array( $current_users_ids ) ? $current_users_ids : array(),
+			'enabled' => ( $user_selection == 'ids' )
+		);
+		$users_table = new MCC_Users_List_Table( $args );
+		$users_table->prepare_items();
+
+
 		?>
-			<h3><?php _e( 'Add users', MULTISTE_CC_LANG_DOMAIN ); ?></h3><br/>
-			
-			<input type="hidden" id="src_blog_id" name="src_blog_id" value="<?php echo $blog_id; ?>">
+			<ul id="users-list">
+            	<?php echo $users_list; ?>
+            </ul>
 
-			<label>
-				<input type="radio" name="users_selection" <?php checked( $this->wizard->get_value( 'users_selection' ) == 'all' ); ?> value="all" /> <?php _e( 'Copy all users in the blog', MULTISTE_CC_LANG_DOMAIN ); ?>
-			</label><br/><br/>
+            <div class="alignleft" style="width:35%;">
+            	<h3><?php _e( 'Add users', MULTISTE_CC_LANG_DOMAIN ); ?></h3><br/>
+	            <label>
+					<input type="radio" name="users_selection" <?php checked( $user_selection == 'all' ); ?> value="all" /> <?php _e( 'Copy all users in the blog', MULTISTE_CC_LANG_DOMAIN ); ?>
+				</label><br/><br/>
 
-			<label>
-				<input type="radio" name="users_selection" <?php checked( $this->wizard->get_value( 'users_selection' ) == 'ids' ); ?> value="ids"> <?php _e( 'Search by ID or login name', MULTISTE_CC_LANG_DOMAIN ); ?>
-			</label><br/><br/>
-			
-				<input name="user_id" type="text" id="user_id" class="small-text" style="float: left; margin-left:20px; margin-right: 10px;" placeholder="<?php _e( 'User ID', MULTISTE_CC_LANG_DOMAIN ); ?>"/>
-				
-	            <div style="display:inline-block"class="ui-widget">
-	                <label for="search_for_usert"> <?php _e( 'Or search by user login', MULTISTE_CC_LANG_DOMAIN ); ?> 
-						<input type="text" id="autocomplete" data-type="users" class="medium-text">
-						<span class="spinner"></span> <input type="button" class="button-secondary" name="add-user" id="add-user" value="<?php _e( 'Add user', MULTISTE_CC_LANG_DOMAIN ); ?>"></input> 
-	                </label>
-	            </div>
-	            <div class="clear"></div>
-	            <ul id="users-list">
-	            	<?php echo $users_list; ?>
-	            </ul>
+				<label>
+					<input type="radio" name="users_selection" <?php checked( $user_selection == 'ids' ); ?> value="ids"> <?php _e( 'Select users in table', MULTISTE_CC_LANG_DOMAIN ); ?>
+				</label>
+			</div>
+			<div class="alignright" id="mcc-users-list" style="width:60%;">
+				<input type="hidden" id="src_blog_id" name="src_blog_id" value="<?php echo $blog_id; ?>">
+				<?php $users_table->search_box( __( 'Search', INCSUB_SBE_LANG_DOMAIN ), 'search' ); ?><br/><br/>
+				<?php $users_table->display(); ?>
+			</div>
+			<div class="clear"></div>
 	        
 		<?php
 	}

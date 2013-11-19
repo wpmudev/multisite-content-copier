@@ -221,8 +221,8 @@ class Multisite_Content_Copier {
 
 	public function maybe_copy_content() {
 
-		if ( ! is_network_admin() && ! get_transient( 'mcc_copying' ) ) {
-			set_transient( 'mcc_copying', true, 900 );
+		if ( ! is_network_admin() && ! get_site_transient( 'mcc_copying' ) ) {
+			set_site_transient( 'mcc_copying', true, 900 );
 			$queue = mcc_get_queue_for_blog();
 			foreach ( $queue as $item ) {
 				
@@ -238,7 +238,7 @@ class Multisite_Content_Copier {
 				$model->delete_queue_item( $item->ID );
 
 			}
-			delete_transient( 'mcc_copying' );
+			delete_site_transient( 'mcc_copying' );
 		}
 		
 	}

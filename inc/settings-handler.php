@@ -23,21 +23,21 @@ class Multisite_Content_Copier_Settings_Handler {
 	public function __construct() {
 		$this->additional_settings = array(
 			'post' => array(
-				'copy_images'	=> __( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ),
-				'update_date'	=> __( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ),
-				'copy_parents'	=> __( 'Copy page/post parents', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_images'	=> __( 'Copy images (required for featured images)', MULTISTE_CC_LANG_DOMAIN ),
+				'update_date'	=> __( 'Update post created date', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_parents'	=> __( 'Copy parents', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_terms' 	=> __( 'Copy terms', MULTISTE_CC_LANG_DOMAIN )
 			),
 			'page' => array(
-				'copy_images'	=> __( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ),
-				'update_date'	=> __( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ),
-				'copy_parents'	=> __( 'Copy page/post parents', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_images'	=> __( 'Copy images', MULTISTE_CC_LANG_DOMAIN ),
+				'update_date'	=> __( 'Update page created date', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_parents'	=> __( 'Copy parents', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN )
 			),
 			'cpt' => array(
-				'copy_images'	=> __( 'Copy images to new upload folder', MULTISTE_CC_LANG_DOMAIN ),
-				'update_date'	=> __( 'Update the created date of the post', MULTISTE_CC_LANG_DOMAIN ),
+				'copy_images'	=> __( 'Copy images (required for featured images)', MULTISTE_CC_LANG_DOMAIN ),
+				'update_date'	=> __( 'Update post created date', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_parents'	=> __( 'Copy parents', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN )
 			)
@@ -85,10 +85,10 @@ class Multisite_Content_Copier_Settings_Handler {
 	 */
 	public function update_settings( $new_settings ) {
 		$this->settings = $new_settings;
-		if ( ! get_option( $this->settings_slug ) )
-			add_option( $this->settings_slug, $new_settings, '', 'no' );
+		if ( ! get_site_option( $this->settings_slug ) )
+			add_site_option( $this->settings_slug, $new_settings );
 		else
-			update_option( $this->settings_slug, $new_settings );
+			update_site_option( $this->settings_slug, $new_settings );
 	}
 
 	/**
@@ -97,7 +97,7 @@ class Multisite_Content_Copier_Settings_Handler {
 	 * @since 0.1
 	 */
 	private function init_settings() {
-		$current_settings = get_option( $this->settings_slug );
+		$current_settings = get_site_option( $this->settings_slug );
 		$this->settings = wp_parse_args( $current_settings, $this->get_default_settings() );
 	}
 

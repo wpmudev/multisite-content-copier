@@ -148,21 +148,7 @@ class Multisite_Content_Copier {
 	/**
 	 * Upgrade the plugin when a new version is uploaded
 	 */
-	public function maybe_upgrade() {
-		$current_version = get_option( self::$version_option_slug );
-
-		if ( ! $current_version )
-			$current_version = '0.1'; // This is the first version that includes some upgradings
-
-		// For the second version, we're just saving the version in DB
-		if ( version_compare( $current_version, '0.2', '<' ) ) {
-			$model = mcc_get_model();
-			$model->create_schema();
-			// Call upgrade functions here
-		}
-
-		update_option( self::$version_option_slug, MULTISTE_CC_VERSION );
-	}
+	public function maybe_upgrade() {}
 
 
 

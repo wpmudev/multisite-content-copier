@@ -12,8 +12,8 @@ class MCC_Post_Meta_Box {
 			wp_enqueue_script( 'mcc-meta-box', MULTISTE_CC_ASSETS_URL . 'js/meta-box.js', array( 'jquery' ) );
 
 			$object = array(
-				'select_an_option' => __( 'You must select a destination blog', MULTISTE_CC_LANG_DOMAIN ),
-				'select_a_group' => __( 'You must select a group of blogs', MULTISTE_CC_LANG_DOMAIN )
+				'select_an_option' => __( 'You must select a destination', MULTISTE_CC_LANG_DOMAIN ),
+				'select_a_group' => __( 'You must select a group', MULTISTE_CC_LANG_DOMAIN )
 			);
 			wp_localize_script( 'mcc-meta-box', 'mcc_meta_texts', $object );
 		}
@@ -37,7 +37,7 @@ class MCC_Post_Meta_Box {
 	public function render_copier_meta_box( $post ) {
 
 		if ( 'publish' != $post->post_status ) {
-			echo '<p>' . __( 'In order to copy content you first need to publish the post/page', MULTISTE_CC_LANG_DOMAIN ) . '</p>';
+			echo '<p>' . __( 'Please publish this content if you would like to copy it.', MULTISTE_CC_LANG_DOMAIN ) . '</p>';
 		}
 		else {
 			$settings = array(
@@ -45,7 +45,7 @@ class MCC_Post_Meta_Box {
 				'class' => 'Multisite_Content_Copier_Post_Copier'
 			);
 			?>
-				<h4><?php _e( 'Select the destination blogs', MULTISTE_CC_LANG_DOMAIN ); ?></h4>
+				<h4><?php _e( 'Select destinations', MULTISTE_CC_LANG_DOMAIN ); ?></h4>
 				<?php if ( get_post_meta( $post->ID, 'mcc_copied' ) ): ?>
 					<p><?php _e( 'You have already copied this post, copying it again could cause duplicated posts', MULTISTE_CC_LANG_DOMAIN ); ?></p>
 				<?php endif; ?>
@@ -53,13 +53,13 @@ class MCC_Post_Meta_Box {
 					<p>
 						<label>
 							<input type="radio" name="mcc_dest_blog_type" value="all"> 
-							<?php _e( 'Copy to all blogs', MULTISTE_CC_LANG_DOMAIN ); ?>
+							<?php _e( 'All sites', MULTISTE_CC_LANG_DOMAIN ); ?>
 						</label>
 					</p>
 					<p>
 						<label>
 							<input type="radio" name="mcc_dest_blog_type" value="group">
-							<?php _e( 'Select by blogs group', MULTISTE_CC_LANG_DOMAIN ); ?>
+							<?php _e( 'Site group', MULTISTE_CC_LANG_DOMAIN ); ?>
 						</label>
 						<select name="mcc_group" id="mcc_group" >
 							<?php mcc_get_groups_dropdown(); ?>
@@ -78,7 +78,7 @@ class MCC_Post_Meta_Box {
 						</p>
 					<?php endif; ?>	
 				</div>
-				<h4><?php _e( 'Additional options', MULTISTE_CC_LANG_DOMAIN ); ?></h4>
+				<h4><?php _e( 'Additional Options', MULTISTE_CC_LANG_DOMAIN ); ?></h4>
 				<?php $options =  mcc_get_post_additional_settings(); ?>
 				<ul style="margin-left:20px;">
 					<?php foreach ( $options as $option_slug => $label ): ?>
@@ -96,7 +96,7 @@ class MCC_Post_Meta_Box {
 					);
 					$link = wp_nonce_url( $link, 'mcc_submit_meta_box' );
 				?>
-				<a id="mcc_copy_link" class="button-primary" href="<?php echo esc_url( $link ); ?>"><?php _e( 'Copy!', MULTISTE_CC_LANG_DOMAIN ); ?></a>
+				<a id="mcc_copy_link" class="button-primary" href="<?php echo esc_url( $link ); ?>"><?php _e( 'Copy', MULTISTE_CC_LANG_DOMAIN ); ?></a>
 			<?php 
 		}
 	}

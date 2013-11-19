@@ -57,7 +57,6 @@ jQuery(document).ready(function($) {
 	}
 
 	// POSTS/PAGES/CPTs SELECTION
-	var current_posts = {};
 	$( '#mcc-posts-list #doaction' ).click( function( e ) { 
 		e.preventDefault();
 
@@ -68,7 +67,12 @@ jQuery(document).ready(function($) {
 		var post_ids = [];
 		post_ids_selected.each( function (i, element) {
 			var value = parseInt($(this).val());
-			post_ids[i] = value;
+
+			if ( current_posts.indexOf(value) == -1 ) {
+				post_ids[i] = value;
+				current_posts.push(value);
+			}
+			
 		} );
 
 		if ( post_ids.length == 0 )
@@ -106,7 +110,6 @@ jQuery(document).ready(function($) {
 		}
 	});
 
-	var current_users = [];
 	$( '#mcc-users-list #doaction' ).click( function( e ) { 
 		e.preventDefault();
 
@@ -117,10 +120,12 @@ jQuery(document).ready(function($) {
 		var user_ids = [];
 		user_ids_selected.each( function (i, element) {
 			var value = parseInt($(this).val());
-			if ( ! current_users[value] ) {
-				current_users[value] = true;
+
+			if ( current_users.indexOf(value) == -1 ) {
 				user_ids[i] = value;
+				current_users.push(value);
 			}
+
 		} );
 
 		if ( user_ids.length == 0 )
@@ -130,8 +135,7 @@ jQuery(document).ready(function($) {
 		$('.spinner').show();
 		var data = {
 			action: 'mcc_retrieve_single_user_data',
-			user_ids: user_ids,
-			current_posts: current_posts
+			user_ids: user_ids
 		};
 		$.ajax({
 			url: ajaxurl,
@@ -193,6 +197,9 @@ jQuery(document).ready(function($) {
 			var post_id = $(this).data('post-id');
 			update_items_ids(post_id);
 			$('#post-' + post_id ).remove(); 
+			var index = current_posts.indexOf(post_id);
+			if ( index > -1 )
+				current_posts.splice(index, 1);
 		});
 	}
 
@@ -203,6 +210,9 @@ jQuery(document).ready(function($) {
 			var user_id = $(this).data('user-id');
 			update_items_ids( user_id );
 			$('#user-' + user_id ).remove(); 
+			var index = current_users.indexOf(user_id);
+			if ( index > -1 )
+				current_users.splice(index, 1);
 		});
 	}
 
@@ -214,7 +224,15 @@ jQuery(document).ready(function($) {
 		});
 	}
 
-
+	$( '#blogs-list-wrap' ).click(function() {
+		$('#dest_blog_type_list').attr('checked', true );
+	});
+	$('#dest_blog_type_group_selector').click(function() {
+		$('#dest_blog_type_group').attr('checked', true );
+	});
+	$('#dest_blog_type_nbt_group_selector').click(function() {
+		$('#dest_blog_type_nbt_group').attr('checked', true );
+	})
 
 	String.prototype.trim = function() { 
 		return this.replace(/^\s+|\s+$/g, ''); 

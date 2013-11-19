@@ -1,0 +1,550 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Multisite Content Copier\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-11-19 13:50+0100\n"
+"PO-Revision-Date: 2013-11-19 13:50+0100\n"
+"Last-Translator: Ignacio <igmoweb@gmail.com>\n"
+"Language-Team: Incsub\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../multisite-content-copier.php:67
+msgid "Multisite Content Copier is a plugin just for multisites, please deactivate it."
+msgstr ""
+
+#: ../multisite-content-copier.php:199
+msgid "Content Copier"
+msgstr ""
+
+#: ../multisite-content-copier.php:200
+#: ../admin/post-meta-box.php:29
+msgid "Multisite Content Copier"
+msgstr ""
+
+#: ../multisite-content-copier.php:207
+#: ../multisite-content-copier.php:208
+msgid "Sites groups"
+msgstr ""
+
+#: ../multisite-content-copier.php:212
+#: ../admin/tables/network-blogs-list.php:101
+#: ../admin/tables/network-groups-list.php:15
+msgid "Groups"
+msgstr ""
+
+#: ../multisite-content-copier.php:213
+#: ../admin/tables/network-blogs-list.php:7
+msgid "Sites"
+msgstr ""
+
+#: ../multisite-content-copier.php:219
+msgid "New Blog Templates"
+msgstr ""
+
+#: ../multisite-content-copier.php:224
+#: ../multisite-content-copier.php:225
+msgid "Settings"
+msgstr ""
+
+#: ../admin/post-meta-box.php:15
+msgid "You must select a destination"
+msgstr ""
+
+#: ../admin/post-meta-box.php:16
+msgid "You must select a group"
+msgstr ""
+
+#: ../admin/post-meta-box.php:40
+msgid "Please publish this content if you would like to copy it."
+msgstr ""
+
+#: ../admin/post-meta-box.php:48
+msgid "Select destinations"
+msgstr ""
+
+#: ../admin/post-meta-box.php:50
+msgid "You have already copied this post, copying it again could cause duplicated posts"
+msgstr ""
+
+#: ../admin/post-meta-box.php:56
+msgid "All sites"
+msgstr ""
+
+#: ../admin/post-meta-box.php:62
+msgid "Site group"
+msgstr ""
+
+#: ../admin/post-meta-box.php:73
+#: ../admin/pages/network-main-page.php:685
+msgid "Select by Blog Templates groups"
+msgstr ""
+
+#: ../admin/post-meta-box.php:81
+#: ../admin/pages/network-main-page.php:530
+msgid "Additional Options"
+msgstr ""
+
+#: ../admin/post-meta-box.php:99
+msgid "Copy"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:42
+msgid "Search by template name"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:59
+msgid "Site Groups"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:60
+msgid "What's a Site Group?"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:72
+msgid "The Group does not exist"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:78
+msgid "The Group has been updated."
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:78
+msgid "Back to Groups list"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:87
+#: ../admin/tables/network-groups-list.php:25
+msgid "Group name"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:92
+msgid "Save Changes"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:93
+msgid "Cancel"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:121
+msgid "The Group has been added"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:143
+msgid "Add new Group"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:147
+msgid "Group Name"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:150
+msgid "Add New Group"
+msgstr ""
+
+#: ../admin/pages/network-blogs-groups.php:168
+#: ../admin/pages/network-blogs-groups.php:187
+msgid "Group name cannot be empty"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:154
+msgid "The blog ID does not exist. Try again."
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:255
+msgid "There are no custom posts registered for that blog"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:333
+msgid "Select the type of content that you would like to copy."
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:337
+msgid "Pages"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:338
+#: ../admin/tables/network-posts-list.php:14
+msgid "Posts"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:339
+msgid "Custom Post Type (products, events...)"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:340
+#: ../admin/tables/network-users-list.php:14
+msgid "Users"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:341
+msgid "Activate plugins"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:344
+#: ../admin/pages/network-main-page.php:368
+#: ../admin/pages/network-main-page.php:464
+#: ../admin/pages/network-main-page.php:694
+msgid "Next Step &raquo;"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:382
+msgid "Enter the id or URL of the site containing the pages you wish to copy"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:384
+msgid "Enter the id or URL of the site containing the post you wish to copy"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:386
+msgid "Enter the id or URL of the site containing the custom post types you wish to copy"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:388
+msgid "Enter the id or URL of the site containing the users you wish to copy"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:390
+msgid "Blog ID"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:393
+#: ../admin/pages/network-main-page.php:649
+msgid "Or search by site URL"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:395
+msgid "Enter either the subdomain or the sub-folder, ie. for mysite.mydomain.com or mydomain.com/mysite, type \"mysite\""
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:401
+msgid "Refresh post types"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:520
+msgid "Select the items of that you would like to copy."
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:522
+msgid "Check the items in the list that you would like to copy, select Add To List and click on Apply. Selected items appear below this message."
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:540
+#: ../admin/pages/network-main-page.php:617
+msgid "Search"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:558
+msgid "Select the plugins you want to activate"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:559
+msgid "Network only or already network activated plugins are not displayed in the list"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:600
+msgid "Select users to copy"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:602
+msgid "If you are not copying all users, then check the users in the list that you would like to copy, select Add To List and click on Apply. Selected users appear below this message."
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:606
+msgid "Add users"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:608
+msgid "All users"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:612
+msgid "Selected users"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:629
+msgid "Select the destination sites"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:636
+msgid "All Sites"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:643
+msgid "Single Site"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:647
+msgid "Site ID"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:651
+msgid "Add Site"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:673
+msgid "Site Group"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:771
+msgid "Your selected items have been copied."
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:791
+msgid "Enqueueing all blogs, please do not close or refresh this window"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:802
+msgid "All good"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:819
+#, php-format
+msgid "Click <a href=\"%s\">here</a> to return to your previous page."
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:893
+msgid "Please select an option"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:912
+msgid "The Blog ID does not exist"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:916
+msgid "You must select a post type"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:936
+msgid "You must add at least one item to the list"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:939
+msgid "You must select at least one plugin"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:943
+msgid "You must select one option"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:948
+msgid "You add at least one user to the list"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:996
+msgid "Please, select an option"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:1017
+msgid "You have not selected any blog"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:1025
+msgid "You have not selected any group"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:1033
+msgid "You have selected a wrong group"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:1038
+msgid "There are no blogs attached to that group."
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:1053
+msgid "There was an error while trying to get the template information"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:1058
+msgid "You have not selected any template"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:1067
+msgid "You have selected a wrong template"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:1073
+msgid "There are no blogs attached to that template."
+msgstr ""
+
+#: ../admin/pages/network-settings-page.php:18
+msgid "Settings saved"
+msgstr ""
+
+#: ../admin/pages/network-settings-page.php:24
+msgid "New Blog Templates Integration"
+msgstr ""
+
+#: ../admin/pages/network-settings-page.php:26
+msgid "Activate"
+msgstr ""
+
+#: ../admin/pages/network-settings-page.php:31
+msgid "Save changes"
+msgstr ""
+
+#: ../admin/pages/network-settings-page.php:57
+msgid "You need first to network activate the New Blog Templates plugin"
+msgstr ""
+
+#: ../admin/tables/network-blogs-list.php:6
+msgid "Site"
+msgstr ""
+
+#: ../admin/tables/network-blogs-list.php:97
+#: ../admin/tables/network-posts-list.php:80
+#: ../admin/tables/network-users-list.php:80
+msgid "Domain"
+msgstr ""
+
+#: ../admin/tables/network-blogs-list.php:97
+#: ../admin/tables/network-posts-list.php:80
+#: ../admin/tables/network-users-list.php:80
+msgid "Path"
+msgstr ""
+
+#: ../admin/tables/network-blogs-list.php:142
+msgid "Assign to Group"
+msgstr ""
+
+#: ../admin/tables/network-groups-list.php:14
+msgid "Group"
+msgstr ""
+
+#: ../admin/tables/network-groups-list.php:26
+#: ../admin/tables/network-nbt-groups-list.php:26
+msgid "Blogs count"
+msgstr ""
+
+#: ../admin/tables/network-groups-list.php:55
+#, php-format
+msgid "<a href=\"%s\">Edit</a>"
+msgstr ""
+
+#: ../admin/tables/network-groups-list.php:56
+#, php-format
+msgid "<a href=\"%s\">Delete</a>"
+msgstr ""
+
+#: ../admin/tables/network-groups-list.php:69
+msgid "Delete"
+msgstr ""
+
+#: ../admin/tables/network-nbt-groups-list.php:14
+msgid "Blog Templates Group"
+msgstr ""
+
+#: ../admin/tables/network-nbt-groups-list.php:15
+msgid "Blog Templates Groups"
+msgstr ""
+
+#: ../admin/tables/network-nbt-groups-list.php:24
+msgid "Template name"
+msgstr ""
+
+#: ../admin/tables/network-nbt-groups-list.php:25
+msgid "Template description"
+msgstr ""
+
+#: ../admin/tables/network-plugins-list.php:14
+msgid "Plugin"
+msgstr ""
+
+#: ../admin/tables/network-plugins-list.php:15
+msgid "Plugins"
+msgstr ""
+
+#: ../admin/tables/network-plugins-list.php:25
+msgid "Plugin name"
+msgstr ""
+
+#: ../admin/tables/network-plugins-list.php:26
+msgid "Plugin description"
+msgstr ""
+
+#: ../admin/tables/network-posts-list.php:13
+msgid "Post"
+msgstr ""
+
+#: ../admin/tables/network-posts-list.php:83
+msgid "Title"
+msgstr ""
+
+#: ../admin/tables/network-posts-list.php:84
+msgid "Published"
+msgstr ""
+
+#: ../admin/tables/network-posts-list.php:106
+#: ../admin/tables/network-users-list.php:108
+msgid "Add to the list"
+msgstr ""
+
+#: ../admin/tables/network-users-list.php:13
+msgid "User"
+msgstr ""
+
+#: ../admin/tables/network-users-list.php:83
+msgid "Username"
+msgstr ""
+
+#: ../admin/tables/network-users-list.php:84
+msgid "Email"
+msgstr ""
+
+#: ../admin/tables/network-users-list.php:141
+msgid "Select All"
+msgstr ""
+
+#: ../inc/errors-handler.php:29
+#, php-format
+msgid "<b>%s plugin error</b>: %s"
+msgstr ""
+
+#: ../inc/helpers.php:66
+#: ../inc/helpers.php:105
+msgid "Select a group"
+msgstr ""
+
+#: ../inc/settings-handler.php:26
+#: ../inc/settings-handler.php:39
+msgid "Copy images (required for featured images)"
+msgstr ""
+
+#: ../inc/settings-handler.php:27
+#: ../inc/settings-handler.php:40
+msgid "Update post created date"
+msgstr ""
+
+#: ../inc/settings-handler.php:28
+#: ../inc/settings-handler.php:35
+#: ../inc/settings-handler.php:41
+msgid "Copy parents"
+msgstr ""
+
+#: ../inc/settings-handler.php:29
+#: ../inc/settings-handler.php:36
+#: ../inc/settings-handler.php:42
+msgid "Copy comments"
+msgstr ""
+
+#: ../inc/settings-handler.php:30
+msgid "Copy terms"
+msgstr ""
+
+#: ../inc/settings-handler.php:33
+msgid "Copy images"
+msgstr ""
+
+#: ../inc/settings-handler.php:34
+msgid "Update page created date"
+msgstr ""
+
+#: ../inc/integration/nbt-integration.php:53
+#, php-format
+msgid "The New Blog Templates plugin is activated. You may want to <a href=\"%s\">activate integration with Multisite Content Copier</a> <a href=\"%s\" class=\"button\">Dismiss</a>"
+msgstr ""
+

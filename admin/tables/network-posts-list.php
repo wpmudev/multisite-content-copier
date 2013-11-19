@@ -81,7 +81,7 @@ class MCC_Posts_List_Table extends WP_List_Table {
 		$sites_columns = array(
 			'cb'          => '<input type="checkbox" />',
 			'title'    	  => __( 'Title', MULTISTE_CC_LANG_DOMAIN ),
-			'date'		  => __( 'Date', MULTISTE_CC_LANG_DOMAIN )
+			'date'		  => __( 'Published', MULTISTE_CC_LANG_DOMAIN )
 		);
 
 		return $sites_columns;

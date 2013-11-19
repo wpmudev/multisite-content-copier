@@ -3,18 +3,24 @@
 if( !defined( 'WP_UNINSTALL_PLUGIN' ) )
 	exit ();
 
-exit();
-
 $plugin_dir = plugin_dir_path( __FILE__ );
 
-require_once( $plugin_dir . 'origin-plugin.php' );
-require_once( $plugin_dir . 'model/model.php' );
-require_once( $plugin_dir . 'inc/settings-handler.php' );
 
-delete_option( Origin_Plugin::$version_option_slug );
+delete_site_option( 'multisite_content_copier_plugin_version' );
+delete_site_option( 'multisite_content_copier_settings' );
+delete_site_option( 'mcc_schema_created' );
+delete_site_option( 'show_nbt_integration_notice' );
 
-$model = Origin_Plugin_Model::get_instance();
-delete_option( $model->schema_created_option_slug );
-$model->delete_tables();
+global $wpdb;
 
-delete_option( Origin_Plugin_Settings_Handler::$settings_slug );
+$queue_table = $wpdb->base_prefix . 'mcc_queue';
+$blogs_groups_table = $wpdb->base_prefix . 'mcc_blogs_groups';
+$blogs_groups_relationship_table = $wpdb->base_prefix . 'mcc_blogs_groups_relationship';
+$nbt_relationships_table = $wpdb->base_prefix . 'mcc_nbt_relationship';
+
+$wpdb->query( "DROP TABLE IF EXISTS $queue_table;" );
+$wpdb->query( "DROP TABLE IF EXISTS $blogs_groups_table;" );
+$wpdb->query( "DROP TABLE IF EXISTS $blogs_groups_relationship_table;" );
+$wpdb->query( "DROP TABLE IF EXISTS $blogs_groups_relationship_table;" );
+$wpdb->query( "DROP TABLE IF EXISTS $nbt_relationships_table;" );
+

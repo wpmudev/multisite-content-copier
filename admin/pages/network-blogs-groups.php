@@ -56,7 +56,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 
         $screen->add_help_tab( array(
 	        'id'	=> 'mcc_groups_help_tab',
-	        'title'	=> __( 'Sites Groups', MULTISTE_CC_LANG_DOMAIN ),
+	        'title'	=> __( 'Site Groups', MULTISTE_CC_LANG_DOMAIN ),
 	        'content'	=> '<h4>' . __( 'What\'s a Site Group?', MULTISTE_CC_LANG_DOMAIN ) . '</h4>',
 	    ) );
  	}
@@ -69,13 +69,13 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 
  		if ( empty( $group ) ) {
  			?>
-				<p><?php _e( 'The group does not exist', MULTISTE_CC_LANG_DOMAIN ); ?></p>
+				<p><?php _e( 'The Group does not exist', MULTISTE_CC_LANG_DOMAIN ); ?></p>
  			<?php
  		}
  		else {
  			if ( isset( $_GET['updated'] ) ) {
 	 			?>
-					<div class="updated"><p><?php _e( 'The group has been updated.', MULTISTE_CC_LANG_DOMAIN ); ?> <a href="<?php echo esc_url( $this->get_permalink() ); ?>"><?php _e( 'Back to groups list', MULTISTE_CC_LANG_DOMAIN ); ?></a></p></div>
+					<div class="updated"><p><?php _e( 'The Group has been updated.', MULTISTE_CC_LANG_DOMAIN ); ?> <a href="<?php echo esc_url( $this->get_permalink() ); ?>"><?php _e( 'Back to Groups list', MULTISTE_CC_LANG_DOMAIN ); ?></a></p></div>
 	 			<?php
 	 		}
 	 		elseif ( mcc_is_error() ) {
@@ -89,7 +89,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 					<p class="submit">
 						<input type="hidden" name="group_id" value="<?php echo $group_id; ?>">
 						<?php wp_nonce_field( 'edit-mcc-group', '_wpnonce' ); ?>
-						<?php submit_button( __( 'Save changes', MULTISTE_CC_LANG_DOMAIN ), 'primary', 'submit_edit_group', false ); ?>
+						<?php submit_button( __( 'Save Changes', MULTISTE_CC_LANG_DOMAIN ), 'primary', 'submit_edit_group', false ); ?>
 						<a href="<?php echo esc_url( $this->get_permalink() ); ?>" class="button-secondary"><?php _e( 'Cancel', MULTISTE_CC_LANG_DOMAIN ); ?></a>
 					</p>
 				</form>
@@ -118,7 +118,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 
  		if ( isset( $_GET['added'] ) ) {
  			?>
-				<div class="updated"><p><?php _e( 'The group has been added', MULTISTE_CC_LANG_DOMAIN ); ?></p></div>
+				<div class="updated"><p><?php _e( 'The Group has been added', MULTISTE_CC_LANG_DOMAIN ); ?></p></div>
  			<?php
  		}
  		elseif ( mcc_is_error() ) {
@@ -140,7 +140,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 				<div id="col-left">
 					<div class="col-wrap">
 						<div class="form-wrap">
-							<h3><?php _e( 'Add new group', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+							<h3><?php _e( 'Add new Group', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 							<form id="mcc-groups-table-form" action="" method="post">
 								<?php wp_nonce_field( 'add-mcc-group' ); ?>
 								<div class="form-field">

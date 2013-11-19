@@ -102,7 +102,8 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 		if ( $new_post_id ) {
 			// Insert post meta
 			foreach ( $orig_post_meta as $post_meta ) {
-				update_post_meta( $new_post_id, $post_meta->meta_key, $post_meta->meta_value );
+				$unserialized_meta_value = maybe_unserialize( $post_meta->meta_value );
+				update_post_meta( $new_post_id, $post_meta->meta_key, $unserialized_meta_value );
 			}			
 		}
 

@@ -50,7 +50,7 @@ class MCC_NBT_Integrator {
 		if ( ! $settings['blog_templates_integration'] ) {
 			$link = add_query_arg( 'page', 'mcc_settings_page', network_admin_url( 'admin.php' ) );
 			$dismiss_link = add_query_arg( 'dismiss_nbt_int_notice', 'true', network_admin_url() );
-			$message = sprintf( __( 'You have activated New Blog Templates and you may want to <a href="%s">activate integration with Multisite Content Copier</a> <a href="%s" class="button">Dismiss</a>', MULTISTE_CC_LANG_DOMAIN ), $link, $dismiss_link );
+			$message = sprintf( __( 'The New Blog Templates plugin is activated. You may want to <a href="%s">activate integration with Multisite Content Copier</a> <a href="%s" class="button">Dismiss</a>', MULTISTE_CC_LANG_DOMAIN ), $link, $dismiss_link );
 			Multisite_Content_Copier_Errors_Handler::show_error_notice( $message );
 		}
 	}

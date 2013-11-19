@@ -144,6 +144,8 @@ class Multisite_Content_Copier_Model {
 		global $wpdb;
 
 		$wpdb->query( "DROP TABLE $this->queue_table;" );
+		$wpdb->query( "DROP TABLE $this->blogs_groups_table;" );
+		$wpdb->query( "DROP TABLE $this->blogs_groups_relationship_table;" );
 	}
 
 	public function deactivate_model() {

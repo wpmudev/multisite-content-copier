@@ -163,7 +163,7 @@ class Multisite_Content_Copier_Model {
 	public function insert_queue_item( $src_blog_id, $dest_blog_id, $settings ) {
 		global $wpdb;
 
-		$wpdb->insert(
+		$insert_id = $wpdb->insert(
 			$this->queue_table,
 			array( 
 				'src_blog_id' => $src_blog_id,

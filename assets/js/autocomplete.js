@@ -58,7 +58,6 @@ jQuery(document).ready(function($) {
 	  select: function ( event, ui ) {
 	  	if ( 'sites' == type ) {
 			$( '#blog_id' ).val( ui.item.blog_id );
-			$( '#blog_ajax_url' ).val( ui.item.ajax_url );
 		}
 		if ( 'posts' == type ) {
 			$( '#post_id' ).val( ui.item.the_id );

@@ -136,6 +136,15 @@ class Multisite_Content_Copier {
 		}
 	}
 
+	public function include_copier_classes() {
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier.php' );
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-plugin.php' );
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-user.php' );
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-cpt.php' );
+	}
+
 	/**
 	 * Upgrade the plugin when a new version is uploaded
 	 */
@@ -231,12 +240,7 @@ class Multisite_Content_Copier {
 			$queue = mcc_get_queue_for_blog();
 			foreach ( $queue as $item ) {
 				
-				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier.php' );
-				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
-				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
-				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-plugin.php' );
-				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-user.php' );
-				require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-cpt.php' );
+				$this->include_copier_classes();
 
 				$settings = $item->settings;
 				$class = $settings['class'];

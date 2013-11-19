@@ -17,7 +17,7 @@ class MCC_Users_List_Table extends WP_List_Table {
 	}
 
 	public function prepare_items() {
-		$per_page = 2;
+		$per_page = 10;
 
 		$columns = $this->get_columns();
         $hidden = array();

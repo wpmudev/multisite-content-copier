@@ -149,6 +149,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	    		wp_enqueue_script( 'mcc-autocomplete', MULTISTE_CC_ASSETS_URL . 'js/autocomplete.js', array( 'jquery' ) );
 	    		wp_enqueue_script( 'jquery-ui-autocomplete' );
 	 			wp_enqueue_style( 'mcc-jquery-ui-styles', MULTISTE_CC_ASSETS_URL . 'css/jquery-ui.css' );
+
+	 			$l10n = array(
+	 				'blog_not_found' => __( 'The blog ID does not exist. Try again.', MULTISTE_CC_LANG_DOMAIN )
+	 			);
+	 			wp_localize_script( 'mcc-wizard-js', 'captions', $l10n );
 	 		}
 	 		if ( 5 == $this->wizard->get_current_step() ) {
 	 			wp_enqueue_script( 'jquery-ui-progressbar', MULTISTE_CC_ASSETS_URL . 'jquery-ui/jquery.ui.progressbar.js', array( 'jquery-ui-core', 'jquery-ui-widget' ) );

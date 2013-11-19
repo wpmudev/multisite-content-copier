@@ -1,35 +1,60 @@
 jQuery(document).ready(function($) {
 
 	// REFRESH CPTs
-	$( '#mcc-refresh-post-types' ).on( 'click', function(e) {
+	$( '#mcc-refresh-post-types' ).on( 'click', refresh_post_types );
+	function refresh_post_types(e) {
 		e.preventDefault();
+		$this = $(this);
+
 
 		var blog_id = $('#blog_id').val();
-		var _ajaxurl = $('#blog_ajax_url').val();
 
 		if ( blog_id == '' || blog_id == 0 )
 			return false;
 
 		$( '.spinner' ).show();
-
-		$( '#mcc-cpt-list-wrap ul li' ).remove();
-
-		var data = {
-			action: 'mcc_retrieve_cpt_selectors_data',
-			blog_id: $('#blog_id').val()
-		};
+		$( '#mcc-refresh-post-types' ).attr('disabled', true);
 
 		$.ajax({
-			url: _ajaxurl,
-			data: data,
+			url: ajaxurl,
+			data: {
+				blog_id: blog_id,
+				action: 'mcc_get_blog_ajax_url'
+			},
 			type: 'post',
 		}).done(function( data ) {
-			$('.spinner').hide();
-			if ( data !== '' ) {
-				$( '#mcc-cpt-list-wrap ul' ).append( data );
+			_ajaxurl = data;
+
+			$( '#mcc-cpt-list-wrap ul li' ).slideUp().remove();
+
+			if ( ! _ajaxurl || _ajaxurl.trim() == '' || _ajaxurl == '0' ) {
+				$('.spinner').hide();
+				$( '#mcc-refresh-post-types' ).attr('disabled', false);
+				$( '#mcc-cpt-list-wrap ul' ).append( '<li>' + captions.blog_not_found + '</li>' );
+				return false;
 			}
+
+			var data = {
+				action: 'mcc_retrieve_cpt_selectors_data',
+				blog_id: $('#blog_id').val()
+			};
+
+			$.ajax({
+				url: _ajaxurl,
+				data: data,
+				type: 'post',
+			}).done(function( data ) {
+				$('.spinner').hide();
+				if ( data !== '' ) {
+					$( '#mcc-cpt-list-wrap ul' ).append( data );
+					$( '#mcc-refresh-post-types' ).attr('disabled', false);
+				}
+			});
+
+			
 		});
-	});
+						
+	}
 
 	// POSTS/PAGES/CPTs SELECTION
 	var current_posts = {};
@@ -126,6 +151,7 @@ jQuery(document).ready(function($) {
 	$( '#add-blog' ).click( function( e ) { 
 		e.preventDefault();
 
+		$('.spinner').show();
 		var blog_id = $( '#blog_id' ).val().trim();
 
 		blog_id = parseInt( blog_id );
@@ -144,6 +170,7 @@ jQuery(document).ready(function($) {
 					$( '#blogs-list' ).append( data );
 					current_blogs[ data.blog_id ] = data.blog_id;
 					update_blog_click_event();
+					$('.spinner').hide();
 				}
 			});
 		}

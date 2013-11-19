@@ -171,3 +171,18 @@ function mcc_insert_all_blogs_queue() {
 	die();
 	
 }
+
+add_action( 'wp_ajax_mcc_get_blog_ajax_url', 'mcc_get_blog_ajax_url' );
+function mcc_get_blog_ajax_url() {
+	global $wpdb;
+	$blog_id = absint( $_POST['blog_id'] );
+
+	$bloginfo = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->blogs WHERE blog_id = %d", $blog_id ) );
+
+	if ( empty( $bloginfo ) )
+		die();
+
+	echo get_admin_url( $blog_id, 'admin-ajax.php' );
+
+	die();
+}

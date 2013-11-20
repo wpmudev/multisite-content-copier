@@ -282,6 +282,22 @@ class Multisite_Content_Copier_Model {
 
 	}
 
+	public function remove_blog_from_group( $blog_id, $group_id ) {
+		global $wpdb;
+
+		if ( ! $this->is_group( $group_id ) )
+			return;
+
+		$wpdb->query( 
+			$wpdb->prepare(
+				"DELETE FROM $this->blogs_groups_relationship_table
+				WHERE blog_id = %d AND blog_group_id = %d",
+				$blog_id,
+				$group_id
+			)
+		);
+	}
+
 	public function update_group( $group_id, $args ) {
 		global $wpdb;
 

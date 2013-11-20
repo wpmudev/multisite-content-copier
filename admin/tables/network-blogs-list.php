@@ -20,6 +20,14 @@ class MCC_Sites_List_Table extends WP_List_Table {
 			}
 		}
 
+		if ( isset( $_POST['mcc-remove-from-group'] ) && ! empty( $_POST['group_selected'] ) && ! empty( $_POST['blog_id'] ) && is_array( $_POST['blog_id'] ) ) {
+			$model = mcc_get_model();
+
+			foreach ( $_POST['blog_id'] as $blog_id ) {
+				$model->remove_blog_from_group( absint( $blog_id ), absint( $_POST['group_selected'] ) );
+			}
+		}
+
 		$per_page = 10;
 
     	$columns = $this->get_columns();
@@ -140,7 +148,16 @@ class MCC_Sites_List_Table extends WP_List_Table {
                     	<?php mcc_get_groups_dropdown(); ?>
                     </select>
                     <input type="submit" name="mcc-assign-group" id="mcc-assign-group" class="button" value="<?php _e( 'Assign to Group', MULTISTE_CC_LANG_DOMAIN ); ?>">
+                    <input type="submit" name="mcc-remove-from-group" id="mcc-remove-group" class="button" value="<?php _e( 'Remove from Group', MULTISTE_CC_LANG_DOMAIN ); ?>">
                 </div>
+                <script>
+                	jQuery(document).ready(function($) {
+                		$('#mcc-blogs-groups-table-form').submit(function(e) {
+                			var hey = confirm( "<?php _e( 'Are you sure?', MULTISTE_CC_LANG_DOMAIN ); ?>" );
+                			return hey;
+                		});
+                	});
+                </script>
             <?php
                 
         }

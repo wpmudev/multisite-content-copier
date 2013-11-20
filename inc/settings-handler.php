@@ -27,7 +27,7 @@ class Multisite_Content_Copier_Settings_Handler {
 				'update_date'	=> __( 'Update post created date', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_parents'	=> __( 'Copy parents', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN ),
-				'copy_terms' 	=> __( 'Copy terms', MULTISTE_CC_LANG_DOMAIN )
+				'copy_terms' 	=> __( 'Copy terms ( Tags & Categories )', MULTISTE_CC_LANG_DOMAIN )
 			),
 			'page' => array(
 				'copy_images'	=> __( 'Copy images', MULTISTE_CC_LANG_DOMAIN ),

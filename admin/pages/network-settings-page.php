@@ -22,6 +22,9 @@ class Multisite_Content_Copier_Network_Settings_Menu extends Multisite_Content_C
  		?>
 			<form action="" method="post">
 				<h3><?php _e( 'New Blog Templates Integration', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+				<p>
+					<?php _e('Checking this option allows the selecting of a New Blog Template Group as a destination for copied content.'); ?>
+				</p>
 				<table class="form-table">
 					<?php $this->render_row( __( 'Activate', MULTISTE_CC_LANG_DOMAIN ), array( &$this, 'render_nbt_integration_field' ) ); ?>
 				</table>

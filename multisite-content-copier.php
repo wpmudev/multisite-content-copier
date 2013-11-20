@@ -2,7 +2,7 @@
 /*
 Plugin Name: Multisite Content Copier
 Plugin URI: 
-Description: Does nothing at all
+Description:
 Author: igmoweb
 Version: 0.3
 Author URI:
@@ -194,6 +194,7 @@ class Multisite_Content_Copier {
 			'page_title' => __( 'Sites groups', MULTISTE_CC_LANG_DOMAIN ),
 			'network_menu' => true,
 			'parent' => 'mcc_network_page',
+			'screen_icon_slug' => 'mcc',
 			'tabs' => array(
 				'groups' => __( 'Groups', MULTISTE_CC_LANG_DOMAIN ),
 				'sites' => __( 'Sites', MULTISTE_CC_LANG_DOMAIN )
@@ -210,7 +211,8 @@ class Multisite_Content_Copier {
 			'menu_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
 			'page_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
 			'network_menu' => true,
-			'parent' => 'mcc_network_page'
+			'parent' => 'mcc_network_page',
+			'screen_icon_slug' => 'mcc'
 		);
 		self::$network_settings_menu_page = new Multisite_Content_Copier_Network_Settings_Menu( 'mcc_settings_page', 'manage_network', $args );
 

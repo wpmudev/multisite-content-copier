@@ -2,12 +2,31 @@
 /*
 Plugin Name: Multisite Content Copier
 Plugin URI: 
-Description:
-Author: igmoweb
-Version: 0.3
-Author URI:
+Description: Copy any content from any site in your network to any other site or group of sites in the same network.
+Author: Ignacio (Incsub)
+Version: 1.0.0
+Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
+Domain Path: lang
 Network:true
+Tags: multisiste plugin, multisite
+*/
+
+/*
+Copyright 2007-2013 Incsub (http://incsub.com)
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License (Version 2 - GPLv2) as published by
+the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 /**
@@ -73,7 +92,7 @@ class Multisite_Content_Copier {
 
 
 	public function enqueue_styles() {
-		wp_enqueue_style( 'origin-icons', MULTISTE_CC_ASSETS_URL . 'css/icons.css' );
+		wp_enqueue_style( 'mcc-icons', MULTISTE_CC_ASSETS_URL . 'css/icons.css' );
 	}
 
 
@@ -133,6 +152,8 @@ class Multisite_Content_Copier {
 		if ( is_admin() ) {
 			require_once( MULTISTE_CC_ADMIN_DIR . 'post-meta-box.php' );
 			require_once( MULTISTE_CC_INCLUDES_DIR . 'ajax.php' );
+
+			include_once( MULTISTE_CC_INCLUDES_DIR . 'wpmudev-dash-notification.php' );
 		}
 	}
 

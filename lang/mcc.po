@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Multisite Content Copier\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-19 13:50+0100\n"
-"PO-Revision-Date: 2013-11-19 13:50+0100\n"
+"POT-Creation-Date: 2013-11-20 17:27+0100\n"
+"PO-Revision-Date: 2013-11-20 17:27+0100\n"
 "Last-Translator: Ignacio <igmoweb@gmail.com>\n"
 "Language-Team: Incsub\n"
 "MIME-Version: 1.0\n"
@@ -13,41 +13,41 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: ../multisite-content-copier.php:67
+#: ../multisite-content-copier.php:68
 msgid "Multisite Content Copier is a plugin just for multisites, please deactivate it."
 msgstr ""
 
-#: ../multisite-content-copier.php:199
+#: ../multisite-content-copier.php:186
 msgid "Content Copier"
 msgstr ""
 
-#: ../multisite-content-copier.php:200
+#: ../multisite-content-copier.php:187
 #: ../admin/post-meta-box.php:29
 msgid "Multisite Content Copier"
 msgstr ""
 
-#: ../multisite-content-copier.php:207
-#: ../multisite-content-copier.php:208
+#: ../multisite-content-copier.php:194
+#: ../multisite-content-copier.php:195
 msgid "Sites groups"
 msgstr ""
 
-#: ../multisite-content-copier.php:212
-#: ../admin/tables/network-blogs-list.php:101
+#: ../multisite-content-copier.php:200
+#: ../admin/tables/network-blogs-list.php:109
 #: ../admin/tables/network-groups-list.php:15
 msgid "Groups"
 msgstr ""
 
-#: ../multisite-content-copier.php:213
+#: ../multisite-content-copier.php:201
 #: ../admin/tables/network-blogs-list.php:7
 msgid "Sites"
 msgstr ""
 
-#: ../multisite-content-copier.php:219
+#: ../multisite-content-copier.php:207
 msgid "New Blog Templates"
 msgstr ""
 
-#: ../multisite-content-copier.php:224
-#: ../multisite-content-copier.php:225
+#: ../multisite-content-copier.php:212
+#: ../multisite-content-copier.php:213
 msgid "Settings"
 msgstr ""
 
@@ -80,7 +80,7 @@ msgid "Site group"
 msgstr ""
 
 #: ../admin/post-meta-box.php:73
-#: ../admin/pages/network-main-page.php:685
+#: ../admin/pages/network-main-page.php:701
 msgid "Select by Blog Templates groups"
 msgstr ""
 
@@ -159,6 +159,26 @@ msgstr ""
 msgid "There are no custom posts registered for that blog"
 msgstr ""
 
+#: ../admin/pages/network-main-page.php:310
+msgid "Copy selection"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:311
+msgid "Select source blog"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:312
+msgid "Select Items to copy"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:313
+msgid "Select destination blog(s)"
+msgstr ""
+
+#: ../admin/pages/network-main-page.php:314
+msgid "Finish"
+msgstr ""
+
 #: ../admin/pages/network-main-page.php:333
 msgid "Select the type of content that you would like to copy."
 msgstr ""
@@ -188,7 +208,7 @@ msgstr ""
 #: ../admin/pages/network-main-page.php:344
 #: ../admin/pages/network-main-page.php:368
 #: ../admin/pages/network-main-page.php:464
-#: ../admin/pages/network-main-page.php:694
+#: ../admin/pages/network-main-page.php:710
 msgid "Next Step &raquo;"
 msgstr ""
 
@@ -213,7 +233,7 @@ msgid "Blog ID"
 msgstr ""
 
 #: ../admin/pages/network-main-page.php:393
-#: ../admin/pages/network-main-page.php:649
+#: ../admin/pages/network-main-page.php:665
 msgid "Or search by site URL"
 msgstr ""
 
@@ -234,7 +254,7 @@ msgid "Check the items in the list that you would like to copy, select Add To Li
 msgstr ""
 
 #: ../admin/pages/network-main-page.php:540
-#: ../admin/pages/network-main-page.php:617
+#: ../admin/pages/network-main-page.php:633
 msgid "Search"
 msgstr ""
 
@@ -246,128 +266,125 @@ msgstr ""
 msgid "Network only or already network activated plugins are not displayed in the list"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:600
+#: ../admin/pages/network-main-page.php:616
 msgid "Select users to copy"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:602
+#: ../admin/pages/network-main-page.php:618
 msgid "If you are not copying all users, then check the users in the list that you would like to copy, select Add To List and click on Apply. Selected users appear below this message."
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:606
-msgid "Add users"
+#: ../admin/pages/network-main-page.php:622
+msgid "Add Users"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:608
+#: ../admin/pages/network-main-page.php:624
 msgid "All users"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:612
+#: ../admin/pages/network-main-page.php:628
 msgid "Selected users"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:629
+#: ../admin/pages/network-main-page.php:645
 msgid "Select the destination sites"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:636
+#: ../admin/pages/network-main-page.php:652
 msgid "All Sites"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:643
+#: ../admin/pages/network-main-page.php:659
 msgid "Single Site"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:647
+#: ../admin/pages/network-main-page.php:663
 msgid "Site ID"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:651
+#: ../admin/pages/network-main-page.php:667
 msgid "Add Site"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:673
+#: ../admin/pages/network-main-page.php:689
 msgid "Site Group"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:771
+#: ../admin/pages/network-main-page.php:787
+#: ../admin/pages/network-main-page.php:818
 msgid "Your selected items have been copied."
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:791
+#: ../admin/pages/network-main-page.php:807
 msgid "Enqueueing all blogs, please do not close or refresh this window"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:802
-msgid "All good"
-msgstr ""
-
-#: ../admin/pages/network-main-page.php:819
+#: ../admin/pages/network-main-page.php:835
 #, php-format
 msgid "Click <a href=\"%s\">here</a> to return to your previous page."
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:893
+#: ../admin/pages/network-main-page.php:909
 msgid "Please select an option"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:912
+#: ../admin/pages/network-main-page.php:928
 msgid "The Blog ID does not exist"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:916
+#: ../admin/pages/network-main-page.php:932
 msgid "You must select a post type"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:936
+#: ../admin/pages/network-main-page.php:952
 msgid "You must add at least one item to the list"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:939
+#: ../admin/pages/network-main-page.php:955
 msgid "You must select at least one plugin"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:943
+#: ../admin/pages/network-main-page.php:959
 msgid "You must select one option"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:948
+#: ../admin/pages/network-main-page.php:964
 msgid "You add at least one user to the list"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:996
+#: ../admin/pages/network-main-page.php:1012
 msgid "Please, select an option"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:1017
+#: ../admin/pages/network-main-page.php:1033
 msgid "You have not selected any blog"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:1025
+#: ../admin/pages/network-main-page.php:1041
 msgid "You have not selected any group"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:1033
+#: ../admin/pages/network-main-page.php:1049
 msgid "You have selected a wrong group"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:1038
+#: ../admin/pages/network-main-page.php:1054
 msgid "There are no blogs attached to that group."
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:1053
+#: ../admin/pages/network-main-page.php:1069
 msgid "There was an error while trying to get the template information"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:1058
+#: ../admin/pages/network-main-page.php:1074
 msgid "You have not selected any template"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:1067
+#: ../admin/pages/network-main-page.php:1083
 msgid "You have selected a wrong template"
 msgstr ""
 
-#: ../admin/pages/network-main-page.php:1073
+#: ../admin/pages/network-main-page.php:1089
 msgid "There are no blogs attached to that template."
 msgstr ""
 
@@ -380,14 +397,18 @@ msgid "New Blog Templates Integration"
 msgstr ""
 
 #: ../admin/pages/network-settings-page.php:26
+msgid "Checking this option allows the selecting of a New Blog Template Group as a destination for copied content."
+msgstr ""
+
+#: ../admin/pages/network-settings-page.php:29
 msgid "Activate"
 msgstr ""
 
-#: ../admin/pages/network-settings-page.php:31
+#: ../admin/pages/network-settings-page.php:34
 msgid "Save changes"
 msgstr ""
 
-#: ../admin/pages/network-settings-page.php:57
+#: ../admin/pages/network-settings-page.php:60
 msgid "You need first to network activate the New Blog Templates plugin"
 msgstr ""
 
@@ -395,20 +416,28 @@ msgstr ""
 msgid "Site"
 msgstr ""
 
-#: ../admin/tables/network-blogs-list.php:97
+#: ../admin/tables/network-blogs-list.php:105
 #: ../admin/tables/network-posts-list.php:80
 #: ../admin/tables/network-users-list.php:80
 msgid "Domain"
 msgstr ""
 
-#: ../admin/tables/network-blogs-list.php:97
+#: ../admin/tables/network-blogs-list.php:105
 #: ../admin/tables/network-posts-list.php:80
 #: ../admin/tables/network-users-list.php:80
 msgid "Path"
 msgstr ""
 
-#: ../admin/tables/network-blogs-list.php:142
+#: ../admin/tables/network-blogs-list.php:150
 msgid "Assign to Group"
+msgstr ""
+
+#: ../admin/tables/network-blogs-list.php:151
+msgid "Remove from Group"
+msgstr ""
+
+#: ../admin/tables/network-blogs-list.php:156
+msgid "Are you sure?"
 msgstr ""
 
 #: ../admin/tables/network-groups-list.php:14
@@ -532,7 +561,7 @@ msgid "Copy comments"
 msgstr ""
 
 #: ../inc/settings-handler.php:30
-msgid "Copy terms"
+msgid "Copy terms ( Tags & Categories )"
 msgstr ""
 
 #: ../inc/settings-handler.php:33

@@ -110,7 +110,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				return false;
 			}
 			elseif ( $dest_blog_type == 'nbt_group' ) {
-				// If is a group, we'll need the blogs IDs
+				// If is a NBT group, we'll need the blogs IDs
 				$template =  absint( $_GET['nbt_group'] );
 				$blogs = $nbt_model->get_template_blogs( $template );
 
@@ -714,6 +714,14 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 	}
 
+	/**
+	 * Gets a row to show an item in a list of posts/users selected
+	 * 
+	 * @param String $slug Slug of the item
+	 * @param Integer $id Item ID
+	 * @param String $title Label
+	 * @return HTML result
+	 */
 	public function get_row_list( $slug, $id, $title ) {
 		ob_start();
 		?>
@@ -725,6 +733,14 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		return ob_get_clean();
 	}
 
+	/**
+	 * Displays a radio button for Custom Post Type selection
+	 * 
+	 * @param String $id Normally, the CPT slug
+	 * @param String $title Label for the radio
+	 * @param Boolean $selected if selected or not
+	 * @return HTML result
+	 */
 	public function get_row_cpt_selector_list( $id, $title, $selected = false ) {
 		ob_start();
 		?>
@@ -735,18 +751,29 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		return ob_get_clean();
 	}
 
+	/**
+	 * Sets all the copy parameters and save it in the queue
+	 * Choose the class depending on what the user has been selected
+	 * through the wizard
+	 */
 	public function render_step_5() {		
 
+		// Source blog ID and destination blogs IDs
 		$src_blog_id = $this->wizard->get_value( 'content_blog_id' );
-		$dest_blog_type = $this->wizard->get_value( 'dest_blog_type' );
-		$settings = $this->wizard->get_value( 'settings' );
 		$dest_blogs_ids = $this->wizard->get_value( 'dest_blogs_ids' );
+		$dest_blog_type = $this->wizard->get_value( 'dest_blog_type' ); // Could be 'all' when trying to copy to all blogs in the network
+
+		// Settings (Additional options)
+		$settings = $this->wizard->get_value( 'settings' );
+		
 
 		if ( empty( $settings ) )
 			$settings = array();
 
+		// Action
 		$action = $this->wizard->get_value( 'mcc_action' );
 
+		// Setting the class and items IDs/slugs
 		if ( 'add-page' == $action ) {
 			$posts_ids = $this->wizard->get_value( 'posts_ids' );
 			$settings['class'] = 'Multisite_Content_Copier_Page_Copier';
@@ -776,8 +803,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		}
 		
 		if ( 'all' != $dest_blog_type ) {
+			// Copyinhg to a few blogs (group, NBT group or list)
 			$model = mcc_get_model();
 			foreach ( $dest_blogs_ids as $dest_blog_id ) {
+				// Inserting a queue item for each blog
 				if ( $dest_blog_id != $src_blog_id && ! is_main_site( $dest_blog_id ) )
 					$model->insert_queue_item( $src_blog_id, $dest_blog_id, $settings );	
 			}
@@ -790,16 +819,21 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 			$this->show_redirect_notice();
 
+			// Cleaning the wizard
 			$this->wizard->clean();
 		}
 		else {
 			$this->wizard->set_value( 'settings', $settings );
+
+			// We need first to update the blogs counts in the network
 			wp_update_network_counts();
 			$blogs_count = get_blog_count();
 			?>
 				<div class="processing_result">
 				</div>
 			<?php
+
+			// Rendering the progressbar
 			$this->render_progressbar_js( $blogs_count );
 
 			?>
@@ -824,6 +858,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 	}
 
+	/**
+	 * Redirection notice displayed when the user tries to copy content
+	 * from the post meta box
+	 */
 	private function show_redirect_notice() {
 		$redirect_url = false;
 		if ( $this->wizard->get_value( 'redirect_to' ) )
@@ -838,6 +876,11 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		}
 	}
 
+	/**
+	 * Needed Javascript to render the progressbar
+	 * 
+	 * @param Integer $items_count No of blogs that are going to be queued
+	 */
 	private function render_progressbar_js( $items_count ) {
 		$settings = $this->wizard->get_value( 'settings' );
 		?>
@@ -900,6 +943,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		if ( isset( $_GET['page'] ) && $this->get_menu_slug() == $_GET['page'] ) {
  			$step = $this->wizard->get_current_step();
 
+ 			//STEP 1: Action selection
  			if ( '1' == $step && isset( $_POST['submit_step_1'] ) ) {
 
  				if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'step_1' ) )
@@ -909,7 +953,16 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					mcc_add_error( 'wrong-action', __( 'Please select an option', MULTISTE_CC_LANG_DOMAIN ) );
 
  				if ( ! mcc_is_error() ) {
+ 					// Let's see if we've gone back to the first step and change the action.
+ 					// In that case we'll remove the posts IDs values
+ 					$current_action = $this->wizard->get_value( 'mcc_action' );
+ 					if ( $current_action != $_POST['mcc_action'] )
+ 						$this->wizard->set_value( 'posts_ids', array() );
+
+ 					// Save action selected
  					$this->wizard->set_value( 'mcc_action', $_POST['mcc_action'] );
+
+ 					// If we are trying to activate plugins, step 2 is not for us
  					if ( 'activate-plugin' == $_POST['mcc_action'] )
  						$this->wizard->go_to_step( '3' );
  					else 
@@ -919,6 +972,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				}
  			}
 
+ 			// Step 2: Source blog/CPTs
  			if ( '2' == $step && isset( $_POST['submit_step_2'] ) ) {
 
  				if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'step_2' ) )
@@ -929,18 +983,22 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  				$action = $this->wizard->get_value( 'mcc_action' );
  				if ( 'add-cpt' == $action && empty( $_POST['mcc_cpt'] ) ) {
+ 					// We need a CPT slug if we are copying a CPT!
  					mcc_add_error( 'blog-id', __( 'You must select a post type', MULTISTE_CC_LANG_DOMAIN ) );
  				}
 
  				if ( ! mcc_is_error() ) {
+ 					// Setting the CPT slug
  					if ( 'add-cpt' == $action )
  						$this->wizard->set_value( 'cpt', $_POST['mcc_cpt'] );
 
+ 					// And the source Blog ID
  					$this->wizard->set_value( 'content_blog_id', $_POST['blog_id'] );
  					$this->wizard->go_to_step( '3' );
  				}
  			}
 
+ 			// STEP 3: Source items
  			if ( '3' == $step && isset( $_POST['submit_step_3'] ) ) {
 
  				if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'step_3' ) )
@@ -966,6 +1024,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					
  				}
 
+ 				// Additional options
  				if ( isset( $_POST['settings'] ) && is_array( $_POST['settings'] ) ) {
  					$settings = array();
  					foreach ( $_POST['settings'] as $setting => $value ) {
@@ -976,6 +1035,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					
 
  				if ( ! mcc_is_error() ) {
+ 					// Setting the sources posts/users/plugins
  					if ( in_array( $action, $post_actions ) ) {
 	 					$posts_ids = array();
 	 					foreach ( $_POST['posts_ids'] as $post_id ) {
@@ -1003,6 +1063,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				}
  			}
 
+ 			// STEP 4: Destination blogs
  			if ( '4' == $step && isset( $_POST['submit_step_4'] ) ) {
  				if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'step_4' ) )
  					return false;
@@ -1028,6 +1089,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					$this->wizard->set_value( 'dest_blogs_ids', $blogs_ids );
  				}
  				
+ 				// List selected by the user
  				if ( 'list' == $type ) {
  					if ( ! isset( $_POST['blogs_ids'] ) || ! is_array( $_POST['blogs_ids'] ) ) {
  						mcc_add_error( 'blog-id', __( 'You have not selected any blog', MULTISTE_CC_LANG_DOMAIN ) );
@@ -1036,6 +1098,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					$this->wizard->set_value( 'dest_blogs_ids', $_POST['blogs_ids'] );
  				}
 
+ 				// Group of blogs
  				if ( 'group' == $type ) {
  					if ( empty( $_POST['group'] ) ) {
  						mcc_add_error( 'blog-group', __( 'You have not selected any group', MULTISTE_CC_LANG_DOMAIN ) );
@@ -1054,6 +1117,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  						mcc_add_error( 'wrong-group', __( 'There are no blogs attached to that group.', MULTISTE_CC_LANG_DOMAIN ) );
  					}
  					else {
+ 						// Saving the blogs IDs in the wizard
  						$ids = array();
  						foreach ( $blogs as $blog ) {
  							$ids[] = $blog->blog_id;
@@ -1063,6 +1127,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  				}
 
+ 				// New Blog Templates Groups
  				if ( 'nbt_group' == $type ) {
 
  					if ( ! function_exists( 'nbt_get_model' ) ) {
@@ -1089,6 +1154,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  						mcc_add_error( 'wrong-nbt-group', __( 'There are no blogs attached to that template.', MULTISTE_CC_LANG_DOMAIN ) );
  					}
  					else {
+ 						// Saving the blogs IDs in the wizard
  						$this->wizard->set_value( 'dest_blogs_ids', $blogs_relationships );
  					}
 

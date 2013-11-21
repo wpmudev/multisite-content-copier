@@ -23,7 +23,7 @@ class MCC_NBT_Groups_List_Table extends WP_List_Table {
         $columns = array(
             'name'      => __( 'Template name', MULTISTE_CC_ADMIN_DIR ),
             'description'      => __( 'Template description', MULTISTE_CC_ADMIN_DIR ),
-            'count'     => __( 'Blogs count', MULTISTE_CC_ADMIN_DIR )
+            'count'     => __( 'Sites', MULTISTE_CC_ADMIN_DIR )
         );
         return $columns;
     }

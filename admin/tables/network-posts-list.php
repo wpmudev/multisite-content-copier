@@ -34,7 +34,6 @@ class MCC_Posts_List_Table extends WP_List_Table {
         switch_to_blog( $this->blog_id );
 		
 		$args = array(
-			'post_status' => 'publish',
 			'post_type' => $this->post_type,
 			'posts_per_page ' => $per_page,
 			'paged' => $current_page,
@@ -81,7 +80,8 @@ class MCC_Posts_List_Table extends WP_List_Table {
 		$sites_columns = array(
 			'cb'          => '<input type="checkbox" />',
 			'title'    	  => __( 'Title', MULTISTE_CC_LANG_DOMAIN ),
-			'date'		  => __( 'Published', MULTISTE_CC_LANG_DOMAIN )
+			'status'	  => __( 'Status', MULTISTE_CC_LANG_DOMAIN ),
+			'date'		  => __( 'Created', MULTISTE_CC_LANG_DOMAIN )
 		);
 
 		return $sites_columns;
@@ -97,8 +97,31 @@ class MCC_Posts_List_Table extends WP_List_Table {
 	}
 
 	function column_date( $item ) {
-		
 		return date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $item->post_date ) );
+	}
+
+	function column_status( $item ) {
+		$status = '';
+		switch ( $item->post_status ) {
+			case 'private':
+				$status = __('Privately Published');
+				break;
+			case 'publish':
+				$status = __('Published');
+				break;
+			case 'future':
+				$status = __('Scheduled');
+				break;
+			case 'pending':
+				$status = __('Pending Review');
+				break;
+			case 'draft':
+			case 'auto-draft':
+				$status = __('Draft');
+				break;
+		}
+		return $status;
+
 	}
 
 	function get_bulk_actions() {

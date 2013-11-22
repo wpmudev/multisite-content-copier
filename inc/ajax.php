@@ -55,40 +55,6 @@ function mcc_get_sites_search() {
 }
 
 
-add_action( 'wp_ajax_mcc_get_posts_search', 'mcc_get_posts_search' );
-function mcc_get_posts_search() {
-	$blog_id = absint( $_POST['blog_id'] );
-
-	switch_to_blog( $blog_id );
-	add_filter( 'posts_where', 'mcc_set_wp_query_filter' );
-	$query = new WP_Query(
-		array(
-			'post_type' => 'post',
-			'posts_per_page' => 10,
-			'status' => 'publish'
-		)
-	);
-	remove_filter( 'posts_where', 'mcc_set_wp_query_filter' );
-	restore_current_blog();
-
-	$returning = array();
-	if ( $query->have_posts() ) {
-		while ( $query->have_posts() ) { 
-			$query->the_post();
-			$returning[] = array(
-				'the_title' => get_the_title(),
-				'the_id'	=> get_the_ID()
-			);
-		}
-
-		wp_reset_postdata();
-	}
-
-	echo json_encode( $returning );
-
-	die();
-
-}
 
 add_action( 'wp_ajax_mcc_get_users_search', 'mcc_get_users_search' );
 function mcc_get_users_search() {
@@ -137,6 +103,8 @@ function mcc_insert_all_blogs_queue() {
 	global $wpdb, $current_site;
 
 	$current_site_id = ! empty ( $current_site ) ? $current_site->id : 1;
+	$main_blog_id = ! empty ( $current_site ) ? $current_site->blog_id : 1;
+
 
 	$offset = $_POST['offset'];
 	$interval = $_POST['interval'];
@@ -152,10 +120,12 @@ function mcc_insert_all_blogs_queue() {
 			"SELECT blog_id FROM $wpdb->blogs 
 			WHERE site_id = %d
 			AND blog_id != %d
+			AND blog_id != %d
 			ORDER BY blog_id
 			LIMIT %d, %d",
 			$current_site_id,
 			$content_blog_id,
+			$main_blog_id,
 			$offset,
 			$interval
 		)

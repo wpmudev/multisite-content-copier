@@ -67,7 +67,13 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				$additional_options = mcc_get_page_additional_settings();
  			}
  			else {
- 				return false;
+ 				// Custom Post Type
+ 				if ( $post->post_type == 'attachment' )
+ 					return false;
+
+ 				$action = 'add-cpt';
+ 				$cpt = $post->post_type;
+ 				$additional_options = mcc_get_cpt_additional_settings();
  			}
 
  			// Additional settings
@@ -126,6 +132,9 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			}
 			
  			$this->wizard->set_value( 'mcc_action', $action );
+ 			if ( 'cpt' == $action )
+ 				$this->wizard->set_value( 'cpt', $cpt );
+
  			$this->wizard->set_value( 'content_blog_id', $content_blog_id );
  			$this->wizard->set_value( 'dest_blog_type', $dest_blog_type );
  			$this->wizard->set_value( 'settings', $settings );
@@ -250,7 +259,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		$blog_id = absint( $_POST['blog_id'] );
 
 		switch_to_blog( $blog_id );
-		$post_types = $this->get_registered_cpts();
+		$post_types = mcc_get_registered_cpts();
 		if ( empty( $post_types ) ) {
 			echo '<li>' . __( 'There are no custom posts registered for that blog', MULTISTE_CC_LANG_DOMAIN ) . '</li>';
 			die();
@@ -307,10 +316,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				<div class="welcome-panel-content">
 					<div class="mcc-wizard-breadcrumbs">
 						<ul>
-							<li class="first <?php $this->wizard->breadcrumb_class(1); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(1); ?>><span class="badge">1</span> <?php _e( 'Copy selection', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
-							<li class="<?php $this->wizard->breadcrumb_class(2); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(2); ?>><span class="badge">2</span> <?php _e( 'Select source blog', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
-							<li class="<?php $this->wizard->breadcrumb_class(3); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(3); ?>><span class="badge">3</span> <?php _e( 'Select Items to copy', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
-							<li class="<?php $this->wizard->breadcrumb_class(4); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(4); ?>><span class="badge">4</span> <?php _e( 'Select destination blog(s)', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
+							<li class="first <?php $this->wizard->breadcrumb_class(1); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(1); ?>><span class="badge">1</span> <?php _e( 'Select Action', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
+							<li class="<?php $this->wizard->breadcrumb_class(2); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(2); ?>><span class="badge">2</span> <?php _e( 'Select Source', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
+							<li class="<?php $this->wizard->breadcrumb_class(3); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(3); ?>><span class="badge">3</span> <?php _e( 'Select Items', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
+							<li class="<?php $this->wizard->breadcrumb_class(4); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(4); ?>><span class="badge">4</span> <?php _e( 'Select Destinations', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
 							<li class="last <?php $this->wizard->breadcrumb_class(5); ?>"><a <?php echo $this->wizard->get_breadcrumb_href(5); ?>><span class="badge">5</span> <?php _e( 'Finish', MULTISTE_CC_LANG_DOMAIN ); ?></a></li>
 						</ul>
 					</div>
@@ -417,17 +426,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		<?php
 	}
 
-	private function  get_registered_cpts() {
-		// Get all post types
-		$args = array(
-			'publicly_queryable' => true
-		); 
-		$post_types = get_post_types( $args, 'object' );
-		unset( $post_types['attachment'] );
-		unset( $post_types['post'] );
-
-		return $post_types;
-	}
 
 	private function render_step_3() {
 		$current_action = $this->wizard->get_value( 'mcc_action' );
@@ -517,7 +515,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 		?>
 
-			<h3><?php _e( 'Select the items of that you would like to copy.', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+			<h3><?php _e( 'Select the items that you would like to copy.', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 			<p class="about-description">
 				<?php _e( 'Check the items in the list that you would like to copy, select Add To List and click on Apply. Selected items appear below this message.', MULTISTE_CC_LANG_DOMAIN ); ?>
 			</p>
@@ -892,7 +890,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				var rt_total = <?php echo $items_count; ?>;
 				var label = 0;
 
-				console.log(rt_total);
 				$('.processing_result')
 					.html('<div id="progressbar" style="margin-top:20px"><div class="progress-label">' + label +'%</div></div>')
 

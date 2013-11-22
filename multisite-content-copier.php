@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: 
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
 Author: Ignacio (Incsub)
-Version: 1.0.0
+Version: 1.0.1
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
@@ -104,7 +104,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '0.2' );
+		define( 'MULTISTE_CC_VERSION', '1.0.1' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -214,8 +214,8 @@ class Multisite_Content_Copier {
 		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
 
 		$args = array(
-			'menu_title' => __( 'Sites groups', MULTISTE_CC_LANG_DOMAIN ),
-			'page_title' => __( 'Sites groups', MULTISTE_CC_LANG_DOMAIN ),
+			'menu_title' => __( 'Site Groups', MULTISTE_CC_LANG_DOMAIN ),
+			'page_title' => __( 'Site Groups', MULTISTE_CC_LANG_DOMAIN ),
 			'network_menu' => true,
 			'parent' => 'mcc_network_page',
 			'screen_icon_slug' => 'mcc',
@@ -247,11 +247,12 @@ class Multisite_Content_Copier {
 
 	public function maybe_copy_content() {
 
-		if ( ! is_network_admin() && ! get_site_transient( 'mcc_copying' ) ) {
-			set_site_transient( 'mcc_copying', true, 900 );
+		if ( ! is_network_admin() && ! get_transient( 'mcc_copying' ) ) {
+			set_transient( 'mcc_copying', true, 900 );
 			$queue = mcc_get_queue_for_blog();
 			foreach ( $queue as $item ) {
-				
+				global $wpdb;
+				$wpdb->query( "BEGIN;" );
 				$this->include_copier_classes();
 
 				$settings = $item->settings;
@@ -260,11 +261,13 @@ class Multisite_Content_Copier {
 				$copier = new $class( $item->src_blog_id, $settings );
 				$copier->execute();
 
+				$wpdb->query( "COMMIT" );
+
 				$model = mcc_get_model();
 				$model->delete_queue_item( $item->ID );
 
 			}
-			delete_site_transient( 'mcc_copying' );
+			delete_transient( 'mcc_copying' );
 		}
 		
 	}

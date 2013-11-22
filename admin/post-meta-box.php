@@ -21,23 +21,32 @@ class MCC_Post_Meta_Box {
 
 	public function add_meta_box( $post_type, $post ) {
 
-		if ( ! in_array( $post->post_type, array( 'post', 'page' ) ) || ! is_super_admin() )
+		if ( ! is_super_admin() )
 			return;
 
-		add_meta_box( 
-	        'copier-meta-box',
-	        __( 'Multisite Content Copier', MULTISTE_CC_LANG_DOMAIN ),
-	        array( &$this, 'render_copier_meta_box' ),
-	        'post',
-	        'normal',
-	        'default'
-	    );
+		$post_types = array();
+		$_post_types = mcc_get_registered_cpts();
+		foreach ( $_post_types as $post_type )
+			$post_types[] = $post_type->name;
+
+		$post_types = array_merge( $post_types, array( 'post', 'page' ) );
+
+		foreach ( $post_types as $post_type ) {
+			add_meta_box( 
+		        'copier-meta-box',
+		        __( 'Multisite Content Copier', MULTISTE_CC_LANG_DOMAIN ),
+		        array( &$this, 'render_copier_meta_box' ),
+		        $post_type,
+		        'normal',
+		        'default'
+		    );
+		}
 	}
 
 	public function render_copier_meta_box( $post ) {
 
-		if ( 'publish' != $post->post_status ) {
-			echo '<p>' . __( 'Please publish this content if you would like to copy it.', MULTISTE_CC_LANG_DOMAIN ) . '</p>';
+		if ( ! in_array( $post->post_status, array( 'publish', 'draft', 'pending' ) ) ) {
+			echo '<p>' . __( 'Please save this post if you would like to copy it.', MULTISTE_CC_LANG_DOMAIN ) . '</p>';
 		}
 		else {
 			$settings = array(
@@ -79,7 +88,19 @@ class MCC_Post_Meta_Box {
 					<?php endif; ?>	
 				</div>
 				<h4><?php _e( 'Additional Options', MULTISTE_CC_LANG_DOMAIN ); ?></h4>
-				<?php $options =  mcc_get_post_additional_settings(); ?>
+				<?php
+					switch ( $post->post_type ) {
+						case 'post':
+							$options =  mcc_get_post_additional_settings();
+							break;
+						case 'page':
+							$options =  mcc_get_page_additional_settings();
+							break;						
+						default:
+							$options =  mcc_get_cpt_additional_settings();
+							break;
+					}
+				?>
 				<ul style="margin-left:20px;">
 					<?php foreach ( $options as $option_slug => $label ): ?>
 						<li><label><input type="checkbox" class="mcc_options" name="<?php echo $option_slug; ?>" value="<?php echo $option_slug; ?>"></input> <?php echo $label; ?></label></li>

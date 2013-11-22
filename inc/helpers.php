@@ -108,3 +108,15 @@ function mcc_get_nbt_groups_dropdown( $selected = '' ) {
 		<?php endforeach; ?>
 	<?php
 }
+
+function mcc_get_registered_cpts() {
+	// Get all post types
+	$args = array(
+		'publicly_queryable' => true
+	); 
+	$post_types = get_post_types( $args, 'object' );
+	unset( $post_types['attachment'] );
+	unset( $post_types['post'] );
+
+	return $post_types;
+}

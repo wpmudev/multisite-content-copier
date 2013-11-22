@@ -134,17 +134,20 @@ abstract class Multisite_Content_Copier_Copier {
 		}
 
 		// 4. Getting those images that must be attachments in DB
-		$images = get_posts(
-			array(
-				'post_type' => 'attachment',
-				'numberposts' => -1,
-				'orderby'        => 'title',
-				'order'           => 'ASC',
-				'post_mime_type' => 'image',
-				'exclude' => $already_found_attachments,
-				'include' => $attachments_ids
-			)
-		);
+		$images = array();
+		if ( ! empty( $attachments_ids ) ) {
+			$images = get_posts(
+				array(
+					'post_type' => 'attachment',
+					'numberposts' => -1,
+					'orderby'        => 'title',
+					'order'           => 'ASC',
+					'post_mime_type' => 'image',
+					'exclude' => $already_found_attachments,
+					'include' => $attachments_ids
+				)
+			);
+		}
 
 		foreach ( $images as $image ) {
 			$already_found_attachments[] = $image->ID;

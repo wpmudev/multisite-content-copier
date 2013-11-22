@@ -5,6 +5,13 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.0.1 - 2013-11-22
+----------------------------------------------------------------------
+- Added meta box for Custom Post Types and pages
+- Fixed bug: Copying images when the post has no images was copying all images uploaded of the month.
+- Fixed: When copying to all blogs, main site was included
+- Copying transient was saved network wide, now is site wide
+
 1.0.0 - 2013-11-20
 ----------------------------------------------------------------------
 - Initial Release.

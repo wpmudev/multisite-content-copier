@@ -153,9 +153,11 @@ class Multisite_Content_Copier {
 		if ( is_admin() ) {
 			require_once( MULTISTE_CC_ADMIN_DIR . 'post-meta-box.php' );
 			require_once( MULTISTE_CC_INCLUDES_DIR . 'ajax.php' );
-
-			include_once( MULTISTE_CC_INCLUDES_DIR . 'wpmudev-dash-notification.php' );
 		}
+		
+		global $wpmudev_notices;
+		$wpmudev_notices[] = array( 'id'=> 855335,'name'=> 'Multisite Content Copier', 'screens' => array( 'toplevel_page_mcc_network_page-network', 'content-copier_page_mcc_sites_groups_page-network', 'content-copier_page_mcc_settings_page-network' ) );
+		include_once( MULTISTE_CC_INCLUDES_DIR . 'dash-notice/wpmudev-dash-notification.php' );
 	}
 
 	public function include_copier_classes() {

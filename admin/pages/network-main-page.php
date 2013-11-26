@@ -1003,7 +1003,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  				$action = $this->wizard->get_value( 'mcc_action' );
  				$post_actions = array( 'add-post', 'add-page', 'add-cpt' );
- 				if ( in_array( $action, $post_actions ) && empty( $_POST['posts_ids'] ) )
+ 				if ( ! in_array( $action, $post_actions ) && empty( $_POST['posts_ids'] ) )
  					mcc_add_error( 'select-post', __( 'You must add at least one item to the list', MULTISTE_CC_LANG_DOMAIN ) );
 
  				if ( 'activate-plugin' == $action && empty( $_POST['plugins'] ) )

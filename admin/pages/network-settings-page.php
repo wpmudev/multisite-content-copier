@@ -70,7 +70,9 @@ class Multisite_Content_Copier_Network_Settings_Menu extends Multisite_Content_C
  				$current_settings['blog_templates_integration'] = false;
  			}
 
+
  			if ( ! mcc_is_error() ) {
+
  				mcc_update_settings( $current_settings );
 
 	 			$redirect_to = add_query_arg( 'updated', 'true', $this->get_permalink() );
@@ -78,7 +80,7 @@ class Multisite_Content_Copier_Network_Settings_Menu extends Multisite_Content_C
 	 			$redirect_to = apply_filters( 'mcc_update_settings_screen_redirect_url', $redirect_to );
 
 	 			if ( ! empty( $redirect_to ) )
-	 				wp_redirect( $redirect_to );	
+	 				wp_safe_redirect( $redirect_to );	
  			}
  			
  			

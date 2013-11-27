@@ -77,6 +77,7 @@ class MCC_Wizard {
 		if ( in_array( $step, $this->steps ) ) {
 			$this->set_value( 'step', $step );
 			wp_redirect( $this->get_step_url( $step ) );
+			exit;
 		}
 	}
 

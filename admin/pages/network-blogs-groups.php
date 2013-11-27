@@ -172,6 +172,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 	 			$model->add_new_blog_group( $group_name );
 
 	 			wp_redirect( add_query_arg( 'added', 'true', $this->get_permalink() ) );
+	 			exit;
 	 		}
  		}
 
@@ -205,6 +206,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 	 					$this->get_permalink() 
 	 				) 
 	 			);
+	 			exit;
 	 		}
 
  		}

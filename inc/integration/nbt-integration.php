@@ -5,14 +5,14 @@ class MCC_NBT_Integrator {
 	private $show_notice_slug = 'show_nbt_integration_notice';
 
 	public function __construct() {
-		add_action( 'admin_init', array( &$this, 'init' ) );
+		add_action( 'init', array( &$this, 'init' ) );
 
 		add_action( 'deactivate_blogtemplates/blogtemplates.php', array( &$this, 'deactivate_nbt_integration' ) );
 		add_action( 'activate_blogtemplates/blogtemplates.php', array( &$this, 'maybe_show_nbt_integration_notice' ) );
 
 		add_action( 'delete_blog', array( &$this, 'delete_blog_relationships' ), 10, 1 );
 
-		add_action('switch_theme', array( &$this, 'delete_blog_relationships_on_switch_theme' ), 10, 1 );
+		add_action( 'switch_theme', array( &$this, 'delete_blog_relationships_on_switch_theme' ), 10, 1 );
 
 	}
 

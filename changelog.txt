@@ -5,6 +5,11 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.0.3 - 2013-11-28
+----------------------------------------------------------------------
+- Fixed: Javascript incompatibilities with Explorer/Firefox.
+- Fixed: Users could go to step 4 without selecting items.
+
 1.0.2 - 2013-11-26
 ----------------------------------------------------------------------
 - Fixed: on step 3 when selection items the page reloads and gives an error.

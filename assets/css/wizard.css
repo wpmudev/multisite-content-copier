@@ -1,53 +1,41 @@
-#posts-list li,
-#users-list li,
-#blogs-list li {
+#posts-list li,#users-list li,#blogs-list li {
 	background: #EBEBEB;
 	border: 1px solid #CCC;
 	border-radius: 3px;
 	list-style: none;
 }
 
-#posts-list,
-#users-list,
-#blogs-list{
+#posts-list,#users-list,#blogs-list {
 	margin: 20px 0;
 }
 
-#posts-list li span,
-#users-list li span,
-#blogs-list li span {
+#posts-list li span,#users-list li span,#blogs-list li span {
 	padding: 2px 10px;
 	display: inline-block;
 }
 
-#posts-list li span.id-box,
-#users-list li span.id-box,
-#blogs-list li span.id-box {
-	border-right:1px solid #CCC;
+#posts-list li span.id-box,#users-list li span.id-box,#blogs-list li span.id-box {
+	border-right: 1px solid #CCC;
 	min-width: 20px;
-	background:#E2E2E2;
+	background: #E2E2E2;
 	width: 60px;
 }
 
-#posts-list li span.remove-box,
-#users-list li span.remove-box,
-#blogs-list li span.remove-box {
+#posts-list li span.remove-box,#users-list li span.remove-box,#blogs-list li span.remove-box {
 	float: right;
 	border-left: 1px solid #CCC;
 	font-size: 17px;
-	background:#E2E2E2;
-	text-shadow:1px 1px 1px white;
+	background: #E2E2E2;
+	text-shadow: 1px 1px 1px white;
 }
 
-#posts-list li span.remove-box a,
-#users-list li span.remove-box a,
-#blogs-list li span.remove-box a {
+#posts-list li span.remove-box a,#users-list li span.remove-box a,#blogs-list li span.remove-box a {
 	text-decoration: none;
-	font-weight:bold;
+	font-weight: bold;
 }
 
 #blogs-list-wrap {
-	margin-left:15px;
+	margin-left: 15px;
 }
 
 .ui-progressbar {
@@ -56,49 +44,53 @@
 
 .progress-label {
 	position: absolute;
-    left: 50%;
-    top: 4px;
-    font-weight: bold;
-    text-shadow: 1px 1px 0 #fff;
+	left: 50%;
+	top: 4px;
+	font-weight: bold;
+	text-shadow: 1px 1px 0 #fff;
 }
 
 .mcc-wizard-breadcrumbs {
-	margin-bottom:2em;
+	margin-bottom: 2em;
 }
 
 .mcc-wizard-breadcrumbs ul {
-	padding:0;
-	margin:0;
-	list-style:none;
+	padding: 0;
+	margin: 0;
+	list-style: none;
 }
+
 .mcc-wizard-breadcrumbs ul {
-  	overflow: hidden;
+	overflow: hidden;
 	width: 100%;
 }
 
-.mcc-wizard-breadcrumbs ul li{
+.mcc-wizard-breadcrumbs ul li {
 	border-top: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
-  	float: left;
+	float: left;
 }
+
 .mcc-wizard-breadcrumbs ul li.first {
 	border-left: 1px solid #ccc;
 }
 
-.mcc-wizard-breadcrumbs ul a{
+.mcc-wizard-breadcrumbs ul a {
 	padding: 0.4em 1em 0.4em 2em;
 	float: left;
 	text-decoration: none;
 	color: #444;
 	text-shadow: 0 1px 0 rgba(255,255,255,.5);
-	background:#F1F1F1;
-	position:relative;
+	background: #F1F1F1;
+	position: relative;
 }
-.mcc-wizard-breadcrumbs ul li.disabled a{
-  	color: #A2A2A2;
+
+.mcc-wizard-breadcrumbs ul li.disabled a {
+	color: #A2A2A2;
 	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	background: #F5F5F5;
 }
+
 .mcc-wizard-breadcrumbs ul a .badge {
 	background: #DDD;
 	padding: 0.2em 0.6em;
@@ -109,22 +101,26 @@
 .mcc-wizard-breadcrumbs ul li:first-child {
 	border-radius: 5px 0 0 5px;
 }
-.mcc-wizard-breadcrumbs ul li:first-child a{
+
+.mcc-wizard-breadcrumbs ul li:first-child a {
 	padding-left: 1em;
 	border-radius: 5px 0 0 5px;
 }
 
-.mcc-wizard-breadcrumbs ul a:hover{
-  background: #E2E2E2;
-  cursor:pointer;
+.mcc-wizard-breadcrumbs ul a:hover {
+	background: #E2E2E2;
+	cursor: pointer;
 }
+
 .mcc-wizard-breadcrumbs ul a:hover .badge {
 	background: #EEE;
 	border-color: #FFF;
 }
-.mcc-wizard-breadcrumbs ul li.disabled a:hover{
-	cursor:pointer;
+
+.mcc-wizard-breadcrumbs ul li.disabled a:hover {
+	cursor: pointer;
 }
+
 .mcc-wizard-breadcrumbs ul li.disabled a:hover .badge {
 	background: #DDD;
 	padding: 0.2em 0.6em;
@@ -132,56 +128,49 @@
 	border: 1px solid #B8B8B8;
 }
 
-.mcc-wizard-breadcrumbs ul a::after,
-.mcc-wizard-breadcrumbs ul a::before{
+.mcc-wizard-breadcrumbs ul a::after,.mcc-wizard-breadcrumbs ul a::before {
 	content: "";
 	position: absolute;
 	top: 50%;
-	margin-top: -1.5em;   
+	margin-top: -1.5em;
 	border-top: 1.5em solid transparent;
 	border-bottom: 1.5em solid transparent;
 	border-left: 1em solid;
 	right: -1em;
 }
 
-.mcc-wizard-breadcrumbs ul a::after{ 
+.mcc-wizard-breadcrumbs ul a::after {
 	z-index: 2;
-	border-left-color: #F1F1F1;  
+	border-left-color: #F1F1F1;
 }
 
-.mcc-wizard-breadcrumbs ul a::before{
-	border-left-color: #ccc;  
+.mcc-wizard-breadcrumbs ul a::before {
+	border-left-color: #ccc;
 	right: -1.1em;
-	z-index: 1; 
+	z-index: 1;
 }
 
-.mcc-wizard-breadcrumbs ul a:hover::after{
+.mcc-wizard-breadcrumbs ul a:hover::after {
 	border-left-color: #E2E2E2;
 }
-.mcc-wizard-breadcrumbs ul li.disabled a:hover::after{
-  	border-left-color: #F5F5F5;
-}
-.mcc-wizard-breadcrumbs ul li.disabled a:hover .badge {
 
+.mcc-wizard-breadcrumbs ul li.disabled a:hover::after {
+	border-left-color: #F5F5F5;
 }
 
-.mcc-wizard-breadcrumbs ul .current,
-.mcc-wizard-breadcrumbs ul .current:hover{
-  font-weight: bold;
-  background: none;
+.mcc-wizard-breadcrumbs ul .current,.mcc-wizard-breadcrumbs ul .current:hover {
+	font-weight: bold;
+	background: none;
 }
 
-.mcc-wizard-breadcrumbs ul .current::after,
-.mcc-wizard-breadcrumbs ul .current::before{
-  content: normal;  
+.mcc-wizard-breadcrumbs ul .current::after,.mcc-wizard-breadcrumbs ul .current::before {
+	content: normal;
 }
 
 #mcc-posts-list table .column-date {
-	width:20%;
+	width: 20%;
 }
 
 #mcc-panel .about-description {
-	margin-bottom:30px;
+	margin-bottom: 30px;
 }
-
-

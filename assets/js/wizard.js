@@ -6,11 +6,11 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		$this = $(this);
 
-
 		var blog_id = $('#blog_id').val();
 
-		if ( blog_id == '' || blog_id == 0 )
+		if ( blog_id == '' || blog_id == 0 ) {
 			return false;
+		}
 
 		$( '.spinner' ).show();
 		$( '#mcc-refresh-post-types' ).attr('disabled', true);
@@ -21,7 +21,7 @@ jQuery(document).ready(function($) {
 				blog_id: blog_id,
 				action: 'mcc_get_blog_ajax_url'
 			},
-			type: 'post',
+			type: 'post'
 		}).done(function( data ) {
 			_ajaxurl = data;
 
@@ -42,7 +42,7 @@ jQuery(document).ready(function($) {
 			$.ajax({
 				url: _ajaxurl,
 				data: data,
-				type: 'post',
+				type: 'post'
 			}).done(function( data ) {
 				$('.spinner').hide();
 				if ( data !== '' ) {
@@ -55,6 +55,8 @@ jQuery(document).ready(function($) {
 		});
 						
 	}
+
+	$('#mcc-refresh-post-types').trigger('click');
 
 	// POSTS/PAGES/CPTs SELECTION
 	$( '#mcc-posts-list #doaction' ).click( function( e ) { 
@@ -89,7 +91,7 @@ jQuery(document).ready(function($) {
 		$.ajax({
 			url: ajaxurl,
 			data: data,
-			type: 'post',
+			type: 'post'
 		}).done(function( data ) {
 			$('.spinner').hide();
 			if ( data !== '' ) {
@@ -140,7 +142,7 @@ jQuery(document).ready(function($) {
 		$.ajax({
 			url: ajaxurl,
 			data: data,
-			type: 'post',
+			type: 'post'
 		}).done(function( data ) {
 			$('.spinner').hide();
 			if ( data !== '' ) {
@@ -168,7 +170,7 @@ jQuery(document).ready(function($) {
 			$.ajax({
 				url: ajaxurl,
 				data: data,
-				type: 'post',
+				type: 'post'
 			}).done(function( data ) {
 				if ( data !== '' ) {
 					$( '#blogs-list' ).append( data );
@@ -220,7 +222,7 @@ jQuery(document).ready(function($) {
 		$.ajax({
 			url: ajaxurl,
 			type: 'post',
-			data: {action: 'mcc_remove_item_id_from_list', item_id: item_id},
+			data: {action: 'mcc_remove_item_id_from_list', item_id: item_id}
 		});
 	}
 
@@ -237,4 +239,28 @@ jQuery(document).ready(function($) {
 	String.prototype.trim = function() { 
 		return this.replace(/^\s+|\s+$/g, ''); 
 	};
+
+	// Source: http://stackoverflow.com/questions/3697555/why-is-indexof-not-working-in-internet-explorer
+	if (!Array.prototype.indexOf)
+	{
+	  Array.prototype.indexOf = function(elt /*, from*/)
+	  {
+	    var len = this.length >>> 0;
+
+	    var from = Number(arguments[1]) || 0;
+	    from = (from < 0)
+	         ? Math.ceil(from)
+	         : Math.floor(from);
+	    if (from < 0)
+	      from += len;
+
+	    for (; from < len; from++)
+	    {
+	      if (from in this &&
+	          this[from] === elt)
+	        return from;
+	    }
+	    return -1;
+	  };
+	}
 });

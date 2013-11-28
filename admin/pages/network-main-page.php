@@ -41,6 +41,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  		$this->wizard_start();
  		
  		$action = $this->wizard->get_value( 'mcc_action' );
+
  		if ( $this->wizard->get_current_step() != '1' && empty( $action ) ) {
  			$this->wizard->go_to_step( '1' );
  		}
@@ -146,6 +147,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  			$this->wizard->go_to_step( '5' );
 
  		}
+
  	}
 
  	
@@ -154,13 +156,14 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  		if ( get_current_screen()->id == $this->page_id . '-network' ) {
 
  			if ( 2 == $this->wizard->get_current_step() || 3 == $this->wizard->get_current_step() || 4 == $this->wizard->get_current_step() ) {
-	    		wp_enqueue_script( 'mcc-wizard-js', MULTISTE_CC_ASSETS_URL . 'js/wizard.js', array( 'jquery' ) );
+	    		wp_enqueue_script( 'mcc-wizard-js', MULTISTE_CC_ASSETS_URL . 'js/wizard.js', array( 'jquery' ), '20131128' );
 	    		wp_enqueue_script( 'mcc-autocomplete', MULTISTE_CC_ASSETS_URL . 'js/autocomplete.js', array( 'jquery' ) );
 	    		wp_enqueue_script( 'jquery-ui-autocomplete' );
 	 			wp_enqueue_style( 'mcc-jquery-ui-styles', MULTISTE_CC_ASSETS_URL . 'css/jquery-ui.css' );
 
 	 			$l10n = array(
-	 				'blog_not_found' => __( 'The blog ID does not exist. Try again.', MULTISTE_CC_LANG_DOMAIN )
+	 				'blog_not_found' => __( 'The blog ID does not exist. Try again.', MULTISTE_CC_LANG_DOMAIN ),
+	 				'select_a_blog_id' => __( 'You need to select a blog ID', MULTISTE_CC_LANG_DOMAIN )
 	 			);
 	 			wp_localize_script( 'mcc-wizard-js', 'captions', $l10n );
 	 		}
@@ -172,7 +175,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  	public function add_styles() {
  		if ( get_current_screen()->id == $this->page_id . '-network' ) {
- 			wp_enqueue_style( 'mcc-wizard-css', MULTISTE_CC_ASSETS_URL . 'css/wizard.css' );
+ 			wp_enqueue_style( 'mcc-wizard-css', MULTISTE_CC_ASSETS_URL . 'css/wizard.css', '20131128' );
 
  			if ( 5 == $this->wizard->get_current_step() ) {
 				wp_enqueue_style( 'jquery-ui-batchcreate', MULTISTE_CC_ASSETS_URL . 'jquery-ui/jquery-ui-1.10.3.custom.min.css', array() );
@@ -417,7 +420,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				</div>
  				<script>
  					jQuery(document).ready(function($) {
- 						$('#mcc-refresh-post-types').trigger('click');
+ 						//$('#mcc-refresh-post-types').trigger('click');
  					});
  				</script>
             	
@@ -938,6 +941,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 	public function validate_form() {
 		if ( isset( $_GET['page'] ) && $this->get_menu_slug() == $_GET['page'] ) {
+
  			$step = $this->wizard->get_current_step();
 
  			//STEP 1: Action selection
@@ -1003,7 +1007,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  				$action = $this->wizard->get_value( 'mcc_action' );
  				$post_actions = array( 'add-post', 'add-page', 'add-cpt' );
- 				if ( ! in_array( $action, $post_actions ) && empty( $_POST['posts_ids'] ) )
+ 				if ( in_array( $action, $post_actions ) && empty( $_POST['posts_ids'] ) )
  					mcc_add_error( 'select-post', __( 'You must add at least one item to the list', MULTISTE_CC_LANG_DOMAIN ) );
 
  				if ( 'activate-plugin' == $action && empty( $_POST['plugins'] ) )

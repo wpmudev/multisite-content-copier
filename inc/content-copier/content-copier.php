@@ -570,6 +570,14 @@ abstract class Multisite_Content_Copier_Copier {
 
 	}
 
+	protected function get_orig_blog_post_terms( $post_id, $taxonomy ) {
+		switch_to_blog( $this->orig_blog_id );
+		$post_terms = wp_get_object_terms( $post_id, array( $taxonomy ), array( 'fields' => 'all' ) );
+		restore_current_blog();
+
+		return $post_terms;
+	}
+
 }
 
 

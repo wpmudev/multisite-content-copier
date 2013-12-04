@@ -39,6 +39,11 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 	}
 
 	public function copy( $post_id ) {
+
+		$source_post_id = $post_id;
+		$source_blog_id = $this->orig_blog_id;
+		do_action( 'mcc_before_copy_post', $source_blog_id, $source_post_id );
+
 		$new_post_id = $this->copy_post( $post_id );
 		
 		if ( ! $new_post_id )

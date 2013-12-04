@@ -22,6 +22,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
         add_action( 'wp_ajax_mcc_retrieve_single_blog_data', array( &$this, 'retrieve_single_blog_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_single_user_data', array( &$this, 'retrieve_single_user_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_cpt_selectors_data', array( &$this, 'retrieve_cpt_selectors_data' ) );
+        add_action( 'wp_ajax_mcc_retrieve_cpt_custom_selector_data', array( &$this, 'retrieve_cpt_custom_selector_data' ) );
         add_action( 'wp_ajax_mcc_remove_item_id_from_list', array( &$this, 'remove_item_id_from_list' ) );
  	}
 
@@ -268,6 +269,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			die();
 		}
 
+
 		$returning = '';
 		foreach ( $post_types as $post_type ) {
 			$selected = false;
@@ -276,6 +278,17 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		
 		restore_current_blog();
 
+		echo $returning;
+
+		die();
+	}
+
+	public function retrieve_cpt_custom_selector_data() {
+		$blog_id = absint( $_POST['blog_id'] );
+
+		$returning = '';
+		$returning .= $this->get_row_cpt_selector_list( 'custom', '', false, true );
+		
 		echo $returning;
 
 		die();
@@ -742,11 +755,27 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	 * @param Boolean $selected if selected or not
 	 * @return HTML result
 	 */
-	public function get_row_cpt_selector_list( $id, $title, $selected = false ) {
+	public function get_row_cpt_selector_list( $id, $title, $selected = false, $custom = false ) {
 		ob_start();
 		?>
 			<li id="cpt-<?php echo $id; ?>">
-				<label><input type="radio" name="mcc_cpt" value="<?php echo $id; ?>" <?php checked( $selected ); ?>> <?php echo $title; ?></label>
+				<?php if ( ! $custom ): ?>
+					<label><input type="radio" name="mcc_cpt" value="<?php echo $id; ?>" <?php checked( $selected ); ?>> <?php echo $title; ?></label>
+				<?php else: ?>
+					<label for="mcc_cpt_custom">
+						<input type="radio" id="mcc_cpt_custom" name="mcc_cpt" value="custom" <?php checked( $selected ); ?>>
+						<input type="text" name="mcc_cpt_slug" id="mcc_cpt_slug" value="">
+						<?php echo $title; ?><br/>
+						<span class="description"><?php _e( 'Or insert the slug of your Custom Post Type here if you don\'t see it in the list', MULTISTE_CC_LANG_DOMAIN ); ?></span>
+					</label>
+					<script>
+						jQuery(document).ready(function($) {
+							$('#mcc_cpt_slug').click(function(){
+								$('#mcc_cpt_custom').attr('checked', true);
+							});
+						});
+					</script>
+				<?php endif; ?>
 			</li>
 		<?php
 		return ob_get_clean();
@@ -987,10 +1016,18 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					// We need a CPT slug if we are copying a CPT!
  					mcc_add_error( 'blog-id', __( 'You must select a post type', MULTISTE_CC_LANG_DOMAIN ) );
  				}
+ 				elseif ( 'add-cpt' == $action && 'custom' == $_POST['mcc_cpt'] ) {
+ 					if ( empty( $_POST['mcc_cpt_slug'] ) )
+ 						mcc_add_error( 'mcc-cpt', __( 'You must select a post type', MULTISTE_CC_LANG_DOMAIN ) );
+ 					else
+ 						$mcc_cpt_slug = $_POST['mcc_cpt_slug'];
+ 				}
 
  				if ( ! mcc_is_error() ) {
  					// Setting the CPT slug
- 					if ( 'add-cpt' == $action )
+ 					if ( 'add-cpt' == $action && ! empty( $mcc_cpt_slug ) )
+ 						$this->wizard->set_value( 'cpt', $mcc_cpt_slug );
+ 					elseif ( 'add-cpt' == $action )
  						$this->wizard->set_value( 'cpt', $_POST['mcc_cpt'] );
 
  					// And the source Blog ID

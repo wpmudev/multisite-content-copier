@@ -44,11 +44,26 @@ jQuery(document).ready(function($) {
 				data: data,
 				type: 'post'
 			}).done(function( data ) {
-				$('.spinner').hide();
 				if ( data !== '' ) {
 					$( '#mcc-cpt-list-wrap ul' ).append( data );
-					$( '#mcc-refresh-post-types' ).attr('disabled', false);
 				}
+			})
+			.always( function() {
+				$.ajax({
+					url: ajaxurl,
+					type: 'post',
+					data: {
+						action: 'mcc_retrieve_cpt_custom_selector_data',
+						blog_id: $('#blog_id').val()
+					},
+				})
+				.done(function(data) {
+					$( '#mcc-cpt-list-wrap ul' ).append( data );
+				})
+				.always(function() {
+					$('.spinner').hide();
+					$( '#mcc-refresh-post-types' ).attr('disabled', false);
+				});				
 			});
 
 			

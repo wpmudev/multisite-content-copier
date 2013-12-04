@@ -252,6 +252,10 @@ class Multisite_Content_Copier {
 			$queue = mcc_get_queue_for_blog();
 			foreach ( $queue as $item ) {
 				global $wpdb;
+
+				$model = mcc_get_model();
+				$model->delete_queue_item( $item->ID );
+
 				$wpdb->query( "BEGIN;" );
 				$this->include_copier_classes();
 
@@ -263,8 +267,6 @@ class Multisite_Content_Copier {
 
 				$wpdb->query( "COMMIT" );
 
-				$model = mcc_get_model();
-				$model->delete_queue_item( $item->ID );
 
 			}
 			delete_transient( 'mcc_copying' );

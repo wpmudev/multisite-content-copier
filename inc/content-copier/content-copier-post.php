@@ -28,11 +28,17 @@ class Multisite_Content_Copier_Post_Copier extends Multisite_Content_Copier_Page
 
 		// Copy terms?
 		if ( $this->copy_terms ) {
+			
 			if ( absint( $new_parent_post_id ) ) {
-				// Copy parent terms
+				// Copy parents terms
+				$parent_post_id = $this->get_orig_post_parent( $post_id );
+				if ( $parent_post_id )
+					$this->copy_terms( $parent_post_id, $new_parent_post_id );	
 			}
-			$this->copy_terms( $post_id, $new_post_id );
+
 			// Copy child terms 
+			$this->copy_terms( $post_id, $new_post_id );
+			
 		}
 
 		return $results;
@@ -76,14 +82,6 @@ class Multisite_Content_Copier_Post_Copier extends Multisite_Content_Copier_Page
 			wp_set_object_terms( $new_post_id, $term_ids, 'post_tag' );
 
 
-	}
-
-	private function get_orig_blog_post_terms( $post_id, $taxonomy ) {
-		switch_to_blog( $this->orig_blog_id );
-		$post_terms = wp_get_object_terms( $post_id, array( $taxonomy ), array( 'fields' => 'all' ) );
-		restore_current_blog();
-
-		return $post_terms;
 	}
 
 }

@@ -423,8 +423,13 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
             <?php if ( 'add-cpt' == $this->wizard->get_value( 'mcc_action' ) ): ?>
 	            <p class="submit">
-	            	<?php submit_button( __( 'Refresh post types', MULTISTE_CC_ADMIN_DIR ), 'secondary', 'mcc-refresh-cpts', false, array( 'id' => 'mcc-refresh-post-types' ) ); ?>
-	            	<span class="spinner" style="float:left"></span>
+	            	<div class="alignleft">
+	            		<?php submit_button( __( 'Refresh post types', MULTISTE_CC_ADMIN_DIR ), 'secondary', 'mcc-refresh-cpts', false, array( 'id' => 'mcc-refresh-post-types' ) ); ?>
+	            	</div>
+	            	<div class="alignleft">
+	            		<span class="spinner"></span>
+	            	</div>
+	            	<div style="clear:both"></div>
 	            </p>
             	<div id="mcc-cpt-list-wrap">
             		<ul>
@@ -533,7 +538,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 			<h3><?php _e( 'Select the items that you would like to copy.', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 			<p class="about-description">
-				<?php _e( 'Check the items in the list that you would like to copy, select Add To List and click on Apply. Selected items appear below this message.', MULTISTE_CC_LANG_DOMAIN ); ?>
+				<?php _e( 'Check the items in the list that you would like to copy and click on Add itmes to list. Selected items appear below this message.', MULTISTE_CC_LANG_DOMAIN ); ?>
 			</p>
 			
             <ul id="posts-list">
@@ -740,7 +745,8 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		ob_start();
 		?>
 			<li id="<?php echo $slug; ?>-<?php echo $id; ?>">
-				<span class="id-box"><?php echo $id; ?></span> <span class="title-box"><?php echo $title; ?></span> <span class="remove-box"><a class="mcc-remove-<?php echo $slug; ?>" href="" data-<?php echo $slug; ?>-id="<?php echo $id; ?>">X</a></span>
+				<span class="remove-box"><a class="mcc-remove-<?php echo $slug; ?>" href="" data-<?php echo $slug; ?>-id="<?php echo $id; ?>">Remove</a></span>
+				<span class="id-box"><?php echo $id; ?></span> <span class="title-box"><?php echo $title; ?></span> 
 				<input type="hidden" name="<?php echo $slug; ?>s_ids[]" value="<?php echo $id; ?>"></input>
 			</li>
 		<?php

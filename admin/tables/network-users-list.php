@@ -61,10 +61,6 @@ class MCC_Users_List_Table extends WP_List_Table {
 		if ( 'top' == $which ) {
 			?>
 				<div class="tablenav <?php echo esc_attr( $which ); ?>">
-
-					<div class="alignleft actions">
-						<?php $this->bulk_actions(); ?>
-					</div>
 			<?php
 					$this->extra_tablenav( $which );
 					$this->pagination( $which );
@@ -103,16 +99,13 @@ class MCC_Users_List_Table extends WP_List_Table {
 		return $item->data->user_email;
 	}
 
-	function get_bulk_actions() {
-        $actions = array(
-            'add'    => __( 'Add to the list', MULTISTE_CC_ADMIN_DIR )
-        );
-        return $actions;
-    }
 
 
 	function extra_tablenav( $which ) {
         ?>
+            <div class="alignleft actions">
+            	<input type="submit" name="" id="doaction" class="button action" value="<?php echo esc_attr( __( 'Add items to the list', MULTISTE_CC_LANG_DOMAIN ) ); ?>">
+            </div>
             <div class="alignleft actions">
                 <span class="spinner"></span>
             </div>

@@ -1,38 +1,50 @@
-#posts-list li,#users-list li,#blogs-list li {
-	background: #EBEBEB;
-	border: 1px solid #CCC;
-	border-radius: 3px;
+#posts-list li,
+#users-list li,
+#blogs-list li {
+	border-bottom: 1px solid #AAA;
 	list-style: none;
+	margin-bottom:0;
 }
 
-#posts-list,#users-list,#blogs-list {
+#posts-list li:first-child,
+#users-list li:first-child,
+#blogs-list li:first-child {
+	border-top:none;
+}
+
+#posts-list,
+#users-list,
+#blogs-list {
 	margin: 20px 0;
 }
 
-#posts-list li span,#users-list li span,#blogs-list li span {
+#posts-list li span,
+#users-list li span,
+#blogs-list li span {
 	padding: 2px 10px;
 	display: inline-block;
 }
 
-#posts-list li span.id-box,#users-list li span.id-box,#blogs-list li span.id-box {
-	border-right: 1px solid #CCC;
+#posts-list li span.id-box,
+#users-list li span.id-box,
+#blogs-list li span.id-box {
 	min-width: 20px;
-	background: #E2E2E2;
 	width: 60px;
 }
 
-#posts-list li span.remove-box,#users-list li span.remove-box,#blogs-list li span.remove-box {
-	float: right;
-	border-left: 1px solid #CCC;
-	font-size: 17px;
-	background: #E2E2E2;
-	text-shadow: 1px 1px 1px white;
+#posts-list li span.remove-box,
+#users-list li span.remove-box,
+#blogs-list li span.remove-box {
+	font-size: 11px;
 }
 
-#posts-list li span.remove-box a,#users-list li span.remove-box a,#blogs-list li span.remove-box a {
+#posts-list li span.remove-box a,
+#users-list li span.remove-box a,
+#blogs-list li span.remove-box a {
 	text-decoration: none;
 	font-weight: bold;
 }
+
 
 #blogs-list-wrap {
 	margin-left: 15px;

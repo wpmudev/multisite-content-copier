@@ -77,9 +77,7 @@ jQuery(document).ready(function($) {
 	$( '#mcc-posts-list #doaction' ).click( function( e ) { 
 		e.preventDefault();
 
-		if ( $('#mcc-posts-list select[name=action]').val() != 'add' )
-			return;
-
+		var $this = $(this);
 		var post_ids_selected = $( 'input.post_id:checked' );
 		var post_ids = [];
 		post_ids_selected.each( function (i, element) {
@@ -95,7 +93,7 @@ jQuery(document).ready(function($) {
 		if ( post_ids.length == 0 )
 			return;
 
-
+		$this.attr('disabled', true);
 		$('.spinner').show();
 		var data = {
 			action: 'mcc_retrieve_single_post_data',
@@ -113,6 +111,9 @@ jQuery(document).ready(function($) {
 				$( '#posts-list' ).append( data );
 				update_post_click_event();
 			}
+		})
+		.always(function() {
+			$this.attr('disabled', false);
 		});
 	});
 
@@ -130,9 +131,7 @@ jQuery(document).ready(function($) {
 	$( '#mcc-users-list #doaction' ).click( function( e ) { 
 		e.preventDefault();
 
-		if ( $('#mcc-users-list select[name=action]').val() != 'add' )
-			return false;
-
+		var $this = $(this);
 		var user_ids_selected = $( 'input.user_id:checked' );
 		var user_ids = [];
 		user_ids_selected.each( function (i, element) {
@@ -148,7 +147,7 @@ jQuery(document).ready(function($) {
 		if ( user_ids.length == 0 )
 			return;
 
-
+		$this.attr('disabled', true);
 		$('.spinner').show();
 		var data = {
 			action: 'mcc_retrieve_single_user_data',
@@ -164,6 +163,9 @@ jQuery(document).ready(function($) {
 				$( '#users-list' ).append( data );
 				update_user_click_event();
 			}
+		})
+		.always(function() {
+			$this.attr('disabled', false);
 		});
 	});
 

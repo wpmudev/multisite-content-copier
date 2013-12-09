@@ -167,6 +167,14 @@ class Multisite_Content_Copier {
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-plugin.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-user.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-cpt.php' );
+
+		$this->include_integration_files();
+	}
+
+	public function include_integration_files() {
+		if ( class_exists( 'Woocommerce' ) ) {
+			require_once( MULTISTE_CC_INCLUDES_DIR . 'integration/woocommerce.php' );
+		}
 	}
 
 	/**

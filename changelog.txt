@@ -5,6 +5,17 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.0.4 - 2013-12-17
+----------------------------------------------------------------------
+- Fixed error while copying terms
+- Added Woocommerce integration
+- Improved few styles
+- Improved items selection accesibility
+- Adding copy terms feature for Custom Post Types.
+- Actions/Filters added
+- Added Custom Post Type slug selection feature.
+- More minor improvements/fixes.
+
 1.0.3 - 2013-11-28
 ----------------------------------------------------------------------
 - Fixed: Javascript incompatibilities with Explorer/Firefox.

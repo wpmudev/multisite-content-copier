@@ -104,7 +104,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.0.4' );
+		define( 'MULTISTE_CC_VERSION', '1.0.5' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -136,7 +136,6 @@ class Multisite_Content_Copier {
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'admin-page.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'errors-handler.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'helpers.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
 		
 
 		//Integrations
@@ -160,7 +159,7 @@ class Multisite_Content_Copier {
 		include_once( MULTISTE_CC_INCLUDES_DIR . 'dash-notice/wpmudev-dash-notification.php' );
 	}
 
-	public function include_copier_classes() {
+	public static function include_copier_classes() {
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
@@ -168,10 +167,10 @@ class Multisite_Content_Copier {
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-user.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-cpt.php' );
 
-		$this->include_integration_files();
+		self::include_integration_files();
 	}
 
-	public function include_integration_files() {
+	public static function include_integration_files() {
 		if ( class_exists( 'Woocommerce' ) ) {
 			require_once( MULTISTE_CC_INCLUDES_DIR . 'integration/woocommerce.php' );
 		}
@@ -180,7 +179,16 @@ class Multisite_Content_Copier {
 	/**
 	 * Upgrade the plugin when a new version is uploaded
 	 */
-	public function maybe_upgrade() {}
+	public function maybe_upgrade() {
+
+		$current_version = get_site_option( self::$version_option_slug, '1.0.4' );
+
+		if ( version_compare( $current_version, '1.0.4', '<=' ) ) {
+			require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
+			mcc_upgrade_105();
+			update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
+		}
+	}
 
 
 
@@ -265,7 +273,7 @@ class Multisite_Content_Copier {
 				$model->delete_queue_item( $item->ID );
 
 				$wpdb->query( "BEGIN;" );
-				$this->include_copier_classes();
+				self::include_copier_classes();
 
 				$settings = $item->settings;
 				$class = $settings['class'];

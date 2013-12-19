@@ -22,6 +22,7 @@ class Multisite_Content_Copier_Model {
 	private $queue_table;
 	private $blogs_groups_table;
 	private $blogs_groups_relationship_table;
+	private $synced_posts_relationships_table;
 
 	// Charset and Collate
 	private $db_charset_collate;
@@ -58,6 +59,7 @@ class Multisite_Content_Copier_Model {
 		$this->queue_table = $wpdb->base_prefix . 'mcc_queue';
 		$this->blogs_groups_table = $wpdb->base_prefix . 'mcc_blogs_groups';
 		$this->blogs_groups_relationship_table = $wpdb->base_prefix . 'mcc_blogs_groups_relationship';
+		$this->synced_posts_relationships_table = $wpdb->base_prefix . 'mcc_synced_posts_relationships';
 
 		if ( ! get_site_option( $this->schema_created_option_slug, false ) ) {
 			$this->create_schema();
@@ -74,6 +76,7 @@ class Multisite_Content_Copier_Model {
 		$this->create_queue_table();
 		$this->create_blogs_groups_table();
 		$this->create_blogs_groups_relationship_table();
+		$this->create_synced_posts_relationships_table();
 	}
 
 	/**
@@ -130,6 +133,92 @@ class Multisite_Content_Copier_Model {
         dbDelta($sql);
 	}
 
+	public function create_synced_posts_relationships_table() {
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+		$sql = "CREATE TABLE $this->synced_posts_relationships_table (
+              ID bigint(20) NOT NULL AUTO_INCREMENT,
+              src_blog_id bigint(20),
+              src_post_id bigint(20),
+              dest_blog_id bigint(20),
+              dest_post_id bigint(20),
+              PRIMARY KEY  (ID),
+              UNIQUE KEY `relation` (`src_blog_id`,`src_post_id`,`dest_blog_id`, `dest_post_id`)
+            )  ENGINE=MyISAM $this->db_charset_collate;";
+       	
+        dbDelta($sql);
+	}
+
+	public function get_synced_children( $src_post_id, $src_blog_id = 0 ) {
+		global $wpdb;
+
+		if ( ! $src_blog_id )
+			$src_blog_id = get_current_blog_id();
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT dest_blog_id, dest_post_id FROM $this->synced_posts_relationships_table WHERE src_blog_id = %d AND src_post_id = %d",
+				$src_blog_id,
+				$src_post_id
+			)
+		);
+	}
+
+	public function add_synced_content( $src_post_id, $src_blog_id, $dest_posts ) {
+		global $wpdb;
+
+		if ( ! is_array( $dest_posts ) || empty( $dest_posts ) )
+			return new WP_Error( 'dest_posts',  __( "Destination posts must be an array", MULTISTE_CC_LANG_DOMAIN ) );
+
+		$dest_blogs_ids = wp_list_pluck( $dest_posts, 'blog_id' );
+		$dest_posts_ids = wp_list_pluck( $dest_posts, 'post_id' );
+
+		if ( count( $dest_blogs_ids ) != count( $dest_posts_ids ) )
+			return new WP_Error( 'dest_posts',  __( "Destination posts must be a coherent array", MULTISTE_CC_LANG_DOMAIN ) );
+
+		$query = "INSERT IGNORE INTO $this->synced_posts_relationships_table ( src_blog_id, src_post_id, dest_blog_id, dest_post_id )";
+		$insert = array();
+		for ( $i = 0; $i < count( $dest_blogs_ids ); $i++ ) {
+			$insert[] = $wpdb->prepare( "(%d,%d,%d,%d)", $src_post_id, $src_blog_id, $dest_blogs_ids[ $i ], $dest_posts_ids[ $i ] );
+		}
+		$insert = implode( ',', $insert );
+
+		$query .= "VALUES $insert";
+
+		$wpdb->query( $query );
+	}
+
+	public function get_synced_parent( $src_post_id, $src_blog_id = 0 ) {
+		global $wpdb;
+
+		if ( ! $src_blog_id )
+			$src_blog_id = get_current_blog_id();
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT dest_blog_id, dest_post_id FROM $this->synced_posts_relationships_table WHERE src_blog_id = %d AND src_post_id = %d",
+				$src_blog_id,
+				$src_post_id
+			)
+		);
+	}
+
+	public function delete_synced_content( $post_id, $blog_id = 0 ) {
+		global $wpdb;
+
+		if ( ! $blog_id )
+			$blog_id = get_current_blog_id();
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM $this->synced_posts_relationships_table
+				WHERE ( src_blog_id = %d AND src_post_id = %d)",
+				$blog_id,
+				$post_id
+			)
+		);
+	}
+
 
 	/**
 	 * Upgrades for the 0.2 version schema
@@ -143,9 +232,10 @@ class Multisite_Content_Copier_Model {
 	public function delete_tables() {
 		global $wpdb;
 
-		$wpdb->query( "DROP TABLE $this->queue_table;" );
-		$wpdb->query( "DROP TABLE $this->blogs_groups_table;" );
-		$wpdb->query( "DROP TABLE $this->blogs_groups_relationship_table;" );
+		$wpdb->query( "DROP TABLE IF EXISTS $this->queue_table;" );
+		$wpdb->query( "DROP TABLE IF EXISTS $this->blogs_groups_table;" );
+		$wpdb->query( "DROP TABLE IF EXISTS $this->blogs_groups_relationship_table;" );
+		$wpdb->query( "DROP TABLE IF EXISTS $this->synced_posts_relationships_table;" );
 	}
 
 	public function deactivate_model() {

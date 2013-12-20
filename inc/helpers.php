@@ -120,3 +120,28 @@ function mcc_get_registered_cpts() {
 
 	return $post_types;
 }
+
+
+function mcc_get_action_copier_class( $action ) {
+	switch ( $action ) {
+		case 'add-post':
+			$class = 'Multisite_Content_Copier_Post_Copier';
+			break;
+		case 'add-cpt': {
+			$class = 'Multisite_Content_Copier_CPT_Copier';
+			break;
+		}
+		case 'activate-plugin': {
+			$class = 'Multisite_Content_Copier_Plugins_Activator';
+			break;
+		}
+		case 'add-user': {
+			$class = 'Multisite_Content_Copier_User_Copier';
+			break;
+		}
+		default:
+			$class = 'Multisite_Content_Copier_Page_Copier';
+			break;
+	}
+	return $class;
+}

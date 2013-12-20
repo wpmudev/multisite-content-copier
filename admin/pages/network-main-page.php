@@ -812,17 +812,17 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		// Setting the class and items IDs/slugs
 		if ( 'add-page' == $action ) {
 			$posts_ids = $this->wizard->get_value( 'posts_ids' );
-			$settings['class'] = 'Multisite_Content_Copier_Page_Copier';
+			$settings['class'] = mcc_get_action_copier_class( $action );
 			$settings['post_ids'] = $posts_ids;
 		}
 		if ( 'add-post' == $action ) {
 			$posts_ids = $this->wizard->get_value( 'posts_ids' );
-			$settings['class'] = 'Multisite_Content_Copier_Post_Copier';
+			$settings['class'] = mcc_get_action_copier_class( $action );
 			$settings['post_ids'] = $posts_ids;
 		}
 		if ( 'add-cpt' == $action ) {
 			$posts_ids = $this->wizard->get_value( 'posts_ids' );
-			$settings['class'] = 'Multisite_Content_Copier_CPT_Copier';
+			$settings['class'] = mcc_get_action_copier_class( $action );
 			$settings['post_ids'] = $posts_ids;
 			$settings['post_type'] = $this->wizard->get_value( 'cpt' );
 		}

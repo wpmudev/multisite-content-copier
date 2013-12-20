@@ -150,7 +150,7 @@ class Multisite_Content_Copier {
 		require_once( MULTISTE_CC_ADMIN_DIR . 'pages/network-settings-page.php' );
 
 		if ( is_admin() ) {
-			require_once( MULTISTE_CC_ADMIN_DIR . 'post-meta-box.php' );
+			require_once( MULTISTE_CC_ADMIN_DIR . 'edit-post.php' );
 			require_once( MULTISTE_CC_INCLUDES_DIR . 'ajax.php' );
 		}
 		

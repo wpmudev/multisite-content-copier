@@ -17,6 +17,8 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 		$this->copy_parents = $copy_parents;
 		$this->update_date = $update_date;
 		$this->copy_comments = $copy_comments;
+		$this->updating = $updating;
+		$this->sync = $sync;
 
 	}
 
@@ -27,7 +29,9 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 			'keep_user' => true,
 			'update_date' => false,
 			'copy_parents' => false,
-			'copy_comments' => false
+			'copy_comments' => false,
+			'updating' => false,
+			'sync' => false
 		);
 	}
 
@@ -102,9 +106,37 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 
 		// Insert post in the new blog ( we should be currently on it)
 		$postarr = $this->get_postarr( $orig_post );
+
+		// Are we updating the post
+		if ( $this->updating ) {
+
+			$model = mcc_get_model();
+			$child_id = $model->get_synced_child( $post_id, $this->orig_blog_id );
+
+			if ( ! empty( $child_id ) )
+				$postarr['ID'] = absint( $child_id );
+		}
+
 		$new_post_id = wp_insert_post( $postarr );
 
 		if ( $new_post_id ) {
+			// Do we have to sync the post for the future?
+			if ( $this->sync ) {
+				$model = mcc_get_model();
+				$dest_post = array( 
+					array( 
+						'blog_id' => get_current_blog_id(), 
+						'post_id' => $new_post_id 
+					)
+				);
+
+				$settings = array(
+					'class' => get_class( $this ),
+					'copy_images' => $this->copy_images
+				);
+				$model->add_synced_content( $post_id, $this->orig_blog_id, $dest_post, $settings );
+			}
+
 			// Insert post meta
 			foreach ( $orig_post_meta as $post_meta ) {
 				$unserialized_meta_value = maybe_unserialize( $post_meta->meta_value );

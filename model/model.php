@@ -142,10 +142,12 @@ class Multisite_Content_Copier_Model {
               src_post_id bigint(20),
               dest_blog_id bigint(20),
               dest_post_id bigint(20),
+              settings text,
               PRIMARY KEY  (ID),
-              UNIQUE KEY `relation` (`src_blog_id`,`src_post_id`,`dest_blog_id`, `dest_post_id`)
+              UNIQUE KEY `relation` (`src_blog_id`,`src_post_id`,`dest_blog_id`, `dest_post_id`),
+              UNIQUE KEY `dest_relation` (`dest_blog_id`, `dest_post_id`)
             )  ENGINE=MyISAM $this->db_charset_collate;";
-       	
+
         dbDelta($sql);
 	}
 
@@ -155,16 +157,32 @@ class Multisite_Content_Copier_Model {
 		if ( ! $src_blog_id )
 			$src_blog_id = get_current_blog_id();
 
-		return $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT dest_blog_id, dest_post_id FROM $this->synced_posts_relationships_table WHERE src_blog_id = %d AND src_post_id = %d",
-				$src_blog_id,
-				$src_post_id
-			)
+		$pq = $wpdb->prepare(
+			"SELECT dest_blog_id, dest_post_id FROM $this->synced_posts_relationships_table WHERE src_blog_id = %d AND src_post_id = %d",
+			$src_blog_id,
+			$src_post_id
 		);
+
+		return $wpdb->get_results( $pq );
 	}
 
-	public function add_synced_content( $src_post_id, $src_blog_id, $dest_posts ) {
+	public function get_synced_child( $src_post_id, $src_blog_id, $dest_blog_id = 0 ) {
+		global $wpdb;
+
+		if ( ! $dest_blog_id )
+			$dest_blog_id = get_current_blog_id();
+
+		$pq = $wpdb->prepare(
+			"SELECT dest_post_id FROM $this->synced_posts_relationships_table WHERE src_blog_id = %d AND src_post_id = %d AND dest_blog_id = %d",
+			$src_blog_id,
+			$src_post_id,
+			$dest_blog_id
+		);
+
+		return $wpdb->get_var( $pq );
+	}
+
+	public function add_synced_content( $src_post_id, $src_blog_id, $dest_posts, $settings = array() ) {
 		global $wpdb;
 
 		if ( ! is_array( $dest_posts ) || empty( $dest_posts ) )
@@ -176,11 +194,18 @@ class Multisite_Content_Copier_Model {
 		if ( count( $dest_blogs_ids ) != count( $dest_posts_ids ) )
 			return new WP_Error( 'dest_posts',  __( "Destination posts must be a coherent array", MULTISTE_CC_LANG_DOMAIN ) );
 
-		$query = "INSERT IGNORE INTO $this->synced_posts_relationships_table ( src_blog_id, src_post_id, dest_blog_id, dest_post_id )";
+		$settings = maybe_serialize( $settings );
+
+		$query = "INSERT IGNORE INTO $this->synced_posts_relationships_table ( src_blog_id, src_post_id, dest_blog_id, dest_post_id, settings )";
 		$insert = array();
 		for ( $i = 0; $i < count( $dest_blogs_ids ); $i++ ) {
-			$insert[] = $wpdb->prepare( "(%d,%d,%d,%d)", $src_post_id, $src_blog_id, $dest_blogs_ids[ $i ], $dest_posts_ids[ $i ] );
+			if ( $src_blog_id != $dest_blogs_ids[ $i ] )
+				$insert[] = $wpdb->prepare( "(%d,%d,%d,%d,%s)", $src_blog_id, $src_post_id, $dest_blogs_ids[ $i ], $dest_posts_ids[ $i ], $settings );
 		}
+		
+		if ( empty( $insert ) )
+			return new WP_Error( 'dest_posts',  __( "Nothing to insert", MULTISTE_CC_LANG_DOMAIN ) );
+
 		$insert = implode( ',', $insert );
 
 		$query .= "VALUES $insert";
@@ -188,7 +213,7 @@ class Multisite_Content_Copier_Model {
 		$wpdb->query( $query );
 	}
 
-	public function get_synced_parent( $src_post_id, $src_blog_id = 0 ) {
+	public function get_synced_parent( $dest_post_id, $dest_blog_id = 0 ) {
 		global $wpdb;
 
 		if ( ! $src_blog_id )
@@ -196,11 +221,35 @@ class Multisite_Content_Copier_Model {
 
 		return $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT dest_blog_id, dest_post_id FROM $this->synced_posts_relationships_table WHERE src_blog_id = %d AND src_post_id = %d",
-				$src_blog_id,
-				$src_post_id
+				"SELECT src_blog_id, src_post_id FROM $this->synced_posts_relationships_table WHERE dest_blog_id = %d AND dest_post_id = %d",
+				$dest_post_id,
+				$dest_blog_id
 			)
 		);
+	}
+
+	public function post_is_synced( $src_post_id, $src_blog_id = 0 ) {
+		global $wpdb;
+
+		if ( ! $src_blog_id )
+			$src_blog_id = get_current_blog_id();
+
+		$cache = wp_cache_get( $src_post_id . ' ' . $src_blog_id, 'post_synced' );
+
+		if ( ! empty( $cache ) )
+			return $cache;
+
+		$results = $wpdb->get_row( 
+			$wpdb->prepare(
+				"SELECT ID FROM $this->synced_posts_relationships_table WHERE src_blog_id = %d AND src_post_id = %d LIMIT 1",
+				$src_blog_id,
+				$src_post_id
+			) 
+		);
+
+		wp_cache_set( $src_post_id . ' ' . $src_blog_id, $results, 'post_synced' );
+
+		return $results;
 	}
 
 	public function delete_synced_content( $post_id, $blog_id = 0 ) {
@@ -212,7 +261,7 @@ class Multisite_Content_Copier_Model {
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM $this->synced_posts_relationships_table
-				WHERE ( src_blog_id = %d AND src_post_id = %d)",
+				WHERE ( src_blog_id = %d AND src_post_id = %d )",
 				$blog_id,
 				$post_id
 			)
@@ -236,6 +285,8 @@ class Multisite_Content_Copier_Model {
 		$wpdb->query( "DROP TABLE IF EXISTS $this->blogs_groups_table;" );
 		$wpdb->query( "DROP TABLE IF EXISTS $this->blogs_groups_relationship_table;" );
 		$wpdb->query( "DROP TABLE IF EXISTS $this->synced_posts_relationships_table;" );
+
+		delete_site_option( $this->schema_created_option_slug );
 	}
 
 	public function deactivate_model() {

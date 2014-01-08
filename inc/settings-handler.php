@@ -41,6 +41,9 @@ class Multisite_Content_Copier_Settings_Handler {
 				'copy_parents'	=> __( 'Copy parents', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_comments' => __( 'Copy comments', MULTISTE_CC_LANG_DOMAIN ),
 				'copy_terms' 	=> __( 'Copy terms ( Tags, Categories... )', MULTISTE_CC_LANG_DOMAIN )
+			),
+			'user' => array(
+				'default_role'	=> __( 'If the role does not exist in destination blog, assign this role to the user' )
 			)
 		);
 	}

@@ -78,6 +78,7 @@ class MCC_Users_List_Table extends WP_List_Table {
 			'cb'          => '<input type="checkbox" />',
 			'username'    => __( 'Username' ),
 			'email'		  => __( 'Email' ),
+			'role'		  => __( 'Role' ),
 		);
 
 		return $sites_columns;
@@ -97,6 +98,11 @@ class MCC_Users_List_Table extends WP_List_Table {
 	function column_email( $item ) {
 		
 		return $item->data->user_email;
+	}
+
+	function column_role( $item ) {
+		global $wp_roles;
+		return translate_user_role( $wp_roles->role_names[ $item->roles[0] ] );
 	}
 
 

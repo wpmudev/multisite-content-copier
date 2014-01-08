@@ -89,6 +89,11 @@ function mcc_get_cpt_additional_settings() {
 	return $settings_handler->get_additional_settings( 'cpt' );
 }
 
+function mcc_get_user_additional_settings() {
+	$settings_handler = mcc_get_settings_handler();
+	return $settings_handler->get_additional_settings( 'user' );
+}
+
 function mcc_get_nbt_model() {
 	return Multisite_Content_Copier_NBT_Model::get_instance();
 }
@@ -144,4 +149,20 @@ function mcc_get_action_copier_class( $action ) {
 			break;
 	}
 	return $class;
+}
+
+function mcc_basic_roles_dropdown( $selected = false ) {
+	global $wp_roles;
+
+	$basic_roles_slugs = array( 'administrator', 'author', 'contributor', 'editor', 'subscriber' );
+
+	$selected = $selected && in_array( $selected, $basic_roles_slugs ) ? $selected : 'subscriber';
+
+	$basic_roles = array();
+	foreach ( $basic_roles_slugs as $role_slug ) {
+		?>
+			<option value="<?php echo esc_attr( $role_slug ); ?>" <?php selected( $selected, $role_slug ); ?>><?php echo translate_user_role( $wp_roles->role_names[ $role_slug ] ); ?></option>
+		<?php
+	}
+
 }

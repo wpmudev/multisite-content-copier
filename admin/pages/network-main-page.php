@@ -581,6 +581,8 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	}
 
 	private function render_user_selector( $blog_id ) {
+
+		// Get the current selected options/settings, users...
 		$current_selected_settings = $this->wizard->get_value( 'settings' );
 		if ( ! is_array( $current_selected_settings ) )
 			$current_selected_settings = array();
@@ -588,7 +590,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		$current_users_ids = $this->wizard->get_value( 'posts_ids', array() );
 		$users_list = '';
 		if ( empty( $current_users_ids ) ) {
+			// There are not users sleected already
 			$current_users_ids = array();
+
+			// Javascript cache for selected users
 			?>
 				<script>
 					var current_users = [];
@@ -596,6 +601,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			<?php
 		}
 		else {
+			// We have some users already selected
 			$users_ids_list = array();
 			foreach ( $current_users_ids as $user_id ) {
 				$user = get_userdata( $user_id );
@@ -606,6 +612,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				}
 				
 			}
+			// Javascript cache for selected users
 			?>
 				<script>
 					var current_users = [<?php echo implode( ',', $users_ids_list ); ?>];
@@ -613,10 +620,12 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			<?php
 		}
 
+		// Have we selected "All users" or selected manually?
 		$user_selection = $this->wizard->get_value( 'users_selection' );
 		if ( empty( $user_selection ) )
 			$user_selection = 'ids';
 
+		// Preparing the selection users table
 		require_once( MULTISTE_CC_ADMIN_DIR . 'tables/network-users-list.php' );
 		$args = array(
 			'blog_id' => $this->wizard->get_value( 'content_blog_id' ),
@@ -625,7 +634,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		);
 		$users_table = new MCC_Users_List_Table( $args );
 		$users_table->prepare_items();
-
 
 		?>
 			<ul id="users-list">
@@ -646,6 +654,23 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				<label>
 					<input type="radio" name="users_selection" <?php checked( $user_selection == 'ids' ); ?> value="ids"> <?php _e( 'Selected users', MULTISTE_CC_LANG_DOMAIN ); ?>
 				</label>
+				<br/><br/>
+				<h3><?php _e( 'Additional Options', MULTISTE_CC_LANG_DOMAIN ); ?></h3><br/>
+				<?php $options = mcc_get_additional_settings( 'user' ); ?>
+				<ul>
+					<?php foreach( $options as $option_slug => $label ): ?>
+						<?php if ( 'default_role' == $option_slug ): ?>
+							<li>
+								<label><?php echo $label; ?></label>
+								<br/>
+								<select name="settings[<?php echo $option_slug; ?>]">
+									<?php $selected = isset( $current_selected_settings['default_role'] ) ? $current_selected_settings['default_role'] : false; ?>
+									<?php mcc_basic_roles_dropdown( $selected ); ?>
+								</select>
+							</li>
+						<?php endif; ?>
+					<?php endforeach; ?>
+				</ul>
 			</div>
 			<div class="alignright" id="mcc-users-list" style="width:60%;">
 				<input type="hidden" id="src_blog_id" name="src_blog_id" value="<?php echo $blog_id; ?>">
@@ -1072,7 +1097,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				if ( isset( $_POST['settings'] ) && is_array( $_POST['settings'] ) ) {
  					$settings = array();
  					foreach ( $_POST['settings'] as $setting => $value ) {
- 						$settings[ $setting ] = true;
+ 						if ( 'default_role' == $setting )
+ 							$settings[ $setting ] = $value;
+ 						else
+ 							$settings[ $setting ] = true;
  					}
  					$this->wizard->set_value( 'settings', $settings );
  				}

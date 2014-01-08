@@ -3,6 +3,7 @@
 class Multisite_Content_Copier_User_Copier extends Multisite_Content_Copier_Copier {
 	
 	protected $users;
+	protected $default_role;
 
 	public function __construct( $orig_blog_id, $args ) {
 		parent::__construct( $orig_blog_id );
@@ -12,12 +13,14 @@ class Multisite_Content_Copier_User_Copier extends Multisite_Content_Copier_Copi
 		extract( $settings );
 
 		$this->users_ids = $users;
+		$this->default_role = $default_role;
 
 	}
 
 	protected function get_defaults_args() {
 		return array(
-			'users' => 'all'
+			'users' => 'all',
+			'default_role' => 'subscriber'
 		);
 	}
 
@@ -53,7 +56,19 @@ class Multisite_Content_Copier_User_Copier extends Multisite_Content_Copier_Copi
 		if ( ! empty( $user_in_blog ) )
 			return false;
 
-		return add_user_to_blog( get_current_blog_id(), $user->data->ID, $user->roles[0] );
+		switch_to_blog( $this->orig_blog_id );
+		$orig_user = get_user_by( 'id', $user->data->ID );
+		$orig_role = $orig_user->roles[0];
+		restore_current_blog();
+
+		require_once( ABSPATH . 'wp-admin/includes/user.php' );
+
+		$roles = get_editable_roles();
+		$roles = array_keys( $roles );
+
+		$new_role = ! in_array( $orig_role, $roles ) ? $this->default_role : $orig_role;
+
+		return add_user_to_blog( get_current_blog_id(), $user->data->ID, $new_role );
 	}
 
 }

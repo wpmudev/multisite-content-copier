@@ -56,7 +56,7 @@ class Multisite_Content_Copier_Network_Settings_Menu extends Multisite_Content_C
  			$current_settings = mcc_get_settings();
 
  			if ( isset( $input['blog_templates_integration'] ) ) {
- 				if ( ! is_plugin_active_for_network( 'blogtemplates/blogtemplates.php' ) ) {
+ 				if ( ! mcc_is_nbt_active() ) {
  					mcc_add_error( 'nbt-not-active', __( 'You need first to network activate the New Blog Templates plugin', MULTISTE_CC_LANG_DOMAIN ) );
  				}
  				else {

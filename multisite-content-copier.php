@@ -261,6 +261,7 @@ class Multisite_Content_Copier {
 
 	}
 
+	
 	public function maybe_copy_content() {
 
 		if ( ! is_network_admin() && ! get_transient( 'mcc_copying' ) ) {

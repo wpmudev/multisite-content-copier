@@ -151,6 +151,7 @@ class Multisite_Content_Copier_Model {
         dbDelta($sql);
 	}
 
+
 	public function get_synced_children( $src_post_id, $src_blog_id = 0 ) {
 		global $wpdb;
 

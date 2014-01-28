@@ -35,11 +35,32 @@ class MCC_Posts_List_Table extends WP_List_Table {
 		
 		$args = array(
 			'post_type' => $this->post_type,
-			'posts_per_page ' => $per_page,
+			'posts_per_page' => $per_page,
 			'paged' => $current_page,
 			'order' => 'DESC',
 			'orderby' => 'date'
 		);
+		
+		// Taxonomy filter
+		$tax_query = array();
+
+		$taxonomies = $this->get_post_type_taxonomies();
+		foreach ( $taxonomies as $tax => $tax_name ) {
+			if ( isset( $_POST[ $tax ] ) && absint( $_POST[ $tax ] ) ) {
+				$tax_query[] = array(
+					'taxonomy' => $tax,
+					'field' => 'id',
+					'terms' => array( absint( $_POST[ $tax ] ) )
+				);
+			}
+		} 
+
+		if ( ! empty( $tax_query ) ) {
+			$tax_query['relation'] = 'AND';
+			$args['tax_query'] = $tax_query;
+		}
+
+		
 
 		if ( ! empty( $_REQUEST['s'] ) )
 			$args['s'] = $_REQUEST['s'];
@@ -87,11 +108,17 @@ class MCC_Posts_List_Table extends WP_List_Table {
 
 
 	function column_cb( $item ) {
-		return '<input type="checkbox" name="post_id[]" ' . checked( in_array( $item->ID, $this->selected ), true, false ) . ' class="post_id" value="' . $item->ID . '">';
+		return '<input type="checkbox" name="post_id[]" ' . checked( in_array( $item->ID, $this->selected ), true, false ) . ' id="post_id_' . $item->ID . '" class="post_id" value="' . $item->ID . '">';
 	}
 
 	function column_title( $item ) {
-		return $item->post_title;
+		if ( empty( $item->post_title ) )
+			$title = __( '(no title)', MULTISTE_CC_LANG_DOMAIN );
+		else
+			$title = $item->post_title;
+
+
+		return '<label for="post_id_' . $item->ID . '">' . $title . '</label>';
 	}
 
 	function column_date( $item ) {
@@ -122,12 +149,48 @@ class MCC_Posts_List_Table extends WP_List_Table {
 
 	}
 
+	function get_post_type_taxonomies() {
+		$_taxonomies = get_object_taxonomies( $this->post_type );
+		
+		// We allow filtering by hierachical taxonomies
+		$taxonomies = array();
+		foreach ( $_taxonomies as $taxonomy ) {
+			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
+				$labels = get_taxonomy( $taxonomy )->labels;
+				$taxonomies[ $taxonomy ] = $labels->name;
+			}
+		}
+
+		return $taxonomies;
+	}
+
 
 
 	function extra_tablenav( $which ) {
+		$taxonomies = $this->get_post_type_taxonomies();
         ?>
         	<div class="alignleft actions">
-            	<input type="submit" name="" id="doaction" class="button action" value="<?php echo esc_attr( __( 'Add items to the list', MULTISTE_CC_LANG_DOMAIN ) ); ?>">
+            	<input type="submit" name="" id="doaction" class="button-primary action" value="<?php echo esc_attr( __( 'Add items to the list', MULTISTE_CC_LANG_DOMAIN ) ); ?>">
+            </div>
+            <div class="alignleft actions">
+            	<?php $dropdowns = ''; ?>
+                <?php foreach ( $taxonomies as $tax => $tax_name ): ?>
+					<?php 
+						$dropdowns .= wp_dropdown_categories( array(
+							'show_option_all' => sprintf( __( 'Show all %s'), $tax_name ),
+							'name' => $tax,
+							'id' => 'filter_' . $tax,
+							'taxonomy' => $tax,
+							'selected' => isset( $_POST[ $tax ] ) ? absint( $_POST[ $tax ] ) : '',
+							'hide_if_empty' => true,
+							'echo' => false
+						) ); 
+					?>
+            	<?php endforeach; ?>
+            	<?php if ( ! empty( $dropdowns ) ): ?>
+            		<?php echo $dropdowns; ?>
+	            	<input type="submit" name="filter" id="filter" class="button action" value="<?php echo esc_attr( __( 'Filter', MULTISTE_CC_LANG_DOMAIN ) ); ?>">
+	            <?php endif; ?>
             </div>
             <div class="alignleft actions">
                 <span class="spinner"></span>

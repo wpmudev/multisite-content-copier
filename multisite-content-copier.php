@@ -93,7 +93,17 @@ class Multisite_Content_Copier {
 
 
 	public function enqueue_styles() {
-		wp_enqueue_style( 'mcc-icons', MULTISTE_CC_ASSETS_URL . 'css/icons.css' );
+		global $wp_version;
+		if ( version_compare( $wp_version, '3.8', '>=' ) ) {
+			?>
+				<style>
+					#adminmenu #toplevel_page_mcc_network_page div.wp-menu-image:before { content: "\f325"; }
+				</style>
+			<?php
+		}
+		else {
+			wp_enqueue_style( 'mcc-icons', MULTISTE_CC_ASSETS_URL . 'css/icons.css' );
+		}
 	}
 
 

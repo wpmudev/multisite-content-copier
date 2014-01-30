@@ -120,6 +120,8 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 		$new_post_id = wp_insert_post( $postarr );
 
 		if ( $new_post_id ) {
+			do_action( 'mcc_copy_post', $this->orig_blog_id, $post_id, $new_post_id );
+
 			// Do we have to sync the post for the future?
 			if ( $this->sync ) {
 				$model = mcc_get_model();
@@ -141,6 +143,7 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 			foreach ( $orig_post_meta as $post_meta ) {
 				$unserialized_meta_value = maybe_unserialize( $post_meta->meta_value );
 				update_post_meta( $new_post_id, $post_meta->meta_key, $unserialized_meta_value );
+				do_action( 'mcc_copy_post_meta', $this->orig_blog_id, $post_id, $new_post_id, $post_meta->meta_key, $unserialized_meta_value );
 			}			
 		}
 

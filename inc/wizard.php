@@ -8,16 +8,23 @@ class MCC_Wizard {
 	private $action;
 	private $steps;
 	private $initialized = false;
+	private $parameters;
+	private $wizard_id;
 
 	public function __construct( $steps = array(), $url ) {
 
-		if ( ! session_id() )
-			session_start();
+		if ( ! is_user_logged_in() )
+			return false;
+
+		$this->wizard_id = get_current_user_id() . '_mcc_wizard';
+
+		if ( ! $params = get_transient( $this->wizard_id ) )
+			$params = array();
+
+		$this->parameters = $params;
 
 		$this->steps = $steps;
 		$this->baseurl = $url;
-
-
 
 		if ( isset( $_REQUEST['step'] ) && in_array( $_REQUEST['step'], $steps ) )
 			$this->current_step = $_REQUEST['step'];
@@ -27,7 +34,7 @@ class MCC_Wizard {
 	}
 
 	public function is_initialized() {
-		return isset( $_SERVER['mcc_wizard']['initialized'] );
+		return isset( $this->parameters['initialized'] );
 	}
 
 
@@ -36,19 +43,21 @@ class MCC_Wizard {
 	}
 
 	public function get_value( $key, $default = '' ) {
-		if ( isset( $_SESSION['mcc_wizard'][ $key ] ) )
-			return $_SESSION['mcc_wizard'][ $key ];	
+		if ( isset( $this->parameters[ $key ] ) )
+			return $this->parameters[ $key ];
 
 		return $default;
 	}
 
 	public function set_value( $key, $value ) {
-		$_SESSION['mcc_wizard'][ $key ] = $value;
+		$this->parameters[ $key ] = $value;
+		delete_transient( $this->wizard_id );
+		set_transient( $this->wizard_id, $this->parameters, 259200 );
 	}
 
 	public function clean() {
 		$this->initialized = false;
-		unset( $_SESSION['mcc_wizard'] );
+		delete_transient( $this->wizard_id );
 	}
 
 	public function is_last_step() {
@@ -88,7 +97,7 @@ class MCC_Wizard {
 	}
 
 	public function debug() {
-		var_dump( $_SESSION['mcc_wizard'] );
+		var_dump( $this->parameters );
 	}
 
 	public function breadcrumb_class( $step ) {

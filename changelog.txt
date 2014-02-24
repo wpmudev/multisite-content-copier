@@ -5,6 +5,17 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.1 - 2014-02-24
+----------------------------------------------------------------------
+- Improved wizard performance and reliability
+- Added new filters
+- Added 3.8 icon
+- Copying content to main site is now allowed
+- Improved admin styles
+- Added taxonomies filtering in posts/pages/CPTs lists
+- Added role column to users list
+- Added a default role when copying users.
+
 1.0.4 - 2013-12-17
 ----------------------------------------------------------------------
 - Fixed error while copying terms

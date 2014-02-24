@@ -18,7 +18,7 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 		$this->update_date = $update_date;
 		$this->copy_comments = $copy_comments;
 		$this->updating = $updating;
-		$this->sync = $sync;
+		//$this->sync = $sync;
 
 	}
 
@@ -31,7 +31,7 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 			'copy_parents' => false,
 			'copy_comments' => false,
 			'updating' => false,
-			'sync' => false
+			//'sync' => false
 		);
 	}
 
@@ -111,7 +111,7 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 		if ( $this->updating ) {
 
 			$model = mcc_get_model();
-			$child_id = $model->get_synced_child( $post_id, $this->orig_blog_id );
+			//$child_id = $model->get_synced_child( $post_id, $this->orig_blog_id );
 
 			if ( ! empty( $child_id ) )
 				$postarr['ID'] = absint( $child_id );
@@ -123,21 +123,21 @@ class Multisite_Content_Copier_Page_Copier extends Multisite_Content_Copier_Copi
 			do_action( 'mcc_copy_post', $this->orig_blog_id, $post_id, $new_post_id );
 
 			// Do we have to sync the post for the future?
-			if ( $this->sync ) {
-				$model = mcc_get_model();
-				$dest_post = array( 
-					array( 
-						'blog_id' => get_current_blog_id(), 
-						'post_id' => $new_post_id 
-					)
-				);
-
-				$settings = array(
-					'class' => get_class( $this ),
-					'copy_images' => $this->copy_images
-				);
-				$model->add_synced_content( $post_id, $this->orig_blog_id, $dest_post, $settings );
-			}
+//			if ( $this->sync ) {
+//				$model = mcc_get_model();
+//				$dest_post = array( 
+//					array( 
+//						'blog_id' => get_current_blog_id(), 
+//						'post_id' => $new_post_id 
+//					)
+//				);
+//
+//				$settings = array(
+//					'class' => get_class( $this ),
+//					'copy_images' => $this->copy_images
+//				);
+//				$model->add_synced_content( $post_id, $this->orig_blog_id, $dest_post, $settings );
+//			}
 
 			// Insert post meta
 			foreach ( $orig_post_meta as $post_meta ) {

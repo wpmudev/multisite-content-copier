@@ -5,14 +5,14 @@ class MCC_Post_Meta_Box {
 	public function __construct() {
 		add_action( 'add_meta_boxes', array( &$this, 'add_meta_boxes' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
-		add_action( 'edit_form_top', array( &$this, 'maybe_sync_post' ) );
-		add_action( 'save_post', array( &$this, 'process_sync_form' ), 10, 3 );
+		//add_action( 'edit_form_top', array( &$this, 'maybe_sync_post' ) );
+		//add_action( 'save_post', array( &$this, 'process_sync_form' ), 10, 3 );
 	}
 
 	public function enqueue_scripts( $hook ) {
 		if ( $hook == 'post.php' && is_super_admin() ) {
 			wp_enqueue_script( 'mcc-meta-box', MULTISTE_CC_ASSETS_URL . 'js/meta-box.js', array( 'jquery' ) );
-			wp_enqueue_script( 'mcc-meta-box-sync', MULTISTE_CC_ASSETS_URL . 'js/meta-box-sync.js', array( 'jquery' ) );
+			//wp_enqueue_script( 'mcc-meta-box-sync', MULTISTE_CC_ASSETS_URL . 'js/meta-box-sync.js', array( 'jquery' ) );
 
 			$object = array(
 				'select_an_option' => __( 'You must select a destination', MULTISTE_CC_LANG_DOMAIN ),
@@ -44,14 +44,14 @@ class MCC_Post_Meta_Box {
 		        'default'
 		    );
 
-		    add_meta_box( 
-		        'syncer-meta-box',
-		        __( 'Multisite Content Copier: Sync post', MULTISTE_CC_LANG_DOMAIN ),
-		        array( &$this, 'render_syncer_meta_box' ),
-		        $post_type,
-		        'normal',
-		        'default'
-		    );
+		    //add_meta_box( 
+		        //'syncer-meta-box',
+		        //__( 'Multisite Content Copier: Sync post', MULTISTE_CC_LANG_DOMAIN ),
+		        //array( &$this, 'render_syncer_meta_box' ),
+		        //$post_type,
+		        //'normal',
+		        //'default'
+//		    );
 		}
 	}
 
@@ -178,16 +178,16 @@ class MCC_Post_Meta_Box {
 	}
 
 	public function maybe_sync_post() {
-		if ( isset( $_GET['sync'] ) && $_GET['sync'] == 'true' ) {
-			$destination = $_GET['d'];
-			$group = isset( $_GET['g'] ) ? absint( $_GET['g'] ) : 0;
-
-			if ( 'all' == $destination ) {
-				wp_update_network_counts();
-				$blogs_count = get_blog_count();
-				var_dump($blogs_count);
-			}
-		}
+		//if ( isset( $_GET['sync'] ) && $_GET['sync'] == 'true' ) {
+			//$destination = $_GET['d'];
+			//$group = isset( $_GET['g'] ) ? absint( $_GET['g'] ) : 0;
+//
+			//if ( 'all' == $destination ) {
+				//wp_update_network_counts();
+				//$blogs_count = get_blog_count();
+				//var_dump($blogs_count);
+			//}
+		//}
 	}
 
 	/**

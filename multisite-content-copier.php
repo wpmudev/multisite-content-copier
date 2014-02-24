@@ -202,7 +202,7 @@ class Multisite_Content_Copier {
 
 
 
-	/**
+	/** 
 	 * Actions executed when the plugin is deactivated
 	 */
 	public function deactivate() {
@@ -229,7 +229,6 @@ class Multisite_Content_Copier {
 	 * Initialize the plugin
 	 */
 	public function init_plugin() {
-
 		// A network menu
 		$args = array(
 			'menu_title' => __( 'Content Copier', MULTISTE_CC_LANG_DOMAIN ),

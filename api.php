@@ -1,5 +1,22 @@
 <?php
 
+/** Example of use:
+Copying two pages ( IDs 51 and 64 ) from blog ID = 4 to blog ID = 10 and 15
+We want also to copy images and updtae the pages date to the current date
+
+mcc_include_core_files();
+$source_blog_id = 4
+$dest_blog_ids = array( 10, 15 );
+$pages_ids = array( 51, 64 )
+$args = array(
+	'copy_images' => truem
+	'update_date' => true
+);
+
+mcc_copy_items( 'page', $pages_ids, $source_blog_id, $dest_blog_ids, $args );
+
+**/
+
 function mcc_include_core_files() {
 	$mcc_path = plugin_dir_path( __FILE__ );
 	require_once( $mcc_path . 'inc/content-copier/content-copier.php' );
@@ -76,3 +93,4 @@ function mcc_copy_items( $type, $items_ids, $source_blog_id, $dest_blog_ids, $ar
 	}
 	switch_to_blog( $current_blog );
 }
+

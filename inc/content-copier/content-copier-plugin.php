@@ -1,33 +1,22 @@
 <?php
 
-class Multisite_Content_Copier_Plugins_Activator {
-	
-	private $plugins;
+class Multisite_Content_Copier_Plugin_Copier extends Multisite_Content_Copier_Abstract {
 
-	public function __construct( $src_blog_id, $args ) {
-
-		$settings = wp_parse_args( $args, $this->get_defaults_args() );
-
-		extract( $settings );
-
-		$this->plugins = is_array( $plugins ) ? $plugins : array();
-	}
-
-	private function get_defaults_args() {
-		return array(
-			'plugins' => array()
-		);
+	public function get_default_args() {
+		return array();
 	}
 
 	public function execute() {
 		$plugins = array();
 		require_once(ABSPATH . 'wp-admin/includes/plugin.php');
-		foreach( $this->plugins as $plugin ) {
+		foreach( $this->items as $plugin ) {
 			if ( ! is_plugin_active( $plugin ) )
 				$plugins[] = $plugin;				
 		}
 		activate_plugins( $plugins );
 	}
+
+	public function copy_item() {}
 
 	
 }

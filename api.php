@@ -19,12 +19,7 @@ mcc_copy_items( 'page', $pages_ids, $source_blog_id, $dest_blog_ids, $args );
 
 function mcc_include_core_files() {
 	$mcc_path = plugin_dir_path( __FILE__ );
-	require_once( $mcc_path . 'inc/content-copier/content-copier.php' );
-	require_once( $mcc_path . 'inc/content-copier/content-copier-page.php' );
-	require_once( $mcc_path . 'inc/content-copier/content-copier-post.php' );
-	require_once( $mcc_path . 'inc/content-copier/content-copier-plugin.php' );
-	require_once( $mcc_path . 'inc/content-copier/content-copier-user.php' );
-	require_once( $mcc_path . 'inc/content-copier/content-copier-cpt.php' );
+	require_once( $mcc_path . 'inc/content-copier/content-copier-factory.php' );
 	require_once( $mcc_path . 'inc/helpers.php' );
 	require_once( $mcc_path . 'model/copier-model.php' );
 
@@ -52,32 +47,11 @@ function mcc_include_core_files() {
 function mcc_copy_items( $type, $items_ids, $source_blog_id, $dest_blog_ids, $args = array() ) {
 	global $wpdb;
 
-	$cpt_slug = '';
-	switch ( $type ) {
-		case 'post': {
-			$class = 'Multisite_Content_Copier_Post_Copier';
-			break;
-		}
-		case 'page': {
-			$class = 'Multisite_Content_Copier_Page_Copier';
-			break;
-		}
-		default: {
-			$class = 'Multisite_Content_Copier_CPT_Copier';
-			$cpt_slug = $type;
-			break;
-		}
-	}
-
 	if ( ! is_array( $dest_blog_ids ) || empty( $dest_blog_ids ) )
 		return false;
 
 	if ( ! is_array( $items_ids ) || empty( $items_ids ) )
 		return false;
-
-	$settings = $args;
-	$settings['post_ids'] = $items_ids;
-	$settings['post_type'] = $cpt_slug;
 
 	$current_blog = get_current_blog_id();
 	foreach ( $dest_blog_ids as $_blog_id ) {
@@ -86,7 +60,7 @@ function mcc_copy_items( $type, $items_ids, $source_blog_id, $dest_blog_ids, $ar
 
 
 		$wpdb->query( "BEGIN;" );
-		$copier = new $class( absint( $source_blog_id ), $settings );
+		$copier = Multisite_Content_Copier_Factory::get_copier( $type, $source_blog_id, $items_ids, $args );
 		$copier->execute();
 		$wpdb->query( "COMMIT;" );
 

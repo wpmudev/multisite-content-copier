@@ -170,13 +170,7 @@ class Multisite_Content_Copier {
 	}
 
 	public static function include_copier_classes() {
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-page.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-post.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-plugin.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-user.php' );
-		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-cpt.php' );
-
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-factory.php' );
 		self::include_integration_files();
 	}
 
@@ -283,12 +277,9 @@ class Multisite_Content_Copier {
 				$model->delete_queue_item( $item->ID );
 
 				$wpdb->query( "BEGIN;" );
+				
 				self::include_copier_classes();
-
-				$settings = $item->settings;
-				$class = $settings['class'];
-
-				$copier = new $class( $item->src_blog_id, $settings );
+				$copier = Multisite_Content_Copier_Factory::get_copier( $type, $source_blog_id, $items_ids, $args );
 				$copier->execute();
 
 				$wpdb->query( "COMMIT" );

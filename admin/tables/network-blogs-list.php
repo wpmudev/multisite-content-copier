@@ -32,7 +32,7 @@ class MCC_Sites_List_Table extends WP_List_Table {
 
     	$columns = $this->get_columns();
     	$hidden = array();
-    	$sortable = array();
+    	$sortable = $this->get_sortable_columns();
 
     	$this->_column_headers = array(
         	$columns, 
@@ -43,13 +43,9 @@ class MCC_Sites_List_Table extends WP_List_Table {
         $pagenum = $this->get_pagenum();
 
         $s = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST[ 's' ] ) ) : '';
-        $wild = '';
-		if ( false !== strpos($s, '*') ) {
-			$wild = '%';
-			$s = trim($s, '*');
-		}
 
 		$like_s = esc_sql( like_escape( $s ) );
+		
 
 		$query = "SELECT * FROM {$wpdb->blogs} WHERE site_id = '{$wpdb->siteid}' ";
 
@@ -70,18 +66,30 @@ class MCC_Sites_List_Table extends WP_List_Table {
 				WHERE site_id = '{$wpdb->siteid}'
 				AND {$wpdb->blogs}.blog_id IN (" . implode( ', ', $reg_blog_ids ) . ")";
 		} else {
-			if ( is_numeric($s) && empty( $wild ) ) {
+			if ( is_numeric($s) ) {
 				$query .= " AND ( {$wpdb->blogs}.blog_id = '{$like_s}' )";
 			} elseif ( is_subdomain_install() ) {
-				$blog_s = str_replace( '.' . $current_site->domain, '', $like_s );
-				$blog_s .= $wild . '.' . $current_site->domain;
-				$query .= " AND ( {$wpdb->blogs}.domain LIKE '$blog_s' ) ";
+				$like_s = '%' . $like_s . '%';
+				$query .= " AND ( {$wpdb->blogs}.domain LIKE '$like_s' ) ";
 			} else {
-				if ( $like_s != trim('/', $current_site->path) )
-					$blog_s = $current_site->path . $like_s . $wild . '/';
-				else
-					$blog_s = $like_s;
-				$query .= " AND  ( {$wpdb->blogs}.path LIKE '$blog_s' )";
+				$like_s = '%' . $like_s . '%';
+				$query .= " AND  ( {$wpdb->blogs}.path LIKE '$like_s' )";
+			}
+		}
+
+		$q_order = '';
+		if ( isset( $_REQUEST['orderby'] ) ) {
+			$order = 'ASC';
+			if ( ! empty( $_REQUEST['order'] ) && in_array( strtolower( $_REQUEST['order'] ), array( 'asc', 'desc' ) ) )
+				$order = strtoupper( $_REQUEST['order'] );
+
+			if ( 'blogname' == $_REQUEST['orderby'] ) {
+				if ( is_subdomain_install() ) {
+					$order_q = "ORDER BY {$wpdb->blogs}.domain $order";
+				}
+				else {
+					$order_q = "ORDER BY {$wpdb->blogs}.path $order";
+				}
 			}
 		}
 
@@ -89,7 +97,7 @@ class MCC_Sites_List_Table extends WP_List_Table {
 		if ( ! wp_is_large_network() )
 			$total = $wpdb->get_var( str_replace( 'SELECT *', 'SELECT COUNT( blog_id )', $query ) );
 
-		$query .= " LIMIT " . intval( ( $pagenum - 1 ) * $per_page ) . ", " . intval( $per_page );
+		$query .= "$order_q LIMIT " . intval( ( $pagenum - 1 ) * $per_page ) . ", " . intval( $per_page );
 		$this->items = $wpdb->get_results( $query, ARRAY_A );
 
 		if ( wp_is_large_network() )
@@ -138,6 +146,12 @@ class MCC_Sites_List_Table extends WP_List_Table {
 		return implode( '<br/>', $return );
 	}
 
+	function get_sortable_columns() {
+		return array(
+			'blogname' => array('blogname',false)
+		);
+	}
+
 	function extra_tablenav( $which ) {
         if ( 'top' == $which) {
         	$model = mcc_get_model();
@@ -153,8 +167,8 @@ class MCC_Sites_List_Table extends WP_List_Table {
                 <script>
                 	jQuery(document).ready(function($) {
                 		$('#mcc-blogs-groups-table-form').submit(function(e) {
-                			var hey = confirm( "<?php _e( 'Are you sure?', MULTISTE_CC_LANG_DOMAIN ); ?>" );
-                			return hey;
+                			var confirm = confirm( "<?php _e( 'Are you sure?', MULTISTE_CC_LANG_DOMAIN ); ?>" );
+                			return confirm;
                 		});
                 	});
                 </script>

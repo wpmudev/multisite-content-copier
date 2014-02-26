@@ -19,11 +19,18 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
  		}
 
  		if ( 'sites' == $this->get_current_tab() ) {
- 			
- 			?><form id="mcc-blogs-groups-table-form" method="post"><?php
  			require_once( MULTISTE_CC_ADMIN_DIR . 'tables/network-blogs-list.php' );
 	 		$wp_list_table = new MCC_Sites_List_Table();
-			$wp_list_table->prepare_items();
+	 		$wp_list_table->prepare_items();
+	 		?>
+			<form id="mcc-blogs-groups-search-form" method="post">
+				<?php $wp_list_table->search_box( __( 'Search sites', MULTISTE_CC_LANG_DOMAIN ), 'blog-search' ); ?>
+			</form>
+			
+			<?php
+ 			?><form id="mcc-blogs-groups-table-form" method="post"><?php
+ 			
+			
 			$wp_list_table->display();
 			?></form><?php
  		}

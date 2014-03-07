@@ -16,7 +16,7 @@ class Multisite_Content_Copier_Plugin_Copier extends Multisite_Content_Copier_Ab
 		activate_plugins( $plugins );
 	}
 
-	public function copy_item() {}
+	public function copy_item( $item_id ) {}
 
 	
 }

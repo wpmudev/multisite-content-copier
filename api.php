@@ -31,7 +31,7 @@ function mcc_include_core_files() {
 /**
  * Copy posts, pages or CPTs
  * 
- * @param String $type page,post or Custom Post Type slug
+ * @param String $type page or post
  * @param Array $items_ids page,post or cpt IDs
  * @param Integer $source_blog_id Source Blog ID
  * @param Array $dest_blog_ids Destination blog IDs

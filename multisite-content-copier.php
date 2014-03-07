@@ -282,6 +282,8 @@ class Multisite_Content_Copier {
 				$copier = Multisite_Content_Copier_Factory::get_copier( $type, $source_blog_id, $items_ids, $args );
 				$copier->execute();
 
+				do_action( 'mcc_after_execute_copier', $type, $source_blog_id, $items_ids, $args );
+
 				$wpdb->query( "COMMIT" );
 
 

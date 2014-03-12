@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: 
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
 Author: Ignacio (Incsub)
-Version: 1.1
+Version: 1.1.1
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
@@ -33,6 +33,25 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /**
  * The main class of the plugin
  */
+
+function myplugin_add_custom_box() {
+
+    $screens = array( 'product' );
+
+    add_meta_box(
+        'myplugin_sectionid',
+        __( 'My Post Section Title', 'myplugin_textdomain' ),
+        'myplugin_inner_custom_box',
+        'product'
+    );
+}
+add_action( 'add_meta_boxes', 'myplugin_add_custom_box' );
+
+function myplugin_inner_custom_box() {
+	?>
+		<input type="text" name="mi_campo">
+	<?php
+}
 
 class Multisite_Content_Copier {
 
@@ -114,7 +133,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.1' );
+		define( 'MULTISTE_CC_VERSION', '1.1.1' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -192,6 +211,12 @@ class Multisite_Content_Copier {
 			mcc_upgrade_11();
 			update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 		}
+
+		if ( version_compare( $current_version, '1.1.1', '<' ) ) {
+			require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
+			mcc_upgrade_111();
+			update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
+		}
 	}
 
 
@@ -259,7 +284,7 @@ class Multisite_Content_Copier {
 		);
 		self::$network_settings_menu_page = new Multisite_Content_Copier_Network_Settings_Menu( 'mcc_settings_page', 'manage_network', $args );
 
-		if ( is_admin() )
+		if ( is_admin() && class_exists( 'MCC_Post_Meta_Box' ) )
 			new MCC_Post_Meta_Box();
 
 	}
@@ -270,19 +295,32 @@ class Multisite_Content_Copier {
 		if ( ! is_network_admin() && ! get_transient( 'mcc_copying' ) ) {
 			set_transient( 'mcc_copying', true, 900 );
 			$queue = mcc_get_queue_for_blog();
+
 			foreach ( $queue as $item ) {
 				global $wpdb;
 
 				$model = mcc_get_model();
 				$model->delete_queue_item( $item->ID );
 
+				if ( empty( $item->settings['type'] ) )
+					continue;
+
+				$type = $item->settings['type'];
+				$args = $item->settings['args'];
+				$items_ids = $item->settings['items_ids'];
+				$source_blog_id = $item->src_blog_id;
+
 				$wpdb->query( "BEGIN;" );
 				
 				self::include_copier_classes();
 				$copier = Multisite_Content_Copier_Factory::get_copier( $type, $source_blog_id, $items_ids, $args );
-				$copier->execute();
 
-				do_action( 'mcc_after_execute_copier', $type, $source_blog_id, $items_ids, $args );
+				$execute = apply_filters( 'mcc_execute_copier', true, $copier, $source_blog_id, $items_ids, $args );
+
+				if ( $execute ) {
+					$copier->execute();
+					do_action( 'mcc_after_execute_copier', $type, $source_blog_id, $items_ids, $args );
+				}
 
 				$wpdb->query( "COMMIT" );
 

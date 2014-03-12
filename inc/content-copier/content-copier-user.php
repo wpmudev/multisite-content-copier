@@ -2,12 +2,8 @@
 
 class Multisite_Content_Copier_User_Copier extends Multisite_Content_Copier_Abstract {
 	
-	protected $users;
-	protected $default_role;
-
 	public function get_default_args() {
 		return array(
-			'users' => 'all',
 			'default_role' => 'subscriber'
 		);
 	}

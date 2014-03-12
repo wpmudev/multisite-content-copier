@@ -75,9 +75,10 @@ class MCC_Sites_List_Table extends WP_List_Table {
 				$like_s = '%' . $like_s . '%';
 				$query .= " AND  ( {$wpdb->blogs}.path LIKE '$like_s' )";
 			}
+
 		}
 
-		$q_order = '';
+		$order_q = '';
 		if ( isset( $_REQUEST['orderby'] ) ) {
 			$order = 'ASC';
 			if ( ! empty( $_REQUEST['order'] ) && in_array( strtolower( $_REQUEST['order'] ), array( 'asc', 'desc' ) ) )
@@ -98,6 +99,7 @@ class MCC_Sites_List_Table extends WP_List_Table {
 			$total = $wpdb->get_var( str_replace( 'SELECT *', 'SELECT COUNT( blog_id )', $query ) );
 
 		$query .= "$order_q LIMIT " . intval( ( $pagenum - 1 ) * $per_page ) . ", " . intval( $per_page );
+
 		$this->items = $wpdb->get_results( $query, ARRAY_A );
 
 		if ( wp_is_large_network() )

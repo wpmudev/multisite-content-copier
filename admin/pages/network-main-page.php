@@ -679,7 +679,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 				<p>
 					<label>
 						<input type="radio" name="dest_blog_type" id="dest_blog_type_list" value="list" <?php checked( $this->wizard->get_value( 'dest_blog_type' ), 'list' ); ?>>
-						<?php _e( 'Single Site', MULTISTE_CC_LANG_DOMAIN ); ?>
+						<?php _e( 'Individual Site(s)', MULTISTE_CC_LANG_DOMAIN ); ?>
 					</label>
 				</p>
 				<div id="blogs-list-wrap">
@@ -804,9 +804,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		// Settings (Additional options)
 		$settings = $this->wizard->get_value( 'settings' );
 
-
 		if ( empty( $settings ) )
 			$settings = array();
+
+		$save_settings = array( 'args' => $settings );		
 
 		// Action
 		$action = $this->wizard->get_value( 'mcc_action' );
@@ -814,39 +815,40 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		// Setting the class and items IDs/slugs
 		if ( 'add-page' == $action ) {
 			$posts_ids = $this->wizard->get_value( 'posts_ids' );
-			$settings['class'] = 'Multisite_Content_Copier_Page_Copier';
-			$settings['post_ids'] = $posts_ids;
+			$save_settings['type'] = 'page';
+			$save_settings['items_ids'] = $posts_ids;
 		}
 		if ( 'add-post' == $action ) {
 			$posts_ids = $this->wizard->get_value( 'posts_ids' );
-			$settings['class'] = 'Multisite_Content_Copier_Post_Copier';
-			$settings['post_ids'] = $posts_ids;
+			$save_settings['type'] = 'post';
+			$save_settings['items_ids'] = $posts_ids;
 		}
 		if ( 'add-cpt' == $action ) {
 			$posts_ids = $this->wizard->get_value( 'posts_ids' );
-			$settings['class'] = 'Multisite_Content_Copier_CPT_Copier';
-			$settings['post_ids'] = $posts_ids;
-			$settings['post_type'] = $this->wizard->get_value( 'cpt' );
+			$save_settings['type'] = 'post';
+			$save_settings['items_ids'] = $posts_ids;
 		}
 		if ( 'activate-plugin' == $action ) {
 			$plugins_ids = $this->wizard->get_value( 'plugins' );
-			$settings['class'] = 'Multisite_Content_Copier_Plugins_Activator';
-			$settings['plugins'] = $plugins_ids;
+			$save_settings['type'] = 'plugin';
+			$save_settings['items_ids'] = $plugins_ids;
 			$src_blog_id = 0;
 		}
 		if ( 'add-user' == $action ) {
 			$users_ids = $this->wizard->get_value( 'posts_ids' );
-			$settings['class'] = 'Multisite_Content_Copier_User_Copier';
-			$settings['users'] = $users_ids;
+			$save_settings['type'] = 'user';
+			$save_settings['items_ids'] = $users_ids;
 		}
 
 		if ( 'all' != $dest_blog_type ) {
+			
 			// Copyinhg to a few blogs (group, NBT group or list)
 			$model = mcc_get_model();
 			foreach ( $dest_blogs_ids as $dest_blog_id ) {
 				// Inserting a queue item for each blog
-				if ( $dest_blog_id != $src_blog_id && ! is_main_site( $dest_blog_id ) )
-					$model->insert_queue_item( $src_blog_id, $dest_blog_id, $settings );
+				if ( $dest_blog_id != $src_blog_id && ! is_main_site( $dest_blog_id ) ) {
+					$model->insert_queue_item( $src_blog_id, $dest_blog_id, $save_settings );
+				}
 			}
 
 			?>
@@ -861,8 +863,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			$this->wizard->clean();
 		}
 		else {
-			$this->wizard->set_value( 'settings', $settings );
-
 			// We need first to update the blogs counts in the network
 			wp_update_network_counts();
 			$blogs_count = get_blog_count();
@@ -872,7 +872,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			<?php
 
 			// Rendering the progressbar
-			$this->render_progressbar_js( $blogs_count );
+			$this->render_progressbar_js( $blogs_count , $save_settings );
 
 			?>
 			<p>
@@ -919,8 +919,8 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	 *
 	 * @param Integer $items_count No of blogs that are going to be queued
 	 */
-	private function render_progressbar_js( $items_count ) {
-		$settings = $this->wizard->get_value( 'settings' );
+	private function render_progressbar_js( $items_count, $settings ) {
+
 		?>
 		<script type="text/javascript" >
 			jQuery(function($) {

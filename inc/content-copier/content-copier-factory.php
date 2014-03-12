@@ -7,11 +7,11 @@ class Multisite_Content_Copier_Factory {
 		
 		if ( ! is_file( $filename ) )
 			return false;
-		
-		include_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-abstract.php' );
-		include_once( $filename );
 
 		$classname = 'Multisite_Content_Copier_' . ucfirst( strtolower( $type ) ) . '_Copier';
+
+		include_once( MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-abstract.php' );
+		include_once( $filename );
 
 		if ( ! class_exists( $classname ) )
 			return false;

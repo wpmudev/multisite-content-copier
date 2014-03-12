@@ -1,6 +1,6 @@
 <?php
 
-include( 'content-copier-post-type.php' );
+include_once( 'content-copier-post-type.php' );
 class Multisite_Content_Copier_Post_Copier extends Multisite_Content_Copier_Post_Type_Copier {
 
 	public function get_default_args() {

@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Multisite Content Copier
-Plugin URI: 
+Plugin URI: https://premium.wpmudev.org/project/multisite-content-copier/
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
-Author: Ignacio (Incsub)
-Version: 1.1.1
+Author: WPMUDEV
+Version: 1.2
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
@@ -33,25 +33,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /**
  * The main class of the plugin
  */
-
-function myplugin_add_custom_box() {
-
-    $screens = array( 'product' );
-
-    add_meta_box(
-        'myplugin_sectionid',
-        __( 'My Post Section Title', 'myplugin_textdomain' ),
-        'myplugin_inner_custom_box',
-        'product'
-    );
-}
-add_action( 'add_meta_boxes', 'myplugin_add_custom_box' );
-
-function myplugin_inner_custom_box() {
-	?>
-		<input type="text" name="mi_campo">
-	<?php
-}
 
 class Multisite_Content_Copier {
 
@@ -133,7 +114,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.1.1' );
+		define( 'MULTISTE_CC_VERSION', '1.2' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -206,17 +187,20 @@ class Multisite_Content_Copier {
 
 		$current_version = get_site_option( self::$version_option_slug, '1.0.4' );
 
+		if ( $current_version === MULTISTE_CC_VERSION )
+			return;
+
 		if ( version_compare( $current_version, '1.0.4', '<=' ) ) {
 			require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
 			mcc_upgrade_11();
-			update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 		}
 
 		if ( version_compare( $current_version, '1.1.1', '<' ) ) {
 			require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
 			mcc_upgrade_111();
-			update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 		}
+
+		update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 	}
 
 

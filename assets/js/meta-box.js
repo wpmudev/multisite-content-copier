@@ -8,8 +8,8 @@ jQuery(document).ready(function($) {
 		var url = anchor.attr( 'href' );
 
 		var selected = $('input[name=mcc_dest_blog_type]:checked').val();
-		var group = $('#mcc_group').val();
-		var nbt_group = $('#mcc_nbt_group').val();
+		var group = $('#mcc_blog_group').val();
+		var nbt_group = $('#mcc_nbt_blog_group').val();
 
 		if ( ! selected ) {
 			alert( mcc_meta_texts.select_an_option );

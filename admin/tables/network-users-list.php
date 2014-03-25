@@ -110,7 +110,7 @@ class MCC_Users_List_Table extends WP_List_Table {
 	function extra_tablenav( $which ) {
         ?>
             <div class="alignleft actions">
-            	<input type="submit" name="" id="doaction" class="button action" value="<?php echo esc_attr( __( 'Add items to the list', MULTISTE_CC_LANG_DOMAIN ) ); ?>">
+            	<input type="submit" name="" id="doaction" class="primary button action" value="<?php echo esc_attr( __( 'Add items to the list', MULTISTE_CC_LANG_DOMAIN ) ); ?>">
             </div>
             <div class="alignleft actions">
                 <span class="spinner"></span>

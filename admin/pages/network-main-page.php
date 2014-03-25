@@ -373,7 +373,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	private function render_step_2() {
 		$current_action = $this->wizard->get_value( 'mcc_action' );
 		?>
-			<form action="" method="post">
+			<form action="" method="post" name="wizardform" id="wizardform">
 				<?php wp_nonce_field( 'step_2' ); ?>
 				<?php
 					switch ( $current_action ) {
@@ -432,11 +432,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  					</ul>
  				</div>
- 				<script>
- 					jQuery(document).ready(function($) {
- 						//$('#mcc-refresh-post-types').trigger('click');
- 					});
- 				</script>
 
         	<?php endif; ?>
 
@@ -448,7 +443,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		$current_action = $this->wizard->get_value( 'mcc_action' );
 		$content_blog_id = $this->wizard->get_value( 'content_blog_id' );
 		?>
-			<form action="" method="post">
+			<form action="" method="post" name="wizardform" id="wizardform">
 				<?php wp_nonce_field( 'step_3' ); ?>
 				<?php
 					switch ( $current_action ) {
@@ -478,6 +473,20 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 					$this->next_step_button( '3' );
 				?>
 			</form>
+			<script>
+				jQuery(document).ready(function($) {
+					$('#wizardform').submit( function( e ) {
+						var list_items = $( '#posts-list > li, #users-list > li' );
+						if ( list_items.length ) {
+							return true;
+						}
+						else {
+							alert( "<?php _e( 'You must add at least one item to the list', MULTISTE_CC_LANG_DOMAIN ); ?>" );
+							return false;
+						}						
+					});
+				});
+			</script>
 		<?php
 	}
 
@@ -664,7 +673,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 	private function render_step_4() {
 		?>
-			<form action="" method="post">
+			<form action="" method="post" name="wizardform" id="wizardform">
 				<h3><?php _e( 'Select the destination sites', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 				<?php wp_nonce_field( 'step_4' ); ?>
 

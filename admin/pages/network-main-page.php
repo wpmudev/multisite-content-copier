@@ -855,7 +855,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			$model = mcc_get_model();
 			foreach ( $dest_blogs_ids as $dest_blog_id ) {
 				// Inserting a queue item for each blog
-				if ( $dest_blog_id != $src_blog_id && ! is_main_site( $dest_blog_id ) ) {
+				if ( $dest_blog_id != $src_blog_id ) {
 					$model->insert_queue_item( $src_blog_id, $dest_blog_id, $save_settings );
 				}
 			}

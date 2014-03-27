@@ -139,6 +139,7 @@ class MCC_Sites_List_Table extends WP_List_Table {
 
 		$model = mcc_get_model();
 		$groups = $model->get_blog_groups( $blog_id );
+		
 
 		$return = array();
 		foreach ( $groups as $group ) {

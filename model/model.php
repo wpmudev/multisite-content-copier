@@ -338,14 +338,14 @@ class Multisite_Content_Copier_Model {
 	public function get_blog_groups( $blog_id ) {
 		global $wpdb;
 
-		$results = $wpdb->get_results( 
-			$wpdb->prepare(
-				"SELECT bg.ID, bg.group_name FROM $this->blogs_groups_table bg
-				LEFT JOIN $this->blogs_groups_relationship_table bgr ON bg.ID = bgr.blog_group_id
-				WHERE bgr.blog_id = %d",
-				$blog_id
-			)
+		$q = $wpdb->prepare(
+			"SELECT bg.ID, bg.group_name FROM $this->blogs_groups_table bg
+			LEFT JOIN $this->blogs_groups_relationship_table bgr ON bg.ID = bgr.blog_group_id
+			WHERE bgr.blog_id = %d",
+			$blog_id
 		);
+
+		$results = $wpdb->get_results( $q );
 
 		return $results;
 
@@ -469,6 +469,5 @@ class Multisite_Content_Copier_Model {
 			
 		}
 	}
-
 
 }

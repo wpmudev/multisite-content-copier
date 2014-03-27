@@ -120,12 +120,10 @@ function mcc_insert_all_blogs_queue() {
 			"SELECT blog_id FROM $wpdb->blogs 
 			WHERE site_id = %d
 			AND blog_id != %d
-			AND blog_id != %d
 			ORDER BY blog_id
 			LIMIT %d, %d",
 			$current_site_id,
 			$content_blog_id,
-			$main_blog_id,
 			$offset,
 			$interval
 		)

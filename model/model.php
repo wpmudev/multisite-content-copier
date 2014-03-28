@@ -388,6 +388,8 @@ class Multisite_Content_Copier_Model {
 			),
 			array( '%s', '%s', '%d' )
 		);
+
+		return $wpdb->insert_id;
 	}
 
 	public function delete_blog_group( $id ) {
@@ -425,7 +427,7 @@ class Multisite_Content_Copier_Model {
 		);
 
 		if ( $result )
-			$wpdb->query( $wpdb->prepare( "UPDATE $this->blogs_groups_table SET bcount = bcount + 1 WHERE ID = %d", $group_id ) );
+			$this->refresh_group_blogs_counts( $group_id );
 
 	}
 
@@ -443,6 +445,15 @@ class Multisite_Content_Copier_Model {
 				$group_id
 			)
 		);
+
+		$this->refresh_group_blogs_counts( $group_id );
+	}
+
+	public function refresh_group_blogs_counts( $group_id ) {
+		global $wpdb;
+
+		$bcount = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( ID ) FROM $this->blogs_groups_relationship_table WHERE blog_group_id = %d ", $group_id ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE $this->blogs_groups_table SET bcount = $bcount WHERE ID = %d", $group_id ) );
 	}
 
 	public function update_group( $group_id, $args ) {

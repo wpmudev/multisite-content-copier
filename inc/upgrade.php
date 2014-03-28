@@ -101,3 +101,30 @@ function mcc_upgrade_111() {
 	}
 
 }
+
+function mcc_upgrade_122() {
+	// Clean blog groups
+	global $wpdb;
+
+	$blogs_groups_relationship_table = $wpdb->base_prefix . 'mcc_blogs_groups_relationship';
+	$blogs_groups_table = $wpdb->base_prefix . 'mcc_blogs_groups';
+
+	$blog_ids = $wpdb->get_col( "SELECT DISTINCT( blog_id ) FROM $blogs_groups_relationship_table" );
+
+	$delete_blog_ids = array();
+	foreach ( $blog_ids as $blog_id ) {
+		$details = get_blog_details( $blog_id );
+		if ( ! $details )
+			$delete_blog_ids[] = $blog_id;
+	}
+
+	$delete_blog_ids_in = implode( ',', $delete_blog_ids );
+	
+	$wpdb->query( "DELETE FROM $blogs_groups_relationship_table WHERE blog_id IN ($delete_blog_ids_in) ");
+	
+	$group_ids = $wpdb->get_col( "SELECT ID FROM $blogs_groups_table" );
+	foreach ( $group_ids as $group_id ) {
+		$bcount = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( ID ) FROM $blogs_groups_relationship_table WHERE blog_group_id = %d ", $group_id ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE $blogs_groups_table SET bcount = $bcount WHERE ID = %d", $group_id ) );
+	}
+}

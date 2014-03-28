@@ -199,7 +199,10 @@ class Multisite_Content_Copier_NBT_Model {
 	}
 
 
-	public function drop_nbt_relationships_table() {			
+	public function drop_nbt_relationships_table() {		
+		global $wpdb;
+
+		$wpdb->query( "DROP TABLE IF EXISTS $this->nbt_relationships_table" );	
 	}
 
 	

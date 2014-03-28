@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: https://premium.wpmudev.org/project/multisite-content-copier/
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
 Author: WPMUDEV
-Version: 1.2.1
+Version: 1.2.2
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
@@ -114,7 +114,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.2.1' );
+		define( 'MULTISTE_CC_VERSION', '1.2.2' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -198,6 +198,11 @@ class Multisite_Content_Copier {
 		if ( version_compare( $current_version, '1.1.1', '<' ) ) {
 			require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
 			mcc_upgrade_111();
+		}
+
+		if ( version_compare( $current_version, '1.2.2', '<' ) ) {
+			require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
+			mcc_upgrade_122();
 		}
 
 		update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
@@ -323,6 +328,12 @@ class Multisite_Content_Copier {
 	public function delete_blog( $blog_id ) {
 		$model = mcc_get_model();
 		$model->delete_queue_for_blog( $blog_id );
+		$blog_groups = $model->get_blog_groups( $blog_id );
+		if ( ! empty( $blog_groups ) ) {
+			foreach ( $blog_groups as $blog_group ) {
+				$model->remove_blog_from_group( $blog_id, $blog_group->ID );
+			}
+		}
 	}
 
 }

@@ -65,7 +65,7 @@ class MCC_Copy_Users extends WP_UnitTestCase {
 
         switch_to_blog( $this->dest_blog_id );
 
-        $copier = Multisite_Content_Copier_Factory::get_copier( 'post', $this->orig_blog_id, $users_to_copy );
+        $copier = Multisite_Content_Copier_Factory::get_copier( 'user', $this->orig_blog_id, $users_to_copy );
         $copier->execute();
 
         $current_users = get_users();
@@ -91,40 +91,16 @@ class MCC_Copy_Users extends WP_UnitTestCase {
         // Instead of administrator we'll add it as a subscriber
         $already_existent_user = add_user_to_blog( get_current_blog_id(), $this->users_ids[0], 'subscriber' );
 
-        $args = array(
+        $users_to_copy = array(
             'users' => $this->users_ids[0]
         );
-        $copier = new Multisite_Content_Copier_User_Copier( $this->orig_blog_id, $args );
+        $copier = Multisite_Content_Copier_Factory::get_copier( 'user', $this->orig_blog_id, $users_to_copy );
         $copier->execute();
 
         // The user must exists but he should have subscriber role
         $user = get_userdata( $this->users_ids[0] );
         
         $this->assertEquals( $user->roles[0], 'subscriber' );
-
-        restore_current_blog();
-    }
-
-    function test_copy_all_users() {
-        switch_to_blog( $this->dest_blog_id );
-
-        $args = array(
-            'users' => 'all'
-        );
-        $copier = new Multisite_Content_Copier_User_Copier( $this->orig_blog_id, $args );
-        $copier->execute();
-
-        $current_users = get_users();
-        $users_roles = array();
-        foreach ( $current_users as $user ) {
-            $users_roles[ $user->data->ID ] = $user->roles[0];
-        }
-
-        foreach ( $this->users_ids as $user_id ) {
-            $role = $this->users[ $user_id ];
-            $this->assertTrue( array_key_exists( $user_id, $users_roles ), "Failed: user_id $user_id does not exist as a key in user_roles" );
-            $this->assertTrue( $users_roles[ $user_id ] == $role, "Failed: user_id $user_id ( " . get_userdata( $user_id )->data->user_email . " ) has not the role $role" );
-        }
 
         restore_current_blog();
     }
@@ -153,15 +129,18 @@ class MCC_Copy_Users extends WP_UnitTestCase {
         restore_current_blog();
 
         switch_to_blog( $this->dest_blog_id );
+        $users_to_copy = array(
+            'users' => array( $custom_role_user_id )
+        );
         $args = array(
-            'users' => array( $custom_role_user_id ),
             'default_role' => 'administrator'
         );
-        $copier = new Multisite_Content_Copier_User_Copier( $this->orig_blog_id, $args );
+        $copier = Multisite_Content_Copier_Factory::get_copier( 'user', $this->orig_blog_id, $users_to_copy, $args );
         $copier->execute();
 
         $copied_user = get_user_by( 'id', $custom_role_user_id );
         $copied_user_role = $copied_user->roles[0];
+
         $this->assertEquals( 'administrator', $copied_user_role );
 
         restore_current_blog();

@@ -5,6 +5,15 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.2.2 - 2014-04-02
+----------------------------------------------------------------------
+- Improved admin styles
+- Disable "Next" button if there are no items selected
+- Fixed: Plugin was not allowing to copy to main site
+- Fixed: Sites counts not working properly on Groups page
+- Removing Non existant blogs from blog-groups relationships on upgrade
+- Fixed: Posts parents could be copied twice in some cases
+
 1.2.1 - 2014-03-17
 ----------------------------------------------------------------------
 - Fixed error when copying to blogs groups from post box.

@@ -344,6 +344,60 @@ class MCC_Copy_CPT extends WP_UnitTestCase {
       //
     }
 
+    function test_copy_post_and_parent_twice() {
+        global $wpdb;
+        // We are going to try to copy parents and
+        // also select the parent to copy. Only one page should be copied
+        switch_to_blog( $this->dest_blog_id );
+
+        // We are going to delete all the pages first
+        $pages_ids = $wpdb->get_col( "SELECT ID FROM $wpdb->posts WHERE post_type = 'book' ");
+        foreach ( $pages_ids as $page_id ) {
+            wp_delete_post( $page_id, true );
+        }
+
+
+        $args = array(
+            'copy_images' => false,
+            'keep_user' => true,
+            'update_date' => false,
+            'copy_parents' => true,
+            'copy_comments' => false
+        );
+
+        $copier = Multisite_Content_Copier_Factory::get_copier( 'page', $this->orig_blog_id, array( $this->orig_post_id, $this->orig_parent_post_id ), $args );
+        restore_current_blog();
+
+        switch_to_blog( $this->dest_blog_id );
+        $results = $copier->execute();
+
+        // Results must be just one
+        // The source parent should not have been copied as an item
+        $this->assertEquals( count( $results ), 1 );
+
+
+        $pages_ids = $wpdb->get_col( "SELECT ID FROM $wpdb->posts WHERE post_type = 'book' ");
+
+        // Just two pages should have been copied: The child and the parent
+        $this->assertEquals( count( $pages_ids ), 2 );
+
+        // Let's test if the child is actually child of that parent
+        $new_child_post_id = $results[ $this->orig_post_id ]['new_post_id'];
+        $new_parent_post_id = $results[ $this->orig_post_id ]['new_parent_post_id'];
+
+        $children = get_children( array( 'post_parent' => $new_parent_post_id ) );
+        $this->assertEquals( count( $children ), 1 );
+
+        $child_id = $children[ key( $children ) ]->ID;
+        
+        // They should be the same page
+        $this->assertEquals( $child_id, $new_child_post_id );
+        
+        restore_current_blog();
+        
+        
+    }
+
     function test_copy_post_update_date() {
 
         switch_to_blog( $this->dest_blog_id );

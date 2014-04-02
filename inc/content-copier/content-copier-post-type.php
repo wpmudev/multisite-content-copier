@@ -6,6 +6,21 @@
  */
 class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier_Abstract {
 
+	/**
+	 * Saves posts copied data:
+	 * Array(
+	 * 		source_post_ID => Array(
+	 * 			new_post_ID => Integer
+	 * 			new_post_parent_ID => Integer/false
+	 * 		)
+	 * )
+	 */
+	private $posts_created = array();
+
+	// Saves the post parents IDs that we are copying
+	// In order to not copy them twice
+	private $copied_parents_ids = array();
+
 	public function get_default_args() {
 		return array(
 			'copy_images' => false,
@@ -19,11 +34,51 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	}
 
 	public function execute() {
+		$this->filter_parent_posts();
+
 		foreach( $this->items as $item_id ) {
-			$this->copy_item( $item_id );
-			update_post_meta( $item_id, 'mcc_copied', true );
+			$post_created = $this->copy_item( $item_id );
+
+			$this->posts_created[ $item_id ] = $post_created;
+			update_post_meta( $item_id, 'mcc_copied', true, $this->posts_created[ $item_id ] );
 		}
+
+		return $this->posts_created;
 	}
+
+	/**
+	 * Remove items that will be already copied as parents
+	 * 
+	 * If copy_parents argument is set, there could be cases where an
+	 * item could be copied twice if another post has it as a parent.
+	 * This function removes them from the items list so later they will be
+	 * copied as parents
+	 * 
+	 */
+	private function filter_parent_posts() {
+		if ( ! $this->args['copy_parents'] )
+			return;
+
+		$items_ids = $this->items;
+
+		// First, we collect all the parents IDs
+		foreach( $this->items as $key => $item_id ) {
+			$parent_post_id = $this->get_orig_post_parent( $item_id );
+			if ( $parent_post_id )
+				$parent_posts_ids[] = $parent_post_id;
+		}
+
+		// Now we remove those parents forom the items list
+		foreach( $this->items as $key => $item_id ) {
+			if ( in_array( $item_id, $parent_posts_ids ) )
+				unset( $items_ids[ $key ] );
+		}
+
+		// And update the list
+		$this->items = $items_ids;
+
+	}
+
 
 	/**
 	 * This need to be overriden by subclasses
@@ -44,10 +99,16 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		$new_parent_item_id = false;
 
 		if ( $this->args['copy_parents'] ) {
+
 			$parent_post_id = $this->get_orig_post_parent( $item_id );
 
 			if ( $parent_post_id ) {
-				$new_parent_item_id = $this->copy_post( $parent_post_id );
+				// If we have already copied the parent post, don't copy it again
+				if ( false === ( $new_parent_item_id = array_search( $parent_post_id, $this->copied_parents_ids ) ) ) {
+					$new_parent_item_id = $this->copy_post( $parent_post_id );
+					$this->copied_parents_ids[] = $new_parent_item_id;
+				}
+
 				$this->update_dest_post_parent( $new_item_id, $new_parent_item_id );
 			}
 		}
@@ -114,8 +175,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 //		}
 
 		$new_item_id = wp_insert_post( $postarr );
-
 		if ( $new_item_id ) {
+
 			do_action( 'mcc_copy_post', $this->orig_blog_id, $item_id, $new_item_id );
 
 			// Do we have to sync the post for the future?

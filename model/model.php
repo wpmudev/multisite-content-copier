@@ -13,11 +13,6 @@ class Multisite_Content_Copier_Model {
 
 	static $instance;
 
-	// This option will tell WP if the schema has been created
-	// Instead of using the activation hook, we'll use this
-	// TODO: Change slug
-	public $schema_created_option_slug = 'mcc_schema_created';
-
 	// Tables names
 	private $queue_table;
 	private $blogs_groups_table;
@@ -61,10 +56,6 @@ class Multisite_Content_Copier_Model {
 		$this->blogs_groups_relationship_table = $wpdb->base_prefix . 'mcc_blogs_groups_relationship';
 		$this->synced_posts_relationships_table = $wpdb->base_prefix . 'mcc_synced_posts_relationships';
 
-		if ( ! get_site_option( $this->schema_created_option_slug, false ) ) {
-			$this->create_schema();
-			update_site_option( $this->schema_created_option_slug, true );
-		}
 	}
 
 	/**
@@ -286,12 +277,6 @@ class Multisite_Content_Copier_Model {
 		$wpdb->query( "DROP TABLE IF EXISTS $this->blogs_groups_table;" );
 		$wpdb->query( "DROP TABLE IF EXISTS $this->blogs_groups_relationship_table;" );
 		$wpdb->query( "DROP TABLE IF EXISTS $this->synced_posts_relationships_table;" );
-
-		delete_site_option( $this->schema_created_option_slug );
-	}
-
-	public function deactivate_model() {
-		delete_site_option( $this->schema_created_option_slug );
 	}
 
 	public function get_queued_elements_for_blog( $blog_id ) {

@@ -77,6 +77,11 @@ class Multisite_Content_Copier_Network_Settings_Menu extends Multisite_Content_C
 
 	 			$redirect_to = add_query_arg( 'updated', 'true', $this->get_permalink() );
 
+	 			/**
+				 * Filters the redirection URL when the settings are saved
+				 * 
+				 * @param String $redirect_to
+				 */
 	 			$redirect_to = apply_filters( 'mcc_update_settings_screen_redirect_url', $redirect_to );
 
 	 			if ( ! empty( $redirect_to ) )

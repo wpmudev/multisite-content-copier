@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: https://premium.wpmudev.org/project/multisite-content-copier/
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
 Author: WPMUDEV
-Version: 1.2.3
+Version: 1.2.4
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
@@ -115,7 +115,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.2.3' );
+		define( 'MULTISTE_CC_VERSION', '1.2.4' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -314,10 +314,31 @@ class Multisite_Content_Copier {
 				self::include_copier_classes();
 				$copier = Multisite_Content_Copier_Factory::get_copier( $type, $source_blog_id, $items_ids, $args );
 
+				/**
+				 * Filters the execution of the Copier class
+				 * 
+				 * By default, the value is true, this means that the Copier
+				 * execution is about to start. Setting this value to false
+				 * will avoid the execution
+				 * 
+				 * @param Boolean true
+				 * @param Object $copier Copier classname
+				 * @param Integer $source_blog_id
+				 * @param Array $items_ids Items IDs to be copied
+				 * @param Array $args Additional Options
+				 */
 				$execute = apply_filters( 'mcc_execute_copier', true, $copier, $source_blog_id, $items_ids, $args );
 
 				if ( $execute ) {
 					$copier->execute();
+					/**
+					 * Triggered when the copier has finished all the copies
+					 * 
+					 * @param Integer $type Type of data we are copying (post/page...)
+					 * @param Integer $source_blog_id Source Blog ID
+					 * @param Integer $items_ids Ids of the items that have just been copied
+					 * @param Integer $args Additional options passed to the Copier class
+					 */
 					do_action( 'mcc_after_execute_copier', $type, $source_blog_id, $items_ids, $args );
 				}
 

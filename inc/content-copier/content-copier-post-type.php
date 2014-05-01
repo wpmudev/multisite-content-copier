@@ -87,8 +87,23 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	 * @return type
 	 */
 	public function copy_item( $item_id ) {
+		
+		// We need to remove these filters
+		// WP could remove iframes, for example
+		// but we have to trust in the source post content
+		// in this case
+		remove_filter('content_save_pre', 'wp_filter_post_kses');
+        remove_filter('content_filtered_save_pre', 'wp_filter_post_kses');
+
 		$source_post_id = $item_id;
 		$source_blog_id = $this->orig_blog_id;
+
+		/**
+		 * Triggered before a post is copied
+		 * 
+		 * @param Integer $source_blog_id Source Blog ID
+		 * @param Integer $source_post_id Source Post ID
+		 */
 		do_action( 'mcc_before_copy_post', $source_blog_id, $source_post_id );
 
 		$new_item_id = $this->copy_post( $item_id );
@@ -114,6 +129,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		}
 
 		if ( $this->args['copy_images'] ) {
+
 			$this->copy_media( $item_id, $new_item_id );
 
 			if ( absint( $new_parent_item_id ) ) {
@@ -136,6 +152,9 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 				$this->copy_comments( $parent_post_id, $new_parent_item_id );
 			}
 		}
+
+		add_filter('content_save_pre', 'wp_filter_post_kses');
+        add_filter('content_filtered_save_pre', 'wp_filter_post_kses');
 
 		return array(
 			'new_post_id' => $new_item_id,
@@ -174,9 +193,20 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 //				$postarr['ID'] = absint( $child_id );
 //		}
 
+
+		
 		$new_item_id = wp_insert_post( $postarr );
+		
+
 		if ( $new_item_id ) {
 
+			/**
+			 * Triggered when a single post/page/CPT has been copied
+			 * 
+			 * @param Integer $source_blog_id Source Blog ID where the post is
+			 * @param Integer $item_id Post ID in the source blog
+			 * @param Integer $new_item_id Id of the post that has just been copied
+			 */
 			do_action( 'mcc_copy_post', $this->orig_blog_id, $item_id, $new_item_id );
 
 			// Do we have to sync the post for the future?
@@ -200,6 +230,16 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 			foreach ( $orig_post_meta as $post_meta ) {
 				$unserialized_meta_value = maybe_unserialize( $post_meta->meta_value );
 				update_post_meta( $new_item_id, $post_meta->meta_key, $unserialized_meta_value );
+
+				/**
+				 * Triggered when a single post/page/CPT Metadata has been copied
+				 * 
+				 * @param Integer $source_blog_id Source Blog ID where the post is
+				 * @param Integer $item_id Post ID in the source blog
+				 * @param Integer $new_item_id Id of the post that has just been copied
+				 * @param Integer $meta_key Metadata slug
+				 * @param Integer $meta_value Unserialized Metadata value
+				 */
 				do_action( 'mcc_copy_post_meta', $this->orig_blog_id, $item_id, $new_item_id, $post_meta->meta_key, $unserialized_meta_value );
 			}			
 		}
@@ -452,18 +492,39 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		return false;
 	}
 
+	/**
+	 * Copy images to the new blog
+	 * 
+	 * @param Integer $post_id Source Post ID
+	 * @param Integer $new_post_id Destination Post ID
+	 * @return type
+	 */
 	public function copy_media( $post_id, $new_post_id ) {
 
+		// Get all medai in the post
 		$all_media = $this->get_all_media_in_post( $post_id );
 
-		apply_filters( 'mcc_copy_media', $all_media, $post_id );
+		/**
+		 * Filter the media extracted from the source Post
+		 *
+		 * @param Array $all_media Images found in the post. They are 
+		 * splitted in attachments (those who are attached to the source post 
+		 * and also those that are not attached but are in the upload folder
+		 * and have been found without width and height in the filename)
+		 * and no attachments (rest of the images)
+		 * 
+		 * @param Integer $post_id Source Post ID
+		 */
+		$all_media = apply_filters( 'mcc_copy_media', $all_media, $post_id );
 
 		$images_as_attachments = $all_media['attachments'];
 		$images_as_no_attachments = $all_media['no_attachments'];
 
 		switch_to_blog( $this->orig_blog_id );
+
 		// Just adding some custom properties
 		foreach ( $images_as_attachments as $key => $image ) {
+
 			$dir = get_attached_file( $image->ID );
 
 			// The path of the file
@@ -479,7 +540,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		}
 
-		// When switching between blogs, wp_upload_dir function
+		// When switching between blogs, wp_upload_dir function does not properly works
 		add_filter( 'upload_dir', array( &$this, 'set_correct_upload_url' ) );
 		$orig_upload_dir = wp_upload_dir();
 		remove_filter( 'upload_dir', array( &$this, 'set_correct_upload_url' ) );
@@ -497,7 +558,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		$new_post = get_post( $new_post_id );
 		$new_post_content = $new_post->post_content;
 
-
 		foreach ( $images_as_attachments as $image ) {
 
 			$info = pathinfo( $image->path );
@@ -506,7 +566,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 			$results = self::copy_attachment_element( $image, $file_name, $upload_dir, $new_post_id );
 
 			if ( false !== $results ) {
-
 				extract( $results );
 				// If the image is a thumbnail we'll need to update the post meta
 				if ( $image->is_thumbnail ) {
@@ -595,7 +654,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	 * @return Array
 	 */
 	public function set_correct_upload_url( $upload_dir ) {
-		$siteurl = get_option( 'siteurl' );
+		$siteurl = trailingslashit( get_option( 'siteurl' ) );
 		$upload_path = trim( get_option( 'upload_path' ) );
 
 		if ( empty( $upload_path ) || 'wp-content/uploads' == $upload_path ) {
@@ -607,9 +666,10 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 			$dir = $upload_path;
 		}
 
-		if ( !$url = get_option( 'upload_url_path' ) ) {
+		if ( ! $url = get_option( 'upload_url_path' ) ) {
 			if ( empty($upload_path) || ( 'wp-content/uploads' == $upload_path ) || ( $upload_path == $dir ) ) {
-				$url = get_option('siteurl') . 'wp-content/uploads';
+
+				$url = $siteurl . 'wp-content/uploads';
 				if ( ! ( is_main_site() && defined( 'MULTISITE' ) ) ) {
 					if ( ! get_site_option( 'ms_files_rewriting' ) ) {
 						// If ms-files rewriting is disabled (networks created post-3.5), it is fairly straightforward:
@@ -733,6 +793,12 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	}
 
 	public function update_post_date( $item_id, $date ) {
+		/**
+		 * Filters the date when the destination post was created
+		 * 
+		 * @param String $date 
+		 * @param Integer $item_id Destination Post ID 
+		 */
 		$date = apply_filters( 'mcc_update_copied_post_date', $date, $item_id );
 		wp_update_post( array( 'ID' => absint( $item_id ), 'post_date' => $date ) );
 	}
@@ -770,6 +836,11 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 			// Parent-child relatioship
 			$parent_children_rels[ $orig_comment_ID ] = $new_comment_ID; 
 
+			/**
+			 * Triggered when a new comment has been copied
+			 * 
+			 * @param Integer $new_comment_ID
+			 */
 			do_action( 'mcc_copied_comment', $new_comment_ID );
 
 			// Now the comment meta
@@ -786,11 +857,24 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 						'meta_key' => $metadata->meta_key,
 						'meta_value' => $metadata->meta_value
 					);
+
+					/**
+					 * Filters the comment metadata that will be attached to the
+					 * comment created
+					 * 
+					 * @param Arra $_metadata
+					 * @param Integer $new_comment_ID Destination Comment ID 
+					 */
 					$_metadata = apply_filters( 'mcc_copy_comment_meta', $_metadata, $new_comment_ID );
 					update_comment_meta( $new_comment_ID, $_metadata['meta_key'], $_metadata['meta_value'] );
 				}
 			}
 
+			/**
+			 * Triggered when the comment metadata have been copied
+			 * 
+			 * @param Integer $new_comment_ID
+			 */
 			do_action( 'mcc_copied_comment_meta', $new_comment_ID );
 
 			
@@ -805,6 +889,12 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 				$_new_comment = (array)$_new_comment;
 				wp_update_comment( $_new_comment );
 
+				/**
+				 * Triggered when the relationship between
+				 * parent/children comment are set
+				 * 
+				 * @param Integer $new_comment_ID
+				 */
 				do_action( 'mcc_set_comment_parent_children_rel', $_new_comment['comment_ID'] );
 			}
 
@@ -854,6 +944,14 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 					$destination_term = wp_insert_term( $term_name, $taxonomy, array( 'description' => $term_description ) );
 
 					$source_blog_id = $this->orig_blog_id;
+
+					/**
+					 * Triggered when a term has been copied
+					 * 
+					 * @param Integer $source_term_ID Source Term ID from the source blog
+					 * @param Integer $destination_term destination Term ID in the destination blog
+					 * @param Integer $source_blog_id Source Blog ID
+					 */
 					do_action( 'mcc_term_copied', $source_term_id, $destination_term, $source_blog_id );
 				}
 

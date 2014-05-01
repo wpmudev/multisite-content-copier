@@ -968,7 +968,6 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 						},
 						function(response) {
 							rt_count = rt_count + interval;
-							console.log(rt_count);
 							label = Math.ceil( (rt_count / rt_total) * 100 );
 							if ( label > 100 )
 								label = 100;

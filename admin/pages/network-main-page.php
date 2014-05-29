@@ -476,7 +476,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			<script>
 				jQuery(document).ready(function($) {
 					$('#wizardform').submit( function( e ) {
-						var list_items = $( '#posts-list > li, #users-list > li' );
+						var list_items = $( '#posts-list > li, #users-list > li, .plugins .plugin-item:checked' );
 						if ( list_items.length ) {
 							return true;
 						}

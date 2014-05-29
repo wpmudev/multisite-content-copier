@@ -30,7 +30,7 @@ class MCC_Plugins_List_Table extends WP_List_Table {
 
     function column_cb($item){
         return sprintf(
-            '<input type="checkbox" name="plugins[]" ' . checked( $item['checked'], true, false ) . ' value="%s" />',
+            '<input type="checkbox" class="plugin-item" name="plugins[]" ' . checked( $item['checked'], true, false ) . ' value="%s" />',
             $item['slug']
         );
     }

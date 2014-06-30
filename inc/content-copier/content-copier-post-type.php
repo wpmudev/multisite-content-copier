@@ -17,6 +17,12 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	 */
 	private $posts_created = array();
 
+	/**
+	 * Saves source parents relationships
+	 * Useful to remap later the posts
+	 */
+	private $parents_mapping = array();
+
 	// Saves the post parents IDs that we are copying
 	// In order to not copy them twice
 	private $copied_parents_ids = array();
@@ -34,49 +40,69 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	}
 
 	public function execute() {
-		$this->filter_parent_posts();
+
+		if ( $this->args['copy_parents'] )
+			$this->add_parents_to_items_list();
 
 		foreach( $this->items as $item_id ) {
+
 			$post_created = $this->copy_item( $item_id );
 
 			$this->posts_created[ $item_id ] = $post_created;
 			update_post_meta( $item_id, 'mcc_copied', true, $this->posts_created[ $item_id ] );
 		}
 
+		$this->remap_parents();
+
 		return $this->posts_created;
 	}
 
 	/**
-	 * Remove items that will be already copied as parents
-	 * 
-	 * If copy_parents argument is set, there could be cases where an
-	 * item could be copied twice if another post has it as a parent.
-	 * This function removes them from the items list so later they will be
-	 * copied as parents
+	 * Add source posts parents to the list to copy
 	 * 
 	 */
-	private function filter_parent_posts() {
-		if ( ! $this->args['copy_parents'] )
-			return;
+	public function add_parents_to_items_list() {
 
-		$items_ids = $this->items;
+		switch_to_blog( $this->orig_blog_id );
+		$this->parents_mapping = array();
 
-		// First, we collect all the parents IDs
-		foreach( $this->items as $key => $item_id ) {
-			$parent_post_id = $this->get_orig_post_parent( $item_id );
-			if ( $parent_post_id )
-				$parent_posts_ids[] = $parent_post_id;
+		foreach ( $this->items as $item_id ) {
+			$cursor = $item_id;
+			$finished = false;
+			while( ! $finished ) {
+				$parent_post_id = false;
+				$parent_post_id = wp_get_post_parent_id( $cursor );
+
+				if ( empty( $parent_post_id ) ) {
+					$finished = true;
+				}
+				else {
+					$this->parents_mapping[ $cursor ] = $parent_post_id;
+					$cursor = $parent_post_id;
+				}
+			}
 		}
 
-		// Now we remove those parents forom the items list
-		foreach( $this->items as $key => $item_id ) {
-			if ( in_array( $item_id, $parent_posts_ids ) )
-				unset( $items_ids[ $key ] );
+		restore_current_blog();
+
+		$this->items = array_merge( $this->parents_mapping, $this->items );
+		$this->items = array_unique( $this->items );
+	}
+
+	/**
+	 * Remap the source parents posts to the newly created
+	 * 
+	 */
+	public function remap_parents() {
+		foreach ( $this->posts_created as $source_post_id => $new_post_id ) {
+			if ( ! empty( $this->parents_mapping[ $source_post_id ] ) && ! empty( $this->posts_created[ $this->parents_mapping[ $source_post_id ] ] ) ) {
+				$args = array(
+					'ID' => $new_post_id,
+					'post_parent' => $this->posts_created[ $this->parents_mapping[ $source_post_id ] ]
+				);
+				wp_update_post( $args );
+			}
 		}
-
-		// And update the list
-		$this->items = $items_ids;
-
 	}
 
 
@@ -111,55 +137,20 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		if ( ! $new_item_id )
 			return false;
 
-		$new_parent_item_id = false;
-
-		if ( $this->args['copy_parents'] ) {
-
-			$parent_post_id = $this->get_orig_post_parent( $item_id );
-
-			if ( $parent_post_id ) {
-				// If we have already copied the parent post, don't copy it again
-				if ( false === ( $new_parent_item_id = array_search( $parent_post_id, $this->copied_parents_ids ) ) ) {
-					$new_parent_item_id = $this->copy_post( $parent_post_id );
-					$this->copied_parents_ids[] = $new_parent_item_id;
-				}
-
-				$this->update_dest_post_parent( $new_item_id, $new_parent_item_id );
-			}
-		}
-
-		if ( $this->args['copy_images'] ) {
-
+		if ( $this->args['copy_images'] )
 			$this->copy_media( $item_id, $new_item_id );
 
-			if ( absint( $new_parent_item_id ) ) {
-				$this->copy_media( $parent_post_id, $new_parent_item_id );
-			}
-		}
-
-		if ( $this->args['update_date'] ) {
+		if ( $this->args['update_date'] )
 			$this->update_post_date( $new_item_id, current_time( 'mysql' ) );
 
-			if ( absint( $new_parent_item_id ) ) {
-				$this->update_post_date( $new_parent_item_id, current_time( 'mysql' ) );
-			}
-		}
 
-		if ( $this->args['copy_comments'] ) {
+		if ( $this->args['copy_comments'] )
 			$this->copy_comments( $item_id, $new_item_id );
-
-			if ( absint( $new_parent_item_id ) ) {
-				$this->copy_comments( $parent_post_id, $new_parent_item_id );
-			}
-		}
 
 		add_filter('content_save_pre', 'wp_filter_post_kses');
         add_filter('content_filtered_save_pre', 'wp_filter_post_kses');
 
-		return array(
-			'new_post_id' => $new_item_id,
-			'new_parent_post_id' => $new_parent_item_id
-		);		
+		return  $new_item_id;
 	}
 
 	/**

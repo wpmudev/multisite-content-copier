@@ -167,7 +167,7 @@ class Multisite_Content_Copier {
 		
 		global $wpmudev_notices;
 		$wpmudev_notices[] = array( 'id'=> 855335,'name'=> 'Multisite Content Copier', 'screens' => array( 'toplevel_page_mcc_network_page-network', 'content-copier_page_mcc_sites_groups_page-network', 'content-copier_page_mcc_settings_page-network' ) );
-		include_once( MULTISTE_CC_INCLUDES_DIR . 'dash-notice/wpmudev-dash-notification.php' );
+		include_once( MULTISTE_CC_PLUGIN_DIR . 'dash-notice/wpmudev-dash-notification.php' );
 	}
 
 	public static function include_copier_classes() {

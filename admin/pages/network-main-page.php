@@ -475,16 +475,23 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			</form>
 			<script>
 				jQuery(document).ready(function($) {
+                    var isFilter = false;
 					$('#wizardform').submit( function( e ) {
 						var list_items = $( '#posts-list > li, #users-list > li, .plugins .plugin-item:checked' );
-						if ( list_items.length ) {
+						if ( list_items.length || isFilter) {
 							return true;
 						}
 						else {
 							alert( "<?php _e( 'You must add at least one item to the list', MULTISTE_CC_LANG_DOMAIN ); ?>" );
 							return false;
-						}						
+						}
+                        isFilter = false;
 					});
+
+                    // POSTS/PAGES/CPTs SELECTION
+                    $( '#filter' ).click( function( e ) {
+                        isFilter = true;
+                    });
 				});
 			</script>
 		<?php
@@ -569,8 +576,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			</div>
 			<div class="alignright" id="mcc-posts-list" style="width:60%;">
 				<input type="hidden" id="src_blog_id" name="src_blog_id" value="<?php echo $blog_id; ?>">
-				<?php $posts_table->search_box( __( 'Search', MULTISTE_CC_LANG_DOMAIN ), 'search' ); ?><br/><br/>
+				<?php switch_to_blog($this->wizard->get_value( 'content_blog_id' )); ?>
+                <?php $posts_table->search_box( __( 'Search', MULTISTE_CC_LANG_DOMAIN ), 'search' ); ?><br/><br/>
 				<?php $posts_table->display(); ?>
+                <?php restore_current_blog(); ?>
 			</div>
 			<div class="clear"></div>
 		<?php
@@ -816,7 +825,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		if ( empty( $settings ) )
 			$settings = array();
 
-		$save_settings = array( 'args' => $settings );		
+		$save_settings = array( 'args' => $settings );
 
 		// Action
 		$action = $this->wizard->get_value( 'mcc_action' );
@@ -850,7 +859,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		}
 
 		if ( 'all' != $dest_blog_type ) {
-			
+
 			// Copyinhg to a few blogs (group, NBT group or list)
 			$model = mcc_get_model();
 			foreach ( $dest_blogs_ids as $dest_blog_id ) {

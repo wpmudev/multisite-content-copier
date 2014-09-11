@@ -19,7 +19,7 @@ class Multisite_Content_Copier_Post_Copier extends Multisite_Content_Copier_Post
 
 		}
 
-		return $results;
+		return $new_item_id;
 	}
 
 }

@@ -3,14 +3,14 @@
 Plugin Name: Multisite Content Copier
 Plugin URI: https://premium.wpmudev.org/project/multisite-content-copier/
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
-Author: WPMUDEV
-Version: 1.2.6
+Author: WPMU DEV
+Version: 1.2.7
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
 Network:true
 WDP ID: 855335
-Tags: multisiste plugin, multisite
+Tags: multisite plugin, multisite
 */
 
 /*
@@ -115,7 +115,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.2.6' );
+		define( 'MULTISTE_CC_VERSION', '1.2.7' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );

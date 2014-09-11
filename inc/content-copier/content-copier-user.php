@@ -20,9 +20,16 @@ class Multisite_Content_Copier_User_Copier extends Multisite_Content_Copier_Abst
 		$users = get_users( $args );
 		restore_current_blog();
 
-		foreach ( $users as $user ) {
+		foreach ( $users as $user )
 			$this->copy_item( $user );
-		}
+
+		/**
+		 * Fired after posts have been copied in destination blog
+		 * 
+		 * @param Array $users List of users added to the destination blog
+		 * @param Integer $orig_blog_id Source blog ID
+		 */
+		do_action( 'mcc_copy_users', $users, $this->orig_blog_id );
 		
 	}
 

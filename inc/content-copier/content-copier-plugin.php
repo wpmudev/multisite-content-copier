@@ -14,6 +14,14 @@ class Multisite_Content_Copier_Plugin_Copier extends Multisite_Content_Copier_Ab
 				$plugins[] = $plugin;				
 		}
 		activate_plugins( $plugins );
+
+		/**
+		 * Fired after plugins are activated in destination blog
+		 * 
+		 * @param Array $items List of plugins activated
+		 * @param Integer $orig_blog_id Source blog ID
+		 */
+		do_action( 'mcc_activate_plugins', $this->items, $this->orig_blog_id );
 	}
 
 	public function copy_item( $item_id ) {}

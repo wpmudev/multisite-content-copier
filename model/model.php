@@ -81,7 +81,7 @@ class Multisite_Content_Copier_Model {
               ID bigint(20) NOT NULL AUTO_INCREMENT,
               src_blog_id bigint(20),
               dest_blog_id bigint(20),
-              settings text DEFAULT '',
+              settings text,
               PRIMARY KEY  (ID)
             )  ENGINE=MyISAM $this->db_charset_collate;";
        	

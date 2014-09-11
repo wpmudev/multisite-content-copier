@@ -1,11 +1,17 @@
 Plugin Name: Multisite Content Copier
 Author: WPMUDEV
 Requires at least: 3.6
-Tested up to: 3.9.1
+Tested up to: 3.9.2
 
 Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
+
+1.2.7 - 2014-08-07
+----------------------------------------------------------------------
+- Fixed: Posts were categorized as "Uncategorized"
+- Fixed minor issues
+- Added: New hooks
 
 1.2.6 - 2014-07-08
 ----------------------------------------------------------------------

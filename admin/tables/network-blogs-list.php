@@ -44,7 +44,7 @@ class MCC_Sites_List_Table extends WP_List_Table {
 
         $s = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST[ 's' ] ) ) : '';
 
-		$like_s = esc_sql( like_escape( $s ) );
+		$like_s = esc_sql( $wpdb->esc_like( $s ) );
 		
 
 		$query = "SELECT * FROM {$wpdb->blogs} WHERE site_id = '{$wpdb->siteid}' ";

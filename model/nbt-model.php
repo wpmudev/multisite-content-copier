@@ -131,7 +131,7 @@ class Multisite_Content_Copier_NBT_Model {
 	            $wild = '%';
 	            $s = trim( $s, '*' );
 	        }
-	        $like_s = esc_sql( like_escape( $s ) );
+	        $like_s = esc_sql( $wpdb->esc_like( $s ) );
 
 	        $query .= " AND t.name LIKE ( '%{$like_s}$wild%' )";
 		}

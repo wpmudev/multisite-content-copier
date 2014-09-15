@@ -16,7 +16,7 @@ function mcc_get_sites_search() {
 		$s = trim($s, '*');
 	}
 
-	$like_s = esc_sql( like_escape( $s ) );
+	$like_s = esc_sql( $wpdb->esc_like( $s ) );
 	$query = "SELECT * FROM {$wpdb->blogs} WHERE site_id = '{$wpdb->siteid}' ";
 
 	if ( is_subdomain_install() ) {

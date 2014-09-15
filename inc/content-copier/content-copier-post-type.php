@@ -161,6 +161,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		if ( $this->args['copy_comments'] )
 			$this->copy_comments( $item_id, $new_item_id );
 
+
+
 		add_filter('content_save_pre', 'wp_filter_post_kses');
         add_filter('content_filtered_save_pre', 'wp_filter_post_kses');
 
@@ -187,18 +189,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		// Insert post in the new blog ( we should be currently on it)
 		$postarr = $this->get_postarr( $orig_post );
-
-		// Are we updating the post
-//		if ( $this->args[0updating'] ) {
-//
-//			$model = mcc_get_model();
-//			//$child_id = $model->get_synced_child( $item_id, $this->orig_blog_id );
-//
-//			if ( ! empty( $child_id ) )
-//				$postarr['ID'] = absint( $child_id );
-//		}
-
-
 		
 		$new_item_id = wp_insert_post( $postarr );
 		
@@ -214,22 +204,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 			 */
 			do_action( 'mcc_copy_post', $this->orig_blog_id, $item_id, $new_item_id );
 
-			// Do we have to sync the post for the future?
-//			if ( $this->sync ) {
-//				$model = mcc_get_model();
-//				$dest_post = array( 
-//					array( 
-//						'blog_id' => get_current_blog_id(), 
-//						'post_id' => $new_item_id 
-//					)
-//				);
-//
-//				$settings = array(
-//					'class' => get_class( $this ),
-//					'copy_images' => $this->args['copy_images']
-//				);
-//				$model->add_synced_content( $item_id, $this->orig_blog_id, $dest_post, $settings );
-//			}
 
 			// Insert post meta
 			foreach ( $orig_post_meta as $post_meta ) {
@@ -247,6 +221,15 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 				 */
 				do_action( 'mcc_copy_post_meta', $this->orig_blog_id, $item_id, $new_item_id, $post_meta->meta_key, $unserialized_meta_value );
 			}			
+
+			// Set post format
+			switch_to_blog( $this->orig_blog_id );
+			$post_format = get_post_format( $item_id );
+			restore_current_blog();
+
+			if ( $post_format === false )
+				$post_format = '';
+			set_post_format( $new_item_id, $post_format );
 		}
 
 		return $new_item_id;
@@ -414,88 +397,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		
 	}
 
-	public static function copy_single_image( $source_blog_id, $attachment_id ) {
-		$current_blog_id = get_current_blog_id();
-		switch_to_blog( $source_blog_id );
-		$image = get_post( $attachment_id );
-
-		if ( $image && 'attachment' == get_post_type( $image ) ) {
-			$dir = get_attached_file( $image->ID );
-			$metadata = wp_get_attachment_metadata( $image->ID );
-
-			$image->path = $dir;
-			$image->metadata = $metadata;
-
-			switch_to_blog( $current_blog_id );
-
-			// Now uploading the files
-			$upload_dir = wp_upload_dir();
-
-			$info = pathinfo( $image->path );
-			$file_name =  $info['basename'];
-
-			$results = self::copy_attachment_element( $image, $file_name, $upload_dir );
-
-			if ( false !== $results ) {
-				$attachment_id = $results['attach_id'];
-				switch_to_blog( $current_blog_id );
-				return $attachment_id;
-			}
-		}
-		switch_to_blog( $current_blog_id );
-		return false;
-	}
-
-
-	public static function copy_attachment_element( $image, $file_name, $upload_dir, $parent_item_id = 0 ) {
-		$new_file_name = wp_unique_filename( $upload_dir['path'], $file_name );
-		$new_file = $upload_dir['path'] . "/$new_file_name";
-
-		if ( @copy( $image->path, $new_file ) ) {
-
-			// Set correct file permissions
-			$stat = stat( dirname( $new_file ));
-			$perms = $stat['mode'] & 0000666;
-			@ chmod( $new_file, $perms );
-
-			// Compute the URL
-			$url = $upload_dir['url'] . "/$new_file_name";
-
-			if ( is_multisite() )
-				delete_transient( 'dirsize_cache' );
-
-			$results = array( 'file' => $new_file, 'url' => $url );
-
-			$wp_filetype = wp_check_filetype( basename( $new_file ), null );
-
-			// Inserting new attachment
-			$attachment = array(
-				'guid' => $upload_dir['url'] . '/' . basename( $new_file ), 
-				'post_mime_type' => $wp_filetype['type'],
-				'post_title' => $image->post_title,
-				'post_content' => '',
-				'post_status' => 'inherit'
-			);
-			$attach_id = wp_insert_attachment( $attachment, $new_file, $parent_item_id );
-
-			// you must first include the image.php file
-			// for the function wp_generate_attachment_metadata() to work
-			require_once( ABSPATH . 'wp-admin/includes/image.php' );
-
-			// Generating metadata
-			$attach_data = wp_generate_attachment_metadata( $attach_id, $new_file );
-			wp_update_attachment_metadata( $attach_id, $attach_data );
-
-			return array(
-				'attachment' => $attachment,
-				'attach_id' => $attach_id,
-				'attach_data' => $attach_data
-			);
-			
-		}
-
-		return false;
-	}
+	
 
 	/**
 	 * Copy images to the new blog
@@ -558,6 +460,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
             $new_attachment['post_parent'] = $new_post_id;
 
             $new_attachment['guid'] = $upload['url'];
+
+            require_once( ABSPATH . 'wp-admin/includes/image.php' );
 
             // Generate the new attachment
             $new_attachment_id = wp_insert_attachment( $new_attachment, $upload['file'] );
@@ -664,7 +568,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
             return new WP_Error( 'import_file_error', __('Zero size file downloaded', WPMUDEV_COPIER_LANG_DOMAIN ) );
         }
 
-        $max_size = (int) apply_filters( 'wpmudev_copier_attachment_size_limit', 0 );
+        $max_size = (int) apply_filters( 'mcc_attachment_size_limit', 0 );
         if ( ! empty( $max_size ) && $filesize > $max_size ) {
             @unlink( $upload['file'] );
             return new WP_Error( 'import_file_error', sprintf(__('Remote file is too large, limit is %s', WPMUDEV_COPIER_LANG_DOMAIN ), size_format($max_size) ) );
@@ -942,6 +846,10 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	protected function get_orig_blog_post_taxonomies( $item_id ) {
 		switch_to_blog( $this->orig_blog_id );
 		$post_taxonomies = get_object_taxonomies( get_post_type( $item_id ), 'names' );
+		$post_format_key = array_search( 'post_format', $post_taxonomies );
+		if ( false !==  $post_format_key ) {
+			unset( $post_taxonomies[ $post_format_key ] );
+		}
 		restore_current_blog();
 
 		return $post_taxonomies;

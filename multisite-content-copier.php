@@ -179,6 +179,7 @@ class Multisite_Content_Copier {
 		if ( class_exists( 'Woocommerce' ) ) {
 			require_once( MULTISTE_CC_INCLUDES_DIR . 'integration/woocommerce.php' );
 		}
+
 	}
 
 	/**

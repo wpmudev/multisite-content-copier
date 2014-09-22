@@ -7,6 +7,14 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.3 - 2014-09-22
+----------------------------------------------------------------------
+- Fixed: Posts format were not copied
+- Fixed: Queue table definition.
+- Fixed: Removed deprecated function.
+- Enhanced: Images copier improved.
+
+
 1.2.7 - 2014-08-07
 ----------------------------------------------------------------------
 - Fixed: Posts were categorized as "Uncategorized"

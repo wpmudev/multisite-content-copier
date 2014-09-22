@@ -475,17 +475,18 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
             // First we try with the plain file
 			$new_post_content = str_replace( $image->guid, $new_attachment['guid'], $new_post_content );
-			
-			// Now with the other sizes
-			if ( ! empty( $attach_data['sizes'] ) ) {
-				foreach ( $attach_data['sizes'] as $key => $attach_size ) {
-					if ( isset( $image->metadata['sizes'][ $key ] ) ) {
-						$old_url = dirname( $image->guid ) . '/' . $image->metadata['sizes'][ $key ]['file'];
-						$new_post_content = str_replace( $old_url, dirname( $new_attachment['guid'] ) . '/' . $attach_size['file'], $new_post_content );
-					}
-				}
-			}
 
+			$parts = pathinfo( $image->guid );
+			$name = basename( $parts['basename'], ".{$parts['extension']}" );
+			$parts_new = pathinfo( $upload['url'] );
+			$name_new = basename( $parts_new['basename'], ".{$parts_new['extension']}" );
+
+			$from_url = $parts['dirname'] . '/' . $name;
+ 			$to_url = $parts_new['dirname'] . '/' . $name_new;
+
+			// Now with the other sizes
+			$new_post_content = str_replace( $from_url, $to_url, $new_post_content );
+					
             
 		}
 
@@ -516,6 +517,17 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
             // First we try with the plain file
 			$new_post_content = str_replace( $image['orig_src'], $new_attachment['guid'], $new_post_content );
+
+			$parts = pathinfo( $image['orig_src'] );
+			$name = basename( $parts['basename'], ".{$parts['extension']}" );
+			$parts_new = pathinfo( $upload['url'] );
+			$name_new = basename( $parts_new['basename'], ".{$parts_new['extension']}" );
+
+			$from_url = $parts['dirname'] . '/' . $name;
+ 			$to_url = $parts_new['dirname'] . '/' . $name_new;
+
+			// Now with the other sizes
+			$new_post_content = str_replace( $from_url, $to_url, $new_post_content );
 
 		}
 

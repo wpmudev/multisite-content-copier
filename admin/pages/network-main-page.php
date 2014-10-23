@@ -12,6 +12,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
  		add_action( 'admin_init', array( &$this, 'init_wizard' ), 10 );
  		add_action( 'admin_init', array( &$this, 'validate_form' ) );
+ 		add_action( 'admin_init', array( &$this, 'redirect_search' ) );
 
 
         add_action( 'admin_enqueue_scripts', array( $this, 'add_javascript' ) );
@@ -489,7 +490,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 					});
 
                     // POSTS/PAGES/CPTs SELECTION
-                    $( '#filter' ).click( function( e ) {
+                    $( '#filter, #search-submit' ).click( function( e ) {
                         isFilter = true;
                     });
 				});
@@ -990,6 +991,14 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			});
 		</script>
 		<?php
+	}
+
+	public function redirect_search() {
+		if ( isset( $_GET['page'] ) && $this->get_menu_slug() == $_GET['page'] && ! empty( $_POST['s'] ) ) {
+			$url = add_query_arg( 's', $_POST['s'] );
+			wp_redirect( $url );
+			exit();
+		}
 	}
 
 

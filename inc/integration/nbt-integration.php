@@ -56,8 +56,13 @@ class MCC_NBT_Integrator {
 	}
 
 	public function add_relationship( $template, $blog_id ) {
+		if ( ! isset( $template['ID'] ) )
+			return false;
+
 		$nbt_model = mcc_get_nbt_model();
 		$nbt_model->insert_relationship( $blog_id, $template['ID'] );
+
+		return true;
 	}
 
 	public function delete_template_relationships( $template_id ) {

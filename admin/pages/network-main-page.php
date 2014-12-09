@@ -23,6 +23,9 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
         add_action( 'wp_ajax_mcc_retrieve_single_blog_data', array( &$this, 'retrieve_single_blog_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_single_user_data', array( &$this, 'retrieve_single_user_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_cpt_selectors_data', array( &$this, 'retrieve_cpt_selectors_data' ) );
+        if ( is_multisite() && is_subdomain_install() )
+        	add_action( 'wp_ajax_nopriv_mcc_retrieve_cpt_selectors_data', array( &$this, 'retrieve_cpt_selectors_data' ) );
+        add_action( 'wp_ajax_mcc_retrieve_cpt_slugs_selector_data', array( &$this, 'retrieve_cpt_slugs_selectors_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_cpt_custom_selector_data', array( &$this, 'retrieve_cpt_custom_selector_data' ) );
         add_action( 'wp_ajax_mcc_remove_item_id_from_list', array( &$this, 'remove_item_id_from_list' ) );
  	}
@@ -276,6 +279,37 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			$selected = false;
 			$returning .= $this->get_row_cpt_selector_list( $post_type->name, $post_type->label, $selected );
 		}
+
+		restore_current_blog();
+
+		echo $returning;
+
+		die();
+	}
+
+	public function retrieve_cpt_slugs_selectors_data() {
+		global $wpdb;
+		$blog_id = absint( $_POST['blog_id'] );
+
+		switch_to_blog( $blog_id );
+		$post_types = mcc_get_registered_cpts();
+		$post_types = $wpdb->get_row( "SELECT DISTINCT( post_type ) FROM $wpdb->posts 
+			WHERE post_type NOT IN ( 'post', 'page', 'attachment', 'nav_menu_item', 'revision' ) "
+		);
+
+		if ( empty( $post_types ) ) {
+			echo '<li>' . __( 'There are no custom posts registered for that blog', MULTISTE_CC_LANG_DOMAIN ) . '</li>';
+			die();
+		}
+
+
+		$returning = '';
+		foreach ( $post_types as $post_type ) {
+			$selected = false;
+			$returning .= $this->get_row_cpt_selector_list( $post_type, $post_type, $selected );
+		}
+
+		$returning .= $this->get_row_cpt_selector_list( 'custom', '', false, true );
 
 		restore_current_blog();
 

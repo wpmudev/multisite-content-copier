@@ -48,7 +48,7 @@ jQuery(document).ready(function($) {
 					$( '#mcc-cpt-list-wrap ul' ).append( data );
 				}
 			})
-			.always( function() {
+			.always( function(response) {
 				$.ajax({
 					url: ajaxurl,
 					type: 'post',

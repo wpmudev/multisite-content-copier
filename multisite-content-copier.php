@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: https://premium.wpmudev.org/project/multisite-content-copier/
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
 Author: WPMU DEV
-Version: 1.3.1
+Version: 1.3.2
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
@@ -71,6 +71,8 @@ class Multisite_Content_Copier {
 
 		add_action( 'delete_blog', array( &$this, 'delete_blog' ) );
 
+		add_filter( 'allowed_http_origin', array( $this, 'allow_http_origin' ) );
+
 		$this->nbt_integrator = new MCC_NBT_Integrator();
 
 		// We don't use the activation hook here
@@ -80,6 +82,13 @@ class Multisite_Content_Copier {
 		register_deactivation_hook( __FILE__, array( &$this, 'deactivate' ) );
 		register_activation_hook( __FILE__, array( &$this, 'activate' ) );
 
+	}
+
+	public function allow_http_origin( $current ) {
+		if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] === 'mcc_retrieve_cpt_selectors_data' && defined( 'DOING_AJAX' ) && DOING_AJAX )
+			return true;
+
+		return $current;
 	}
 
 
@@ -115,7 +124,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.3.1' );
+		define( 'MULTISTE_CC_VERSION', '1.3.2' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -372,5 +381,6 @@ class Multisite_Content_Copier {
 
 global $multisite_content_copier_plugin;
 $multisite_content_copier_plugin = new Multisite_Content_Copier();
+
 
 

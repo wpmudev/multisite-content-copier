@@ -12,21 +12,11 @@ class MCC_Sites_List_Table extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb, $current_site;
 
-		if ( isset( $_POST['mcc-assign-group'] ) && ! empty( $_POST['group_selected'] ) && ! empty( $_POST['blog_id'] ) && is_array( $_POST['blog_id'] ) ) {
-			$model = mcc_get_model();
+		if ( isset( $_POST['mcc-assign-group'] ) && ! empty( $_POST['group_selected'] ) && ! empty( $_POST['blog_id'] ) && is_array( $_POST['blog_id'] ) )
+			mcc_assign_blog_to_group( $_POST['blog_id'], absint( $_POST['group_selected'] ) );
 
-			foreach ( $_POST['blog_id'] as $blog_id ) {
-				$model->assign_group_to_blog( absint( $blog_id ), absint( $_POST['group_selected'] ) );
-			}
-		}
-
-		if ( isset( $_POST['mcc-remove-from-group'] ) && ! empty( $_POST['group_selected'] ) && ! empty( $_POST['blog_id'] ) && is_array( $_POST['blog_id'] ) ) {
-			$model = mcc_get_model();
-
-			foreach ( $_POST['blog_id'] as $blog_id ) {
-				$model->remove_blog_from_group( absint( $blog_id ), absint( $_POST['group_selected'] ) );
-			}
-		}
+		if ( isset( $_POST['mcc-remove-from-group'] ) && ! empty( $_POST['group_selected'] ) && ! empty( $_POST['blog_id'] ) && is_array( $_POST['blog_id'] ) )
+			mcc_remove_blog_from_group( $_POST['blog_id'], absint( $_POST['group_selected'] ) );
 
 		$per_page = 10;
 
@@ -138,7 +128,7 @@ class MCC_Sites_List_Table extends WP_List_Table {
 		$blog_id = $item['blog_id'];
 
 		$model = mcc_get_model();
-		$groups = $model->get_blog_groups( $blog_id );
+		$groups = mcc_get_blog_groups( array( 'blog_id' => $blog_id ) );
 		
 
 		$return = array();
@@ -157,8 +147,6 @@ class MCC_Sites_List_Table extends WP_List_Table {
 
 	function extra_tablenav( $which ) {
         if ( 'top' == $which) {
-        	$model = mcc_get_model();
-        	$groups = $model->get_blogs_groups();
             ?>
                 <div class="alignleft actions">
                     <select name="group_selected">

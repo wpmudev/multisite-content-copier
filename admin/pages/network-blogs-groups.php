@@ -72,7 +72,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 
  		$group_id = absint( $_GET['group'] );
  		$model = mcc_get_model();
- 		$group = $model->get_blog_group( $group_id );
+ 		$group = mcc_get_blog_group( $group_id );
 
  		if ( empty( $group ) ) {
  			?>
@@ -109,7 +109,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
  	public function render_group_name_field() {
  		$group_id = absint( $_GET['group'] );
  		$model = mcc_get_model();
- 		$group = $model->get_blog_group( $group_id );
+ 		$group = mcc_get_blog_group( $group_id );
  		?>
 			<input type="text" name="group_name" value="<?php echo esc_attr( $group->group_name ); ?>">
  		<?php
@@ -175,8 +175,7 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
  				mcc_add_error( 'empty-group-name', __( 'Group name cannot be empty', MULTISTE_CC_LANG_DOMAIN ) );
 
  			if ( ! mcc_is_error() ) {
-	 			$model = mcc_get_model();
-	 			$model->add_new_blog_group( $group_name );
+	 			mcc_insert_blog_group( $group_name );
 
 	 			wp_redirect( add_query_arg( 'added', 'true', $this->get_permalink() ) );
 	 			exit;
@@ -196,12 +195,10 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 
  			
  			if ( ! mcc_is_error() ) {
-	 			$model = mcc_get_model();
-
 	 			$args = array(
 	 				'group_name' => stripslashes_deep( $_POST['group_name'] )
 	 			);
-	 			$model->update_group( $group_id, $args );
+	 			mcc_update_blog_group( $group_id, $args );
 
 	 			wp_redirect( 
 	 				add_query_arg( 

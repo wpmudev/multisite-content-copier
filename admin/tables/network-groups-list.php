@@ -31,7 +31,7 @@ class MCC_Groups_List_Table extends WP_List_Table {
     function column_cb($item){
         return sprintf(
             '<input type="checkbox" name="groups[]" value="%d" />',
-            $item['ID']
+            $item->ID
         );
     }
 
@@ -40,14 +40,14 @@ class MCC_Groups_List_Table extends WP_List_Table {
         $delete_link = add_query_arg( 
             array( 
                 'action' => 'delete',
-                'group' => (int)$item['ID'] 
+                'group' => (int)$item->ID 
             )
         );
 
         $edit_link = add_query_arg( 
             array( 
                 'action' => 'edit',
-                'group' => (int)$item['ID'] 
+                'group' => (int)$item->ID 
             )
         );
 
@@ -56,12 +56,12 @@ class MCC_Groups_List_Table extends WP_List_Table {
             'delete'    => sprintf( __( '<a href="%s">Delete</a>', MULTISTE_CC_ADMIN_DIR ), $delete_link )
         );
 
-        return stripslashes_deep( $item['group_name'] ) . $this->row_actions($actions);
+        return stripslashes_deep( $item->group_name ) . $this->row_actions($actions);
     }
 
 
     function column_count( $item ) {
-        return ( empty( $item['bcount'] ) ? 0 : $item['bcount'] );
+        return ( empty( $item->bcount ) ? 0 : $item->bcount );
     }
 
     function get_bulk_actions() {
@@ -84,10 +84,10 @@ class MCC_Groups_List_Table extends WP_List_Table {
                     wp_die( 'Security check error', MULTISTE_CC_ADMIN_DIR );
 
                 foreach ( $_POST['groups'] as $group )
-                    $model->delete_blog_group( absint( $group ) );
+                    mcc_delete_blog_group( absint( $group ) );
             }
             elseif ( isset( $_GET['group'] ) && $group_id = absint( $_GET['group'] ) ) {
-                $model->delete_blog_group( $group_id );
+                mcc_delete_blog_group( $group_id );
             }
         }
 
@@ -106,7 +106,7 @@ class MCC_Groups_List_Table extends WP_List_Table {
         $current_page = $this->get_pagenum();
 
         
-        $data = $model->get_blogs_groups();
+        $data = mcc_get_blog_groups();
 
         $total_items = count( $data );
 

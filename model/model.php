@@ -15,8 +15,8 @@ class Multisite_Content_Copier_Model {
 
 	// Tables names
 	private $queue_table;
-	private $blogs_groups_table;
-	private $blogs_groups_relationship_table;
+	public $blogs_groups_table;
+	public $blogs_groups_relationship_table;
 	private $synced_posts_relationships_table;
 
 	// Charset and Collate
@@ -320,150 +320,8 @@ class Multisite_Content_Copier_Model {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->queue_table WHERE dest_blog_id = %d OR src_blog_id = %d", $blog_id, $blog_id ) );	
 	}
 
-	public function get_blog_groups( $blog_id ) {
-		global $wpdb;
 
-		$q = $wpdb->prepare(
-			"SELECT bg.ID, bg.group_name FROM $this->blogs_groups_table bg
-			LEFT JOIN $this->blogs_groups_relationship_table bgr ON bg.ID = bgr.blog_group_id
-			WHERE bgr.blog_id = %d",
-			$blog_id
-		);
 
-		$results = $wpdb->get_results( $q );
 
-		return $results;
-
-	}
-
-	public function get_blogs_from_group( $group_id ) {
-		global $wpdb;
-
-		$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $this->blogs_groups_relationship_table WHERE blog_group_id = %d", $group_id ) );
-
-		return $results;
-	}
-
-	public function get_blogs_groups() {
-		global $wpdb;
-
-		$results = $wpdb->get_results( 
-			"SELECT * FROM $this->blogs_groups_table",
-			ARRAY_A
-		);
-
-		return $results;
-	}
-
-	public function get_blog_group( $group_id ) {
-		global $wpdb;
-
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $this->blogs_groups_table WHERE ID = %d", $group_id ) );
-	}
-
-	public function add_new_blog_group( $group_name ) {
-		global $wpdb;
-
-		$wpdb->insert(
-			$this->blogs_groups_table,
-			array( 
-				'group_name' => $group_name,
-				'group_slug' => sanitize_title( $group_name ),
-				'bcount' => 0
-			),
-			array( '%s', '%s', '%d' )
-		);
-
-		return $wpdb->insert_id;
-	}
-
-	public function delete_blog_group( $id ) {
-		global $wpdb;
-
-		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->blogs_groups_table WHERE ID = %d", $id ) );
-		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->blogs_groups_relationship_table WHERE group_id = %d", $id ) );
-
-	}
-
-	public function is_group( $group_id ) {
-		global $wpdb;
-
-		$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $this->blogs_groups_table WHERE ID = %d", $group_id ) );
-
-		if ( ! empty( $results ) )
-			return true;
-
-		return false;
-	}
-
-	public function assign_group_to_blog( $blog_id, $group_id ) {
-		global $wpdb;
-
-		if ( ! $this->is_group( $group_id ) )
-			return;
-
-		$result = $wpdb->insert(
-			$this->blogs_groups_relationship_table,
-			array(
-				'blog_group_id' => $group_id,
-				'blog_id' => $blog_id
-			),
-			array( '%d', '%d' )
-		);
-
-		if ( $result )
-			$this->refresh_group_blogs_counts( $group_id );
-
-	}
-
-	public function remove_blog_from_group( $blog_id, $group_id ) {
-		global $wpdb;
-
-		if ( ! $this->is_group( $group_id ) )
-			return;
-
-		$wpdb->query( 
-			$wpdb->prepare(
-				"DELETE FROM $this->blogs_groups_relationship_table
-				WHERE blog_id = %d AND blog_group_id = %d",
-				$blog_id,
-				$group_id
-			)
-		);
-
-		$this->refresh_group_blogs_counts( $group_id );
-	}
-
-	public function refresh_group_blogs_counts( $group_id ) {
-		global $wpdb;
-
-		$bcount = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( ID ) FROM $this->blogs_groups_relationship_table WHERE blog_group_id = %d ", $group_id ) );
-		$wpdb->query( $wpdb->prepare( "UPDATE $this->blogs_groups_table SET bcount = $bcount WHERE ID = %d", $group_id ) );
-	}
-
-	public function update_group( $group_id, $args ) {
-		global $wpdb;
-
-		if ( ! empty( $args ) ) {
-
-			$values = array();
-			$wildcards = array();
-			if ( ! empty( $args['group_name'] ) ) {
-				$values['group_name'] = $args['group_name'];
-				$wildcards[] = '%s';
-			}
-
-			if ( ! empty( $values ) ) {
-				$wpdb->update(
-					$this->blogs_groups_table,
-					$values,
-					array( 'ID' => $group_id ),
-					$wildcards,
-					array( '%d' )
-				);
-			}
-			
-		}
-	}
 
 }

@@ -153,6 +153,7 @@ class Multisite_Content_Copier {
 		require_once( MULTISTE_CC_MODEL_DIR . 'nbt-model.php' );
 
 		// Libraries
+		require_once( MULTISTE_CC_INCLUDES_DIR . 'classes/class-blog-group.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'admin-page.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'errors-handler.php' );
 		require_once( MULTISTE_CC_INCLUDES_DIR . 'helpers.php' );
@@ -369,10 +370,10 @@ class Multisite_Content_Copier {
 	public function delete_blog( $blog_id ) {
 		$model = mcc_get_model();
 		$model->delete_queue_for_blog( $blog_id );
-		$blog_groups = $model->get_blog_groups( $blog_id );
+		$blog_groups = mcc_get_blog_groups( array( 'blog_id' => $blog_id ) );
 		if ( ! empty( $blog_groups ) ) {
 			foreach ( $blog_groups as $blog_group ) {
-				$model->remove_blog_from_group( $blog_id, $blog_group->ID );
+				mcc_remove_blog_from_group( $blog_id, $blog_group->ID );
 			}
 		}
 	}
@@ -381,6 +382,3 @@ class Multisite_Content_Copier {
 
 global $multisite_content_copier_plugin;
 $multisite_content_copier_plugin = new Multisite_Content_Copier();
-
-
-

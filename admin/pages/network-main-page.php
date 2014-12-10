@@ -100,20 +100,20 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  			$dest_blog_type = $_GET['dest_blog_type'];
  			$model = mcc_get_model();
  			$nbt_model = mcc_get_nbt_model();
- 			if ( $dest_blog_type == 'group' && ! $model->is_group( absint( $_GET['group'] ) ) ) {
+ 			if ( $dest_blog_type == 'group' && ! mcc_get_blog_group( absint( $_GET['group'] ) ) ) {
 				return false;
 			}
 			elseif ( $dest_blog_type == 'group' ) {
 				// If is a group, we'll need the blogs IDs
 				$group =  absint( $_GET['group'] );
-				$blogs = $model->get_blogs_from_group( $group );
+				$blogs = mcc_get_blog_group_blogs( $group );
 
 				if ( empty( $blogs ) )
 					return false;
 
 				$ids = array();
-				foreach ( $blogs as $blog ) {
-					$ids[] = $blog->blog_id;
+				foreach ( $blogs as $blog_id ) {
+					$ids[] = $blog_id;
 				}
 
 				$this->wizard->set_value( 'dest_blogs_ids', $ids );
@@ -1215,10 +1215,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					$group = absint ( $_POST['group'] );
 
  					$model = mcc_get_model();
- 					if ( ! $model->is_group( $group ) )
+ 					if ( ! mcc_get_blog_group( $group ) )
  						mcc_add_error( 'wrong-group', __( 'You have selected a wrong group', MULTISTE_CC_LANG_DOMAIN ) );
 
- 					$blogs = $model->get_blogs_from_group( $group );
+ 					$blogs = mcc_get_blog_group_blogs( $group );
 
  					if ( empty( $blogs ) ) {
  						mcc_add_error( 'wrong-group', __( 'There are no blogs attached to that group.', MULTISTE_CC_LANG_DOMAIN ) );
@@ -1226,8 +1226,8 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  					else {
  						// Saving the blogs IDs in the wizard
  						$ids = array();
- 						foreach ( $blogs as $blog ) {
- 							$ids[] = $blog->blog_id;
+ 						foreach ( $blogs as $blog_id ) {
+ 							$ids[] = $blog_id;
  						}
  						$this->wizard->set_value( 'dest_blogs_ids', $ids );
  					}

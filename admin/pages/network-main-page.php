@@ -22,9 +22,12 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
         add_action( 'wp_ajax_mcc_retrieve_single_post_data', array( &$this, 'retrieve_single_post_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_single_blog_data', array( &$this, 'retrieve_single_blog_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_single_user_data', array( &$this, 'retrieve_single_user_data' ) );
+
         add_action( 'wp_ajax_mcc_retrieve_cpt_selectors_data', array( &$this, 'retrieve_cpt_selectors_data' ) );
+
         if ( is_multisite() && is_subdomain_install() )
         	add_action( 'wp_ajax_nopriv_mcc_retrieve_cpt_selectors_data', array( &$this, 'retrieve_cpt_selectors_data' ) );
+        
         add_action( 'wp_ajax_mcc_retrieve_cpt_slugs_selector_data', array( &$this, 'retrieve_cpt_slugs_selectors_data' ) );
         add_action( 'wp_ajax_mcc_retrieve_cpt_custom_selector_data', array( &$this, 'retrieve_cpt_custom_selector_data' ) );
         add_action( 'wp_ajax_mcc_remove_item_id_from_list', array( &$this, 'remove_item_id_from_list' ) );

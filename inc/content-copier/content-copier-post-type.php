@@ -559,31 +559,31 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
         // request failed
         if ( ! $headers ) {
             @unlink( $upload['file'] );
-            return new WP_Error( 'import_file_error', sprintf( __('Remote server did not respond for file: %s', WPMUDEV_COPIER_LANG_DOMAIN ), $url ) );
+            return new WP_Error( 'import_file_error', sprintf( __('Remote server did not respond for file: %s', MULTISTE_CC_LANG_DOMAIN ), $url ) );
         }
 
         // make sure the fetch was successful
         if ( $headers['response'] != '200' ) {
             @unlink( $upload['file'] );
-            return new WP_Error( 'import_file_error', sprintf( __('Remote server returned error response %1$d %2$s', WPMUDEV_COPIER_LANG_DOMAIN ), esc_html($headers['response']), get_status_header_desc($headers['response']) ) );
+            return new WP_Error( 'import_file_error', sprintf( __('Remote server returned error response %1$d %2$s', MULTISTE_CC_LANG_DOMAIN ), esc_html($headers['response']), get_status_header_desc($headers['response']) ) );
         }
 
         $filesize = filesize( $upload['file'] );
 
         if ( isset( $headers['content-length'] ) && $filesize != $headers['content-length'] ) {
             @unlink( $upload['file'] );
-            return new WP_Error( 'import_file_error', __('Remote file is incorrect size', WPMUDEV_COPIER_LANG_DOMAIN ) );
+            return new WP_Error( 'import_file_error', __('Remote file is incorrect size', MULTISTE_CC_LANG_DOMAIN ) );
         }
 
         if ( 0 == $filesize ) {
             @unlink( $upload['file'] );
-            return new WP_Error( 'import_file_error', __('Zero size file downloaded', WPMUDEV_COPIER_LANG_DOMAIN ) );
+            return new WP_Error( 'import_file_error', __('Zero size file downloaded', MULTISTE_CC_LANG_DOMAIN ) );
         }
 
         $max_size = (int) apply_filters( 'mcc_attachment_size_limit', 0 );
         if ( ! empty( $max_size ) && $filesize > $max_size ) {
             @unlink( $upload['file'] );
-            return new WP_Error( 'import_file_error', sprintf(__('Remote file is too large, limit is %s', WPMUDEV_COPIER_LANG_DOMAIN ), size_format($max_size) ) );
+            return new WP_Error( 'import_file_error', sprintf(__('Remote file is too large, limit is %s', MULTISTE_CC_LANG_DOMAIN ), size_format($max_size) ) );
         }
 
         return $upload;

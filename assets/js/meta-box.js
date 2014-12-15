@@ -44,7 +44,6 @@ jQuery(document).ready(function($) {
 		});
 
 		
-
 		url += '&' + $.param(additional_options);
 
 		window.location = url;

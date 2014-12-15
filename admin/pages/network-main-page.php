@@ -46,6 +46,8 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  		$this->wizard_start();
 
  		$action = $this->wizard->get_value( 'mcc_action' );
+ 		if ( isset( $_GET['mcc_action'] ) && 'mcc_submit_metabox' == $_GET['mcc_action'] )
+ 			$action = 'mcc_submit_metabox';
 
  		if ( $this->wizard->get_current_step() != '1' && empty( $action ) ) {
  			$this->wizard->go_to_step( '1' );
@@ -961,7 +963,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 		if ( ! empty( $redirect_url ) ) {
 			?>
 			<p>
-				<?php printf( __( 'Click <a href="%s">here</a> to return to your previous page.', MULTISTE_CC_LANG_DOMAIN ), esc_url( $redirect_url ) ); ?>
+				<?php printf( __( 'Click <a href="%s">here</a> to return to the previous page.', MULTISTE_CC_LANG_DOMAIN ), esc_url( $redirect_url ) ); ?>
 			</p>
 			<?php
 		}

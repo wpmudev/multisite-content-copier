@@ -75,7 +75,7 @@ class Multisite_Content_Copier {
 		 * 
 		 * If set to false, NBT Integration will not work
 		 */
-		if ( apply_filters( 'mcc_nbt_integration', false ) )
+		if ( apply_filters( 'mcc_nbt_integration', true ) )
 			$this->nbt_integrator = new MCC_NBT_Integrator();
 
 		// We don't use the activation hook here

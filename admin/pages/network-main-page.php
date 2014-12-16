@@ -393,17 +393,20 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 	private function render_step_1() {
 
+		$types_of_content = mcc_get_types_of_content();
 		$current_action = $this->wizard->get_value( 'mcc_action' );
+		if ( empty( $current_action ) ) {
+			$current_action = key( $types_of_content );
+			reset( $types_of_content );
+		}
 		?>
 			<h3><?php _e( 'Select the type of content that you would like to copy.', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
 			<form action="" method="post" name="wizardform" id="wizardform">
 				<?php wp_nonce_field( 'step_1' ); ?>
 				<ul class="wizardoptions">
-					<li><label><input type="radio" name="mcc_action" value="add-page" <?php checked( $current_action == 'add-page' || empty( $current_action ) ); ?>> <?php _e( 'Pages', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-					<li><label><input type="radio" name="mcc_action" value="add-post" <?php checked( $current_action == 'add-post' ); ?>> <?php _e( 'Posts', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-					<li><label><input type="radio" name="mcc_action" value="add-cpt" <?php checked( $current_action == 'add-cpt' ); ?>> <?php _e( 'Custom Post Type (products, events...)', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-					<li><label><input type="radio" name="mcc_action" value="add-user" <?php checked( $current_action == 'add-user' ); ?>> <?php _e( 'Users', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
-					<li><label><input type="radio" name="mcc_action" value="activate-plugin" <?php checked( $current_action == 'activate-plugin' ); ?>> <?php _e( 'Activate plugins', MULTISTE_CC_LANG_DOMAIN ); ?></label></li>
+					<?php foreach ( $types_of_content as $action => $label ): ?>
+						<li><label><input type="radio" name="mcc_action" value="<?php echo esc_attr( $action ); ?>" <?php checked( $current_action == $action ); ?>> <?php echo esc_html( $label ); ?></label></li>	
+					<?php endforeach; ?>
 				</ul>
 				<?php $this->next_step_button( '1' ); ?>
 			</form>
@@ -1052,8 +1055,13 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  				if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'step_1' ) )
  					return false;
 
+ 				
  				if ( ! isset( $_POST['mcc_action'] ) )
  					mcc_add_error( 'wrong-action', __( 'Please select an option', MULTISTE_CC_LANG_DOMAIN ) );
+
+ 				$types_of_content = mcc_get_types_of_content();
+ 				if ( ! array_key_exists( $_POST['mcc_action'], $types_of_content ) )
+ 					mcc_add_error( 'wrong-action', __( 'You have selected a wrong action', MULTISTE_CC_LANG_DOMAIN ) );
 
  				if ( ! mcc_is_error() ) {
  					// Let's see if we've gone back to the first step and change the action.

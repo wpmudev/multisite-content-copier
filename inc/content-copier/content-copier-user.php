@@ -55,6 +55,8 @@ class Multisite_Content_Copier_User_Copier extends Multisite_Content_Copier_Abst
 		require_once( ABSPATH . 'wp-admin/includes/user.php' );
 
 		$roles = get_editable_roles();
+		if ( empty( $roles ) )
+			$roles = array();
 		$roles = array_keys( $roles );
 
 		$new_role = ! in_array( $orig_role, $roles ) ? $this->args['default_role'] : $orig_role;

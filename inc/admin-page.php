@@ -62,7 +62,7 @@ abstract class Multisite_Content_Copier_Admin_Page {
 			'parent' => false,
 			'menu_title' => 'Menu title',
 			'page_title' => 'Page title',
-			'screen_icon_slug' => '',
+			'screen_icon_slug' => 'div',
 			'network_menu' => false,
 			'enqueue_scripts' => false,
 			'enqueue_styles' => false,
@@ -175,7 +175,7 @@ abstract class Multisite_Content_Copier_Admin_Page {
 				$this->capability, 
 				$this->menu_slug, 
 				array( &$this, 'render_page' ),
-				'div'
+				$this->screen_icon_slug
 			);
 		}
 

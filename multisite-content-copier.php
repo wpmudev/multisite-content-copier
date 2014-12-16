@@ -45,7 +45,7 @@ class Multisite_Content_Copier {
 	static $network_blog_groups_menu_page;
 	static $network_settings_menu_page;
 
-	public $nbt_integrator;
+	public $nbt_integrator = null;
 
 	public function __construct() {
 
@@ -66,14 +66,17 @@ class Multisite_Content_Copier {
 
 		add_action( 'plugins_loaded', array( &$this, 'load_text_domain' ) );
 
-		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
-		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_styles' ) );
-
 		add_action( 'delete_blog', array( &$this, 'delete_blog' ) );
 
 		add_filter( 'allowed_http_origin', array( $this, 'allow_http_origin' ) );
 
-		$this->nbt_integrator = new MCC_NBT_Integrator();
+		/**
+		 * Allows to activate/deactivate NBT Integration
+		 * 
+		 * If set to false, NBT Integration will not work
+		 */
+		if ( apply_filters( 'mcc_nbt_integration', false ) )
+			$this->nbt_integrator = new MCC_NBT_Integrator();
 
 		// We don't use the activation hook here
 		// As sometimes is not very helpful and
@@ -98,23 +101,6 @@ class Multisite_Content_Copier {
 		<?php
 	}
 
-	public function enqueue_scripts() {
-	}
-
-
-	public function enqueue_styles() {
-		global $wp_version;
-		if ( version_compare( $wp_version, '3.8', '>=' ) ) {
-			?>
-				<style>
-					#adminmenu #toplevel_page_mcc_network_page div.wp-menu-image:before { content: "\f325"; }
-				</style>
-			<?php
-		}
-		else {
-			wp_enqueue_style( 'mcc-icons', MULTISTE_CC_ASSETS_URL . 'css/icons.css' );
-		}
-	}
 
 
 
@@ -263,7 +249,7 @@ class Multisite_Content_Copier {
 			'menu_title' => __( 'Content Copier', MULTISTE_CC_LANG_DOMAIN ),
 			'page_title' => __( 'Multisite Content Copier', MULTISTE_CC_LANG_DOMAIN ),
 			'network_menu' => true,
-			'screen_icon_slug' => 'mcc'
+			'screen_icon_slug' => 'dashicons-networking'
 		);
 		self::$network_main_menu_page = new Multisite_Content_Copier_Network_Main_Menu( 'mcc_network_page', 'manage_network', $args );
 
@@ -285,14 +271,16 @@ class Multisite_Content_Copier {
 
 		self::$network_blog_groups_menu_page = new Multisite_Content_Copier_Network_Blogs_Groups_Menu( 'mcc_sites_groups_page', 'manage_network', $args );
 
-		$args = array(
-			'menu_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
-			'page_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
-			'network_menu' => true,
-			'parent' => 'mcc_network_page',
-			'screen_icon_slug' => 'mcc'
-		);
-		self::$network_settings_menu_page = new Multisite_Content_Copier_Network_Settings_Menu( 'mcc_settings_page', 'manage_network', $args );
+		if ( $this->nbt_integrator ) {
+			$args = array(
+				'menu_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
+				'page_title' => __( 'Settings', MULTISTE_CC_LANG_DOMAIN ),
+				'network_menu' => true,
+				'parent' => 'mcc_network_page',
+				'screen_icon_slug' => 'mcc'
+			);
+			self::$network_settings_menu_page = new Multisite_Content_Copier_Network_Settings_Menu( 'mcc_settings_page', 'manage_network', $args );
+		}
 
 		if ( is_admin() && class_exists( 'MCC_Post_Meta_Box' ) )
 			new MCC_Post_Meta_Box();

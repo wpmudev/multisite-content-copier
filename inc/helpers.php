@@ -160,3 +160,14 @@ function mcc_basic_roles_dropdown( $selected = false ) {
 function mcc_is_nbt_active() {
 	return is_plugin_active_for_network( 'blogtemplates/blogtemplates.php' );
 }
+
+function mcc_get_types_of_content() {
+	return apply_filters( 'mcc_types_of_content', array(
+		'add-page' => __( 'Pages', MULTISTE_CC_LANG_DOMAIN ),
+		'add-post' => __( 'Posts', MULTISTE_CC_LANG_DOMAIN ),
+		'add-cpt' => __( 'Custom Post Type (products, events...)', MULTISTE_CC_LANG_DOMAIN ),
+		'add-user' => __( 'Users', MULTISTE_CC_LANG_DOMAIN ),
+		'activate-plugin' => __( 'Activate plugins', MULTISTE_CC_LANG_DOMAIN )
+	) );
+}
+

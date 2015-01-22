@@ -29,6 +29,12 @@ class Multisite_Content_Copier_Network_Settings_Menu extends Multisite_Content_C
 					<?php $this->render_row( __( 'Activate', MULTISTE_CC_LANG_DOMAIN ), array( &$this, 'render_nbt_integration_field' ) ); ?>
 				</table>
 
+				<h3><?php _e( 'Logs', MULTISTE_CC_LANG_DOMAIN ); ?></h3>
+
+				<table class="form-table">
+					<?php $this->render_row( __( 'Activate logs', MULTISTE_CC_LANG_DOMAIN ), array( &$this, 'render_activate_logs_field' ) ); ?>
+				</table>
+
 				<?php wp_nonce_field( 'submit_mcc_settings', 'mcc_settings_nonce' ); ?>
 
 				<?php submit_button( __( 'Save changes', MULTISTE_CC_LANG_DOMAIN ), 'primary', 'submit_mcc_settings' ); ?>
@@ -42,6 +48,22 @@ class Multisite_Content_Copier_Network_Settings_Menu extends Multisite_Content_C
 			<input type="checkbox" name="<?php echo mcc_get_settings_slug(); ?>[blog_templates_integration]" <?php checked( $this->settings['blog_templates_integration'] ); ?>>
  		<?php
  	}
+
+ 	public function render_activate_logs_field() {
+ 		?>
+			<input type="checkbox" name="<?php echo mcc_get_settings_slug(); ?>[logs]" <?php checked( $this->settings['logs'] ); ?> />
+			<span class="description">
+				<?php
+					if ( @fopen( MULTISITE_CC_LOG_DIR . 'test-log.log', 'a' ) ) {
+						printf( __( 'Log directory (%s) is writable.', MULTISTE_CC_LANG_DOMAIN ), MULTISITE_CC_LOG_DIR );
+					} else {
+						printf( '<span style="color:red">' . __( 'Log directory (<code>%s</code>) is not writable. To allow logging, make this writable or define a custom <code>MULTISITE_CC_LOG_DIR</code>.', MULTISTE_CC_LANG_DOMAIN ) . '</span>', MULTISITE_CC_LOG_DIR );
+					}
+				?>
+			</span>
+		<?php
+ 	}
+
 
  	
 
@@ -68,6 +90,13 @@ class Multisite_Content_Copier_Network_Settings_Menu extends Multisite_Content_C
  			}
  			else {
  				$current_settings['blog_templates_integration'] = false;
+ 			}
+
+ 			if ( isset( $input['logs'] ) ) {
+ 				$current_settings['logs'] = true; 				
+ 			}
+ 			else {
+ 				$current_settings['logs'] = false;
  			}
 
 

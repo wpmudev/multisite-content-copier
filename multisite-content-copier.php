@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: https://premium.wpmudev.org/project/multisite-content-copier/
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
 Author: WPMU DEV
-Version: 1.3.3
+Version: 1.4
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
@@ -124,7 +124,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.3.3' );
+		define( 'MULTISTE_CC_VERSION', '1.4' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -140,6 +140,9 @@ class Multisite_Content_Copier {
 		define( 'MULTISTE_CC_FRONT_DIR', MULTISTE_CC_PLUGIN_DIR . 'front/' );
 		define( 'MULTISTE_CC_MODEL_DIR', MULTISTE_CC_PLUGIN_DIR . 'model/' );
 		define( 'MULTISTE_CC_INCLUDES_DIR', MULTISTE_CC_PLUGIN_DIR . 'inc/' );
+
+		if ( ! defined( 'MULTISITE_CC_LOG_DIR' ) )
+			define( 'MULTISITE_CC_LOG_DIR', ABSPATH . 'mcc-logs/' );
 
 	}
 
@@ -220,6 +223,10 @@ class Multisite_Content_Copier {
 			delete_site_option( 'mcc_schema_created' );
 		}
 
+		if ( version_compare( $current_version, '1.4', '<' ) ) {
+			$this->create_files();
+		}
+
 
 		update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 	}
@@ -238,6 +245,32 @@ class Multisite_Content_Copier {
 		update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 		$model = mcc_get_model();
 		$model->create_schema();
+		$this->create_files();
+	}
+
+	public function create_files() {
+		$files = array(
+			array(
+				'base' 		=> MULTISITE_CC_LOG_DIR,
+				'file' 		=> '.htaccess',
+				'content' 	=> 'deny from all'
+			),
+			array(
+				'base' 		=> MULTISITE_CC_LOG_DIR,
+				'file' 		=> 'index.html',
+				'content' 	=> ''
+			)
+		);
+
+		// Thanks to Woocommerce for this code :)
+		foreach ( $files as $file ) {
+			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
+				if ( $file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ) ) {
+					fwrite( $file_handle, $file['content'] );
+					fclose( $file_handle );
+				}
+			}
+		}
 	}
 
 	/**

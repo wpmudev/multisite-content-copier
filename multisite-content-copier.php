@@ -249,6 +249,12 @@ class Multisite_Content_Copier {
 	}
 
 	public function create_files() {
+
+		$create_files = apply_filters( 'mcc_create_files', true );
+
+		if ( ! $create_files )
+			return;
+
 		$files = array(
 			array(
 				'base' 		=> MULTISITE_CC_LOG_DIR,

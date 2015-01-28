@@ -420,6 +420,3 @@ class Multisite_Content_Copier {
 
 global $multisite_content_copier_plugin;
 $multisite_content_copier_plugin = new Multisite_Content_Copier();
-
-
-

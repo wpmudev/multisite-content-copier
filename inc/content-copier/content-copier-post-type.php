@@ -600,11 +600,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
         $filesize = filesize( $upload['file'] );
 
-        if ( isset( $headers['content-length'] ) && $filesize != $headers['content-length'] ) {
-            @unlink( $upload['file'] );
-            return new WP_Error( 'import_file_error', __('Remote file is incorrect size', MULTISTE_CC_LANG_DOMAIN ) );
-        }
-
         if ( 0 == $filesize ) {
             @unlink( $upload['file'] );
             return new WP_Error( 'import_file_error', __('Zero size file downloaded', MULTISTE_CC_LANG_DOMAIN ) );

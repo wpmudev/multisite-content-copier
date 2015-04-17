@@ -54,7 +54,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
  		}
 
 
- 		if ( isset( $_GET['mcc_action'] ) && 'mcc_submit_metabox' == $_GET['mcc_action'] && wp_verify_nonce( $_GET['_wpnonce'], 'mcc_submit_meta_box' ) ) {
+ 		if ( isset( $_GET['mcc_action'] ) && 'mcc_submit_metabox' == $_GET['mcc_action'] ) {
  			// The user has submitted the meta box in the post editor
 
  			$content_blog_id = absint( $_GET['content_blog'] );

@@ -1032,7 +1032,7 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	public function redirect_search() {
 		if ( isset( $_GET['page'] ) && $this->get_menu_slug() == $_GET['page'] && ! empty( $_POST['s'] ) ) {
 			$url = add_query_arg( 's', $_POST['s'] );
-			wp_redirect( $url );
+			wp_redirect( esc_url_raw( $url ) );
 			exit();
 		}
 	}

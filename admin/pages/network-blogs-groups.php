@@ -178,7 +178,8 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 	 			$model = mcc_get_model();
 	 			$model->add_new_blog_group( $group_name );
 
-	 			wp_redirect( add_query_arg( 'added', 'true', $this->get_permalink() ) );
+	 			$redirect_to = add_query_arg( 'added', 'true', $this->get_permalink() );
+	 			wp_redirect( esc_url_raw( $redirect_to ) );
 	 			exit;
 	 		}
  		}
@@ -203,16 +204,15 @@ class Multisite_Content_Copier_Network_Blogs_Groups_Menu extends Multisite_Conte
 	 			);
 	 			$model->update_group( $group_id, $args );
 
-	 			wp_redirect( 
-	 				add_query_arg( 
-	 					array( 
-	 						'updated' => 'true', 
-	 						'action' => 'edit',
-	 						'group' => $group_id
-	 					),
-	 					$this->get_permalink() 
-	 				) 
-	 			);
+	 			$redirect_to = add_query_arg( 
+ 					array( 
+ 						'updated' => 'true', 
+ 						'action' => 'edit',
+ 						'group' => $group_id
+ 					),
+ 					$this->get_permalink() 
+ 				);
+	 			wp_redirect( esc_url_raw( $redirect_to ) );
 	 			exit;
 	 		}
 

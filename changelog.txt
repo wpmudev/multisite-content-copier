@@ -7,6 +7,11 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.4.1 - 2015-05-27
+----------------------------------------------------------------------
+- Fixed: Warning when switching a theme or deleting a blog and NBT integration was not activated.
+- Fixed: Plugin was not deleting NBT relationships
+
 1.4 - 2015-05-02
 ----------------------------------------------------------------------
 - Enhancement: Post galleries are now copied too.

@@ -223,10 +223,6 @@ class Multisite_Content_Copier {
 			delete_site_option( 'mcc_schema_created' );
 		}
 
-		if ( version_compare( $current_version, '1.4', '<' ) ) {
-			$this->create_files();
-		}
-
 
 		update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 	}
@@ -245,7 +241,6 @@ class Multisite_Content_Copier {
 		update_site_option( self::$version_option_slug, MULTISTE_CC_VERSION );
 		$model = mcc_get_model();
 		$model->create_schema();
-		$this->create_files();
 	}
 
 	public function create_files() {
@@ -268,7 +263,7 @@ class Multisite_Content_Copier {
 			)
 		);
 
-		// Thanks to Woocommerce for this code :)
+		// Thanks to WooCommerce for this code :)
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
 				if ( $file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ) ) {
@@ -296,6 +291,9 @@ class Multisite_Content_Copier {
 	 * Initialize the plugin
 	 */
 	public function init_plugin() {
+
+		$this->create_files();
+
 		// A network menu
 		$args = array(
 			'menu_title' => __( 'Content Copier', MULTISTE_CC_LANG_DOMAIN ),
@@ -341,8 +339,15 @@ class Multisite_Content_Copier {
 	public function maybe_copy_content() {
 
 		if ( ! is_network_admin() && ! get_transient( 'mcc_copying' ) ) {
+
 			set_transient( 'mcc_copying', true, 900 );
 			$queue = mcc_get_queue_for_blog();
+
+			if ( ! empty( $queue ) ) {
+				mcc_log( "--------------- COPYING CONTENT ----------------------" );
+				mcc_log( $queue );	
+			}
+			
 
 			foreach ( $queue as $item ) {
 				global $wpdb;
@@ -379,6 +384,7 @@ class Multisite_Content_Copier {
 				$execute = apply_filters( 'mcc_execute_copier', true, $copier, $source_blog_id, $items_ids, $args );
 
 				if ( $execute ) {
+					mcc_log( "EXECUTE!" );
 					$copier->execute();
 					/**
 					 * Triggered when the copier has finished all the copies

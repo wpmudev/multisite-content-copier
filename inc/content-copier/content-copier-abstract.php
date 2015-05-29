@@ -17,20 +17,4 @@ abstract class Multisite_Content_Copier_Abstract {
 	abstract public function execute();
 	abstract public function copy_item( $item_id );
 
-	protected function log( $message ) {
-		$settings = mcc_get_settings();
-
-		if ( $settings['logs'] ) {
-			$file = $this->get_log_file();
-			if ( $file_handle = @fopen( $file, 'a' ) ) {
-				fwrite( $file_handle, sprintf('[%s] ==> %s', date( "Y/m/d h:i:s", time() ), $message ) . PHP_EOL );
-				fclose( $file_handle );
-			}
-		}
-	}
-
-	private function get_log_file() {
-		return trailingslashit( MULTISITE_CC_LOG_DIR ) . 'mcc.log';
-	}
-
 }

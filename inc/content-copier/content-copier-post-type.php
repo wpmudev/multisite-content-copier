@@ -46,6 +46,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		foreach( $this->items as $item_id ) {
 
+			mcc_log( "-- COPY ITEM: " . $item_id );
 			$post_created = $this->copy_item( $item_id );
 
 			$this->posts_created[ $item_id ] = $post_created;
@@ -146,23 +147,20 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		 */
 		do_action( 'mcc_before_copy_post', $source_blog_id, $source_post_id );
 
-		$this->log( sprintf( __( '-- Copying post ID = %d in blog ID = %d to blog ID = %d --', MULTISTE_CC_LANG_DOMAIN ), $item_id, $this->orig_blog_id, get_current_blog_id() ) );
-
 		$new_item_id = $this->copy_post( $item_id );
-				
-		if ( $new_item_id ) {
-			if ( $this->args['copy_images'] )
-				$this->copy_media( $item_id, $new_item_id );
+		
+		if ( ! $new_item_id )
+			return false;
 
-			if ( $this->args['update_date'] )
-				$this->update_post_date( $new_item_id, current_time( 'mysql' ) );
+		if ( $this->args['copy_images'] )
+			$this->copy_media( $item_id, $new_item_id );
+
+		if ( $this->args['update_date'] )
+			$this->update_post_date( $new_item_id, current_time( 'mysql' ) );
 
 
-			if ( $this->args['copy_comments'] )
-				$this->copy_comments( $item_id, $new_item_id );
-		}
-
-		$this->log( sprintf( __( '-- FINISHED: Copying post ID = %d in blog ID = %d to blog ID = %d --', MULTISTE_CC_LANG_DOMAIN ), $item_id, $this->orig_blog_id, get_current_blog_id() ) );
+		if ( $this->args['copy_comments'] )
+			$this->copy_comments( $item_id, $new_item_id );
 
 
 		add_filter('content_save_pre', 'wp_filter_post_kses');
@@ -184,8 +182,9 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		// Getting original post data
 		$orig_post = $this->get_orig_blog_post( $item_id );
 
+		mcc_log( "SOURCE POST: " );
+		mcc_log( $orig_post );
 		if ( empty( $orig_post ) ) {
-			$this->log( __( 'Error: Source post not found', MULTISTE_CC_LANG_DOMAIN ) );
 			return false;
 		}
 
@@ -194,16 +193,12 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		// Insert post in the new blog ( we should be currently on it)
 		$postarr = $this->get_postarr( $orig_post );
 		
-		$new_item_id = wp_insert_post( $postarr );
-		
-		if ( is_wp_error( $new_item_id ) ) {
-			$this->log( sprintf( __( 'Error: %s', MULTISTE_CC_LANG_DOMAIN ), $new_item_id->get_error_message() ) );
-			return false;
-		}
+		$new_item_id = wp_insert_post( $postarr, true );
 
-		$this->log( sprintf( __( 'Post created. New post ID: %d', MULTISTE_CC_LANG_DOMAIN ), $new_item_id ) );
+		mcc_log( "POST INSERTED, RESULT: " );
+		mcc_log( $new_item_id );
 
-		if ( $new_item_id ) {
+		if ( ! is_wp_error( $new_item_id ) ) {
 
 			/**
 			 * Triggered when a single post/page/CPT has been copied
@@ -231,8 +226,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 				 */
 				do_action( 'mcc_copy_post_meta', $this->orig_blog_id, $item_id, $new_item_id, $post_meta->meta_key, $unserialized_meta_value );
 			}			
-
-			$this->log( __( 'Post meta copied', MULTISTE_CC_LANG_DOMAIN ) );
 
 			// Set post format
 			switch_to_blog( $this->orig_blog_id );
@@ -434,8 +427,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	 */
 	public function copy_media( $post_id, $new_post_id ) {
 
-		$this->log( __( '* Copying media *', MULTISTE_CC_LANG_DOMAIN ) );
-
 		// Get all media in the post
 		$all_media = $this->get_all_media_in_post( $post_id );
 		$orig_post = get_blog_post( $this->orig_blog_id, $post_id );
@@ -455,12 +446,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		 */
 		$all_media = apply_filters( 'mcc_copy_media', $all_media, $post_id );
 
-		$this->log( sprintf( __( 'Media found: %s', MULTISTE_CC_LANG_DOMAIN ), print_r( $all_media, true ) ) );
-
 		$images_as_attachments = $all_media['attachments'];
 		$images_as_no_attachments = $all_media['no_attachments'];
-
-		$this->log( __( '* Trying to copy media attached to this post *', MULTISTE_CC_LANG_DOMAIN ) );
 
 		foreach ( $images_as_attachments as $key => $image ) {
 
@@ -478,12 +465,9 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
             unset( $new_attachment['ID'] );
             unset( $new_attachment['guid'] );
 
-            $this->log( sprintf( __( 'Copying file [ID=%d]: %s', MULTISTE_CC_LANG_DOMAIN ), $image->ID, $image->guid ) );
-
 			$upload = $this->fetch_remote_file( $image->guid );
 
 			if ( is_wp_error( $upload ) ) {
-				$this->log( sprintf( __( 'Error: %s', MULTISTE_CC_LANG_DOMAIN ), $upload->get_error_message() ) );				
                 continue;
 			}
 
@@ -491,7 +475,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
                 $new_attachment['post_mime_type'] = $info['type'];
             }
             else {
-            	$this->log( __( 'Error: File type is not accepted by the destination blog', MULTISTE_CC_LANG_DOMAIN ) );
                 continue;
             }
 
@@ -543,10 +526,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 				}
 			}
 					
-            $this->log( sprintf( __( 'File copied. New attachment ID = %d', MULTISTE_CC_LANG_DOMAIN ), $new_attachment_id ) );			
 		}
 
-		$this->log( __( '* Trying to copy media NOT attached to this post *', MULTISTE_CC_LANG_DOMAIN ) );
 
 		foreach ( $images_as_no_attachments as $image ) {
 
@@ -554,12 +535,10 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
                 'post_status' => 'publish'
             );
 
-			$this->log( sprintf( __( 'Copying file: %s', MULTISTE_CC_LANG_DOMAIN ), $image['orig_src'] ) );
 
             $upload = $this->fetch_remote_file( $image['orig_src'] );
 
             if ( is_wp_error( $upload ) ) {
-            	$this->log( sprintf( __( 'Error: %s', MULTISTE_CC_LANG_DOMAIN ), $upload->get_error_message() ) );			
                 continue;
             }
 
@@ -590,7 +569,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 			// Now with the other sizes
 			$new_post_content = str_replace( $from_url, $to_url, $new_post_content );
 
-			$this->log( sprintf( __( 'File copied. New attachment ID = %d', MULTISTE_CC_LANG_DOMAIN ), $new_attachment_id ) );	
 		}
 
 		$new_post->post_content = $new_post_content;

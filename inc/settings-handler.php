@@ -54,8 +54,7 @@ class Multisite_Content_Copier_Settings_Handler {
 	 */
 	public function get_default_settings() {
 		return array(
-			'blog_templates_integration' => false,
-			'logs' => false
+			'blog_templates_integration' => false
 		);
 	}
 

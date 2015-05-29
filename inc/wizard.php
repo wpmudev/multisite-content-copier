@@ -85,7 +85,7 @@ class MCC_Wizard {
 	public function go_to_step( $step ) {
 		if ( in_array( $step, $this->steps ) ) {
 			$this->set_value( 'step', $step );
-			wp_redirect( $this->get_step_url( $step ) );
+			wp_redirect( esc_url_raw( $this->get_step_url( $step ) ) );
 			exit;
 		}
 	}

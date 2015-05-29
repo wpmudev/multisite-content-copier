@@ -309,14 +309,9 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		}
 
-
-
-
-		$attachments = array();
-
-		foreach ( $attachments_ids as $id ) {
-			$attachments[] = get_post( $id );
-		}
+		$gallery_attachments_ids = $this->parse_gallery_attachments( $orig_post->post_content );
+		$attachments_ids = array_merge( $attachments_ids, $gallery_attachments_ids );
+		$attachments = array_map( 'get_post', $attachments_ids );
 
 		// 2. Now the thumbnail
 		$thumbnail = get_post( get_post_thumbnail_id( $orig_post->ID ) );
@@ -407,6 +402,25 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		);
 
 		
+	}
+
+	/**
+	 * Get the attachments IDs inside a gallery shortcode if it exists in the post content
+	 */
+	public function parse_gallery_attachments( $post_content ) {
+		$pattern = $this->get_gallery_pattern();
+		preg_match_all( "/$pattern/s", $post_content, $matches );
+		$attr = shortcode_parse_atts( $matches[3][0] );
+
+		$ids = array();
+		if ( isset( $attr['ids'] ) )
+			$ids = array_map( 'absint', explode( ',', $attr['ids'] ) );
+
+		return $ids;
+	}
+
+	public function get_gallery_pattern() {
+		return '\[(\[?)(gallery)(?![\w-])([^\]\/]*(?:\/(?!\])[^\]\/]*)*?)(?:(\/)\]|\](?:([^\[]*+(?:\[(?!\/\2\])[^\[]*+)*+)\[\/\2\])?)(\]?)';
 	}
 
 	
@@ -510,6 +524,24 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 			// Now with the other sizes
 			$new_post_content = str_replace( $from_url, $to_url, $new_post_content );
+
+			// If the image was inside a gallery shortcode, replace the ID inside the shortcode
+			$pattern = $this->get_gallery_pattern();
+			preg_match_all( "/$pattern/s", $new_post_content, $matches );
+			$attr = shortcode_parse_atts( $matches[3][0] );
+
+			if ( ! empty( $matches[3][0] ) ) {
+				$new_id = $new_attachment_id;
+				$old_id = $image->ID;
+				$gallery_ids = $this->parse_gallery_attachments( $new_post_content );
+
+				$key = array_search( $old_id, $gallery_ids );
+				if ( $key !== false ) {
+					$gallery_ids[ $key ] = $new_id;
+					$ids_string = ' ids="' . implode( ',', $gallery_ids ) . '"';
+					$new_post_content = str_replace( $matches[3][0], $ids_string, $new_post_content );
+				}
+			}
 					
             $this->log( sprintf( __( 'File copied. New attachment ID = %d', MULTISTE_CC_LANG_DOMAIN ), $new_attachment_id ) );			
 		}

@@ -1,5 +1,9 @@
 <?php
 class MCC_Posts_List_Table extends WP_List_Table {
+	public $selected;
+	public $post_type;
+	public $blog_id;
+
 	function __construct( $args = array() ) {
 
 		$args = wp_parse_args( $args, array( 'blog_id' => 1, 'post_type' => 'post' , 'selected' => array() ) );

@@ -166,10 +166,10 @@ class Multisite_Content_Copier_NBT_Model {
 		global $wpdb;
 
 		if ( $field == 'template_id' ) {
-			$where = $wpdb->prepare( " template_id = %d", $field );
+			$where = $wpdb->prepare( " template_id = %d", $value );
 		}
 		elseif ( $field == 'blog_id' ) {
-			$where = $wpdb->prepare( " blog_id = %d", $field );
+			$where = $wpdb->prepare( " blog_id = %d", $value );
 		}
 		else {
 			return false;

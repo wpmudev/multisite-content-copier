@@ -82,6 +82,8 @@ class Multisite_Content_Copier {
 		register_deactivation_hook( __FILE__, array( &$this, 'deactivate' ) );
 		register_activation_hook( __FILE__, array( &$this, 'activate' ) );
 
+		do_action( 'mcc_init', $this );
+
 	}
 
 	public function allow_http_origin( $current ) {

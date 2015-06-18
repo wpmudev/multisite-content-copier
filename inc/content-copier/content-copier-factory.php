@@ -20,3 +20,7 @@ class Multisite_Content_Copier_Factory {
 	}
 
 }
+
+function mcc_get_copier( $type, $source_blog_id, $items_ids, $args = array() ) {
+	return Multisite_Content_Copier_Factory::get_copier( $type, $source_blog_id, $items_ids, $args );
+}

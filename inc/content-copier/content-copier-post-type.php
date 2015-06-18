@@ -66,7 +66,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		 * }
 		 * @param Integer $orig_blog_id Source blog ID
 		 */
-		do_action( 'mcc_copy_posts', $this->posts_created, $this->orig_blog_id );
+		do_action( 'mcc_copy_posts', $this->posts_created, $this->orig_blog_id, $this->args );
 
 		return $this->posts_created;
 	}
@@ -189,7 +189,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		// Insert post in the new blog ( we should be currently on it)
 		$postarr = $this->get_postarr( $orig_post );
-		
+
 		$new_item_id = wp_insert_post( $postarr );
 		
 
@@ -723,6 +723,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		// Get the source postmeta
 		$model = mcc_get_copier_model();
 		$post_meta = $model->get_post_meta( $post_id );
+
 
 		restore_current_blog();
 

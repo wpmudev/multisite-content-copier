@@ -123,7 +123,13 @@ function mcc_get_registered_cpts() {
 	unset( $post_types['attachment'] );
 	unset( $post_types['post'] );
 
-	return $post_types;
+	/**
+	 * Filters the registered Custom Post TYpes for a given blog
+	 * 
+	 * @param $post_types Registered Post Types
+	 * @param Blog ID
+	 */
+	return apply_filters( 'mcc_get_registered_cpts', $post_types, get_current_blog_id() );
 }
 
 

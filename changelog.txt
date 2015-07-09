@@ -7,6 +7,12 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.5 - 2015-07-09
+----------------------------------------------------------------------
+- New: WooCommerce integration: Now copying custom and global attributes.
+- New: Added CoursePress Integration
+- Fixed: Several warnings/notices
+
 1.4.1 - 2015-05-27
 ----------------------------------------------------------------------
 - Fixed: Warning when switching a theme or deleting a blog and NBT integration was not activated.

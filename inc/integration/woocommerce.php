@@ -160,3 +160,31 @@ function mcc_woocommerce_copy_products_attributes( $posts, $source_blog_id ) {
 		}
 	}
 }
+
+add_action( 'mcc_copy_attachment', 'mcc_woocommerce_remap_product_gallery', 10, 4 );
+function mcc_woocommerce_remap_product_gallery( $new_attachment_id, $source_attachment_id, $new_post_id, $source_post_id ) {
+	if ( ! class_exists( 'Woocommerce' ) ) {
+		return;
+	}
+
+	if ( get_post_type( $new_post_id ) != 'product' )
+		return;
+
+	// Little hack for WooCommerce
+	register_taxonomy( 'product_type', array() );
+
+	$new_product = wc_get_product( $new_post_id );
+	if ( ! $new_product )
+		return;
+
+	$gallery_ids = $new_product->get_gallery_attachment_ids();
+	$found_keys = array_keys( $gallery_ids, $source_attachment_id );
+	if ( ! empty( $found_keys ) ) {
+		foreach ( $found_keys as $key ) {
+			$gallery_ids[ $key ] = $new_attachment_id;
+		}
+
+		update_post_meta( $new_post_id, '_product_image_gallery', implode( ',', $gallery_ids ) );
+	}
+
+}

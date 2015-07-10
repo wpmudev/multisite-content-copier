@@ -441,7 +441,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		 * 
 		 * @param Integer $post_id Source Post ID
 		 */
-		$all_media = apply_filters( 'mcc_copy_media', $all_media, $post_id );
+		$all_media = apply_filters( 'mcc_copy_media', $all_media, $post_id, $new_post_id );
 
 		$images_as_attachments = $all_media['attachments'];
 		$images_as_no_attachments = $all_media['no_attachments'];
@@ -488,6 +488,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
             if ( $is_thumbnail )
             	set_post_thumbnail( $new_post_id, $new_attachment_id );
+
+			do_action( 'mcc_copy_attachment', $new_attachment_id, $image->ID, $new_post_id, $post_id );
 
             // First we try with the plain file
 			$new_post_content = str_replace( $image->guid, $new_attachment['guid'], $new_post_content );

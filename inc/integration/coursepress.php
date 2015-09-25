@@ -2,6 +2,8 @@
 
 class MCC_CoursePress_Integration {
 
+	public $units_copied = array();
+
 	public function __construct() {
 		add_action( 'mcc_copy_posts', array( $this, 'maybe_copy_units' ), 10, 3 );
 		add_filter( 'mcc_get_registered_cpts', array( $this, 'get_registered_cpts' ) );
@@ -40,8 +42,14 @@ class MCC_CoursePress_Integration {
 				}
 
 				$courses[ $source_post_id ] = array(
-					'units' => wp_list_pluck( $source_course->get_units(), 'ID' )
+					'units' => wp_list_pluck( $source_course->get_units(), 'ID' ),
+					'modules' => array()
 				);
+
+				// Get the modules for each unit
+				foreach ( $courses[ $source_post_id]['units'] as $unit_id ) {
+					$courses[ $source_post_id]['modules'][ $unit_id ] = wp_list_pluck( Unit_Module::get_modules( $unit_id ), 'ID' );
+				}
 				
 				
 			}
@@ -50,11 +58,22 @@ class MCC_CoursePress_Integration {
 
 		foreach ( $courses as $source_course_id => $course_atts ) {
 			if ( ! empty( $course_atts['units'] ) ) {
+				$args['copy_parents'] = false;
 				$copier = mcc_get_copier( 'post', $source_blog_id, $course_atts['units'], $args );
 
+				remove_action( 'mcc_copy_posts', array( $this, 'maybe_copy_units' ), 10, 3 );
 				add_filter( 'mcc_copy_post_meta', array( $this, 'remap_unit_meta' ), 10, 5 );
 				$copier->execute();
 				remove_filter( 'mcc_copy_post_meta', array( $this, 'remap_unit_meta' ), 10, 5 );
+
+				foreach ( $course_atts['modules'] as $unit_id => $modules_ids ) {
+					$copier = mcc_get_copier( 'post', $source_blog_id, $modules_ids, $args );
+					add_action( 'mcc_copy_posts', array( $this, 'remap_module_data' ), 10, 3 );
+					$copier->execute();
+					remove_action( 'mcc_copy_posts', array( $this, 'remap_module_data' ), 10, 3 );
+				}
+
+				add_action( 'mcc_copy_posts', array( $this, 'maybe_copy_units' ), 10, 3 );
 			}
 			
 		}
@@ -77,9 +96,31 @@ class MCC_CoursePress_Integration {
 			return;
 		
 		if ( 'course_id' === $meta_key && isset( $this->copied_posts[ $source_unit->post_parent ] ) ) {
-			update_post_meta( $new_unit_id, 'course_id', $this->copied_posts[ $source_unit->post_parent ] );	
+			remove_filter('content_save_pre', 'wp_filter_post_kses');
+			remove_filter('content_filtered_save_pre', 'wp_filter_post_kses');
+			update_post_meta( $new_unit_id, 'course_id', $this->copied_posts[ $source_unit->post_parent ] );
+			wp_update_post( array( 'post_parent' => $this->copied_posts[ $source_unit->post_parent ], 'ID' => $new_unit_id ) );
+			add_filter('content_save_pre', 'wp_filter_post_kses');
+			add_filter('content_filtered_save_pre', 'wp_filter_post_kses');
 		}
-		
+
+		$this->units_copied[ $unit_id ] = $new_unit_id;
+	}
+
+	public function remap_module_data( $posts_created, $src_blog_id, $args ) {
+		foreach ( $posts_created as $src_module_id => $new_module_id ) {
+			$src_module = get_blog_post( $src_blog_id, $src_module_id );
+			if ( ! is_object( $src_module ) )
+				continue;
+
+			if ( ! isset( $this->units_copied[ $src_module->post_parent ] ) )
+				continue;
+			remove_filter('content_save_pre', 'wp_filter_post_kses');
+			remove_filter('content_filtered_save_pre', 'wp_filter_post_kses');
+			wp_update_post( array( 'post_parent' => $this->units_copied[ $src_module->post_parent ], 'ID' => $new_module_id ) );
+			add_filter('content_save_pre', 'wp_filter_post_kses');
+			add_filter('content_filtered_save_pre', 'wp_filter_post_kses');
+		}
 	}
 }
 

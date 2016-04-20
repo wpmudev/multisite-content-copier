@@ -1,11 +1,25 @@
 Plugin Name: Multisite Content Copier
 Author: WPMUDEV
 Requires at least: 3.6
-Tested up to: 4.2.1
+Tested up to: 4.3
 
 Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
+
+1.5.2 - 2015-08-28
+----------------------------------------------------------------------
+- Fixed: Wizard issue when trying to copy all users in step 3
+
+1.5.1 - 2015-07-10
+----------------------------------------------------------------------
+- Fixed: WooCommerce gallery was not  being remaped
+
+1.5 - 2015-07-09
+----------------------------------------------------------------------
+- New: WooCommerce integration: Now copying custom and global attributes.
+- New: Added CoursePress Integration
+- Fixed: Several warnings/notices
 
 1.4.1 - 2015-05-27
 ----------------------------------------------------------------------

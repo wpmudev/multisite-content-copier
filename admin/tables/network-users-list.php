@@ -1,13 +1,18 @@
 <?php
 class MCC_Users_List_Table extends WP_List_Table {
+
+	private $blog_id;
+	private $selected;
+	private $enabled;
+
 	function __construct( $args = array() ) {
 
-		$args = wp_parse_args( $args, array( 'blog_id' => 1, 'enabled' => false , 'selected' => array() ) );
+		$args = wp_parse_args( $args, array( 'blog_id' => 1, 'enabled' => true , 'selected' => array() ) );
 
 		extract( $args );
-		$this->blog_id = $blog_id;
-		$this->selected = $selected;
-		$this->enabled = $enabled;
+		$this->blog_id = $args['blog_id'];
+		$this->selected = $args['selected'];
+		$this->enabled = $args['enabled'];
 
         parent::__construct( array(
             'singular'  => __( 'User', MULTISTE_CC_LANG_DOMAIN ),  

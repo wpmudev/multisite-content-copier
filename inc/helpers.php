@@ -123,7 +123,13 @@ function mcc_get_registered_cpts() {
 	unset( $post_types['attachment'] );
 	unset( $post_types['post'] );
 
-	return $post_types;
+	/**
+	 * Filters the registered Custom Post TYpes for a given blog
+	 * 
+	 * @param $post_types Registered Post Types
+	 * @param Blog ID
+	 */
+	return apply_filters( 'mcc_get_registered_cpts', $post_types, get_current_blog_id() );
 }
 
 
@@ -172,14 +178,17 @@ function mcc_is_nbt_active() {
 }
 
 function mcc_log( $message ) {
-	$file = mcc_get_log_file();
-	if ( ! is_string( $message ) )
-		$message = print_r( $message, true );
-	
-	if ( $file_handle = @fopen( $file, 'a' ) ) {
-		fwrite( $file_handle, sprintf('[%s] ==> %s', date( "Y/m/d h:i:s", time() ), $message ) . PHP_EOL );
-		fclose( $file_handle );
+	if ( defined( 'MCC_DEBUG' ) && MCC_DEBUG ) {
+		$file = mcc_get_log_file();
+		if ( ! is_string( $message ) )
+			$message = print_r( $message, true );
+
+		if ( $file_handle = @fopen( $file, 'a' ) ) {
+			fwrite( $file_handle, sprintf('[%s] ==> %s', date( "Y/m/d h:i:s", time() ), $message ) . PHP_EOL );
+			fclose( $file_handle );
+		}
 	}
+
 }
 
 function mcc_get_log_file() {

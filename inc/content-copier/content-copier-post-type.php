@@ -67,7 +67,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		 * }
 		 * @param Integer $orig_blog_id Source blog ID
 		 */
-		do_action( 'mcc_copy_posts', $this->posts_created, $this->orig_blog_id );
+		do_action( 'mcc_copy_posts', $this->posts_created, $this->orig_blog_id, $this->args );
 
 		return $this->posts_created;
 	}
@@ -184,6 +184,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		mcc_log( "SOURCE POST: " );
 		mcc_log( $orig_post );
+		
 		if ( empty( $orig_post ) ) {
 			return false;
 		}
@@ -192,7 +193,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		// Insert post in the new blog ( we should be currently on it)
 		$postarr = $this->get_postarr( $orig_post );
-		
+
 		$new_item_id = wp_insert_post( $postarr, true );
 
 		mcc_log( "POST INSERTED, RESULT: " );
@@ -403,7 +404,9 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 	public function parse_gallery_attachments( $post_content ) {
 		$pattern = $this->get_gallery_pattern();
 		preg_match_all( "/$pattern/s", $post_content, $matches );
-		$attr = shortcode_parse_atts( $matches[3][0] );
+
+		if ( isset( $matches[3][0] ) )
+			$attr = shortcode_parse_atts( $matches[3][0] );
 
 		$ids = array();
 		if ( isset( $attr['ids'] ) )
@@ -444,7 +447,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		 * 
 		 * @param Integer $post_id Source Post ID
 		 */
-		$all_media = apply_filters( 'mcc_copy_media', $all_media, $post_id );
+		$all_media = apply_filters( 'mcc_copy_media', $all_media, $post_id, $new_post_id );
 
 		$images_as_attachments = $all_media['attachments'];
 		$images_as_no_attachments = $all_media['no_attachments'];
@@ -494,6 +497,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
             if ( $is_thumbnail )
             	set_post_thumbnail( $new_post_id, $new_attachment_id );
 
+			do_action( 'mcc_copy_attachment', $new_attachment_id, $image->ID, $new_post_id, $post_id );
+
             // First we try with the plain file
 			$new_post_content = str_replace( $image->guid, $new_attachment['guid'], $new_post_content );
 
@@ -510,10 +515,11 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 			// If the image was inside a gallery shortcode, replace the ID inside the shortcode
 			$pattern = $this->get_gallery_pattern();
+			
 			preg_match_all( "/$pattern/s", $new_post_content, $matches );
-			$attr = shortcode_parse_atts( $matches[3][0] );
 
 			if ( ! empty( $matches[3][0] ) ) {
+				$attr = shortcode_parse_atts( $matches[3][0] );
 				$new_id = $new_attachment_id;
 				$old_id = $image->ID;
 				$gallery_ids = $this->parse_gallery_attachments( $new_post_content );
@@ -726,6 +732,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		// Get the source postmeta
 		$model = mcc_get_copier_model();
 		$post_meta = $model->get_post_meta( $post_id );
+
 
 		restore_current_blog();
 

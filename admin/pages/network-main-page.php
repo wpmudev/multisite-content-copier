@@ -519,6 +519,10 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 							return true;
 						}
 						else {
+							var user_selection = $('input[name="users_selection"]:checked' );
+							if ( user_selection.length && user_selection.val() === 'all' ) {
+								return true;
+							}
 							alert( "<?php _e( 'You must add at least one item to the list', MULTISTE_CC_LANG_DOMAIN ); ?>" );
 							return false;
 						}
@@ -655,6 +659,8 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 			<?php
 		}
 		else {
+			if ( ! is_array( $current_users_ids ) )
+				$current_users_ids = array();
 			$users_ids_list = array();
 			foreach ( $current_users_ids as $user_id ) {
 				$user = get_userdata( $user_id );

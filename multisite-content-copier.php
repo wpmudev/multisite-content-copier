@@ -348,8 +348,8 @@ class Multisite_Content_Copier {
 			$queue = mcc_get_queue_for_blog();
 
 			if ( ! empty( $queue ) ) {
-				mcc_log( "--------------- COPYING CONTENT ----------------------" );
-				mcc_log( $queue );	
+				$this->log( "--------------- COPYING CONTENT ----------------------" );
+				$this->log( $queue );
 			}
 			
 
@@ -388,7 +388,7 @@ class Multisite_Content_Copier {
 				$execute = apply_filters( 'mcc_execute_copier', true, $copier, $source_blog_id, $items_ids, $args );
 
 				if ( $execute ) {
-					mcc_log( "EXECUTE!" );
+					$this->log( "EXECUTE!" );
 					$copier->execute();
 					/**
 					 * Triggered when the copier has finished all the copies

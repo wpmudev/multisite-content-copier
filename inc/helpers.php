@@ -176,21 +176,3 @@ function mcc_basic_roles_dropdown( $selected = false ) {
 function mcc_is_nbt_active() {
 	return is_plugin_active_for_network( 'blogtemplates/blogtemplates.php' );
 }
-
-function mcc_log( $message ) {
-	if ( defined( 'MCC_DEBUG' ) && MCC_DEBUG ) {
-		$file = mcc_get_log_file();
-		if ( ! is_string( $message ) )
-			$message = print_r( $message, true );
-
-		if ( $file_handle = @fopen( $file, 'a' ) ) {
-			fwrite( $file_handle, sprintf('[%s] ==> %s', date( "Y/m/d h:i:s", time() ), $message ) . PHP_EOL );
-			fclose( $file_handle );
-		}
-	}
-
-}
-
-function mcc_get_log_file() {
-	return trailingslashit( MULTISITE_CC_LOG_DIR ) . 'mcc.log';
-}

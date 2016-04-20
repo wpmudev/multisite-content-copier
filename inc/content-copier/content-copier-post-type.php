@@ -46,7 +46,7 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		foreach( $this->items as $item_id ) {
 
-			mcc_log( "-- COPY ITEM: " . $item_id );
+			$this->log( "-- COPY ITEM: " . $item_id );
 			$post_created = $this->copy_item( $item_id );
 
 			$this->posts_created[ $item_id ] = $post_created;
@@ -182,8 +182,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		// Getting original post data
 		$orig_post = $this->get_orig_blog_post( $item_id );
 
-		mcc_log( "SOURCE POST: " );
-		mcc_log( $orig_post );
+		$this->log( "SOURCE POST: " );
+		$this->log( $orig_post );
 		
 		if ( empty( $orig_post ) ) {
 			return false;
@@ -196,8 +196,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 
 		$new_item_id = wp_insert_post( $postarr, true );
 
-		mcc_log( "POST INSERTED, RESULT: " );
-		mcc_log( $new_item_id );
+		$this->log( "POST INSERTED, RESULT: " );
+		$this->log( $new_item_id );
 
 		if ( ! is_wp_error( $new_item_id ) ) {
 

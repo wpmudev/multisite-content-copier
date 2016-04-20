@@ -17,4 +17,17 @@ abstract class Multisite_Content_Copier_Abstract {
 	abstract public function execute();
 	abstract public function copy_item( $item_id );
 
+	protected function log( $message ) {
+		if ( defined( 'MCC_DEBUG' ) && MCC_DEBUG ) {
+			$file = trailingslashit( MULTISITE_CC_LOG_DIR ) . 'mcc.log';
+			if ( ! is_string( $message ) )
+				$message = print_r( $message, true );
+
+			if ( $file_handle = @fopen( $file, 'a' ) ) {
+				fwrite( $file_handle, sprintf('[%s] ==> %s', date( "Y/m/d h:i:s", time() ), $message ) . PHP_EOL );
+				fclose( $file_handle );
+			}
+		}
+	}
+
 }

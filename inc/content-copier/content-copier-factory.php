@@ -2,6 +2,14 @@
 
 class Multisite_Content_Copier_Factory {
 
+	/**
+	 * @param $type
+	 * @param $orig_blog_id
+	 * @param $items
+	 * @param array $args
+	 *
+	 * @return Multisite_Content_Copier_Abstract
+	 */
 	public static function get_copier( $type, $orig_blog_id, $items, $args = array() ) {
 		$filename = MULTISTE_CC_INCLUDES_DIR . 'content-copier/content-copier-' . strtolower( $type ) . '.php';
 		

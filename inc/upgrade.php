@@ -128,3 +128,8 @@ function mcc_upgrade_122() {
 		$wpdb->query( $wpdb->prepare( "UPDATE $blogs_groups_table SET bcount = $bcount WHERE ID = %d", $group_id ) );
 	}
 }
+
+function mcc_upgrade_153() {
+	$model = mcc_get_model();
+	$model->create_schema();
+}

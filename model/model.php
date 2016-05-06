@@ -82,6 +82,8 @@ class Multisite_Content_Copier_Model {
               src_blog_id bigint(20),
               dest_blog_id bigint(20),
               settings text,
+              KEY src_blog_id (src_blog_id),
+              KEY dest_blog_id (dest_blog_id),
               PRIMARY KEY  (ID)
             )  ENGINE=MyISAM $this->db_charset_collate;";
        	
@@ -118,7 +120,9 @@ class Multisite_Content_Copier_Model {
               blog_group_id bigint(20),
               blog_id bigint(20),
               PRIMARY KEY  (ID),
-              UNIQUE KEY `group` (`blog_group_id`,`blog_id`)
+              UNIQUE KEY `group` (`blog_group_id`,`blog_id`),
+              KEY blog_group_id (blog_group_id),
+              KEY blog_id (blog_id)
             )  ENGINE=MyISAM $this->db_charset_collate;";
        	
         dbDelta($sql);

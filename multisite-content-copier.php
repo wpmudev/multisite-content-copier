@@ -4,7 +4,7 @@ Plugin Name: Multisite Content Copier
 Plugin URI: https://premium.wpmudev.org/project/multisite-content-copier/
 Description: Copy any content from any site in your network to any other site or group of sites in the same network.
 Author: WPMU DEV
-Version: 1.5.2
+Version: 1.5.3
 Author URI: http://premium.wpmudev.org/
 Text Domain: mcc
 Domain Path: lang
@@ -126,7 +126,7 @@ class Multisite_Content_Copier {
 	private function set_globals() {
 
 		// Basics
-		define( 'MULTISTE_CC_VERSION', '1.5.2' );
+		define( 'MULTISTE_CC_VERSION', '1.5.3' );
 		define( 'MULTISTE_CC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		define( 'MULTISTE_CC_PLUGIN_FILE_DIR', plugin_dir_path( __FILE__ ) . 'multisite-content-copier.php' );
@@ -144,7 +144,7 @@ class Multisite_Content_Copier {
 		define( 'MULTISTE_CC_INCLUDES_DIR', MULTISTE_CC_PLUGIN_DIR . 'inc/' );
 
 		if ( ! defined( 'MULTISITE_CC_LOG_DIR' ) )
-			define( 'MULTISITE_CC_LOG_DIR', ABSPATH . 'mcc-logs/' );
+			define( 'MULTISITE_CC_LOG_DIR', WP_CONTENT_DIR . '/mcc-logs/' );
 
 	}
 
@@ -225,6 +225,11 @@ class Multisite_Content_Copier {
 
 		if ( version_compare( $current_version, '1.2.3', '<' ) ) {
 			delete_site_option( 'mcc_schema_created' );
+		}
+
+		if ( version_compare( $current_version, '1.5.3', '<' ) ) {
+			require_once( MULTISTE_CC_INCLUDES_DIR . 'upgrade.php' );
+			mcc_upgrade_153();
 		}
 
 
@@ -344,14 +349,8 @@ class Multisite_Content_Copier {
 
 		if ( ! is_network_admin() && ! get_transient( 'mcc_copying' ) ) {
 
-			set_transient( 'mcc_copying', true, 900 );
+			set_transient( 'mcc_copying', true, 300 );
 			$queue = mcc_get_queue_for_blog();
-
-			if ( ! empty( $queue ) ) {
-				$this->log( "--------------- COPYING CONTENT ----------------------" );
-				$this->log( $queue );
-			}
-			
 
 			foreach ( $queue as $item ) {
 				global $wpdb;
@@ -368,7 +367,7 @@ class Multisite_Content_Copier {
 				$source_blog_id = $item->src_blog_id;
 
 				$wpdb->query( "BEGIN;" );
-				
+
 				self::include_copier_classes();
 				$copier = Multisite_Content_Copier_Factory::get_copier( $type, $source_blog_id, $items_ids, $args );
 
@@ -388,7 +387,6 @@ class Multisite_Content_Copier {
 				$execute = apply_filters( 'mcc_execute_copier', true, $copier, $source_blog_id, $items_ids, $args );
 
 				if ( $execute ) {
-					$this->log( "EXECUTE!" );
 					$copier->execute();
 					/**
 					 * Triggered when the copier has finished all the copies
@@ -400,7 +398,6 @@ class Multisite_Content_Copier {
 					 */
 					do_action( 'mcc_after_execute_copier', $type, $source_blog_id, $items_ids, $args );
 				}
-
 				$wpdb->query( "COMMIT" );
 
 

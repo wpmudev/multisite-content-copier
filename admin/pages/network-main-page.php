@@ -389,7 +389,9 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 
 
 	private function render_step_1() {
-
+		global $wpdb;
+		$table = $wpdb->base_prefix . 'mcc_queue';
+		
 		$current_action = $this->wizard->get_value( 'mcc_action' );
 		?>
 			<h3><?php _e( 'Select the type of content that you would like to copy.', MULTISTE_CC_LANG_DOMAIN ); ?></h3>

@@ -10,7 +10,7 @@ delete_site_option( 'multisite_content_copier_plugin_version' );
 delete_site_option( 'multisite_content_copier_settings' );
 delete_site_option( 'mcc_schema_created' );
 delete_site_option( 'show_nbt_integration_notice' );
-delete_transient( 'mcc_copying' );
+delete_option( 'mcc_copying' );
 
 global $wpdb;
 

@@ -346,10 +346,21 @@ class Multisite_Content_Copier {
 
 	
 	public function maybe_copy_content() {
+		
+		$copying = get_option( 'mcc_copying' );
+		if ( ( $copying && ( time() > $copying ) ) || ! $copying ) {
+			$copying = false;
+			delete_option( 'mcc_copying' );
+		}
+		else {
+			$copying = true;
+		}
 
-		if ( ! is_network_admin() && ! get_transient( 'mcc_copying' ) ) {
+		if ( ! is_network_admin() && ! $copying ) {
 
-			set_transient( 'mcc_copying', true, 300 );
+			$expires_on = time() + 300;
+			update_option( 'mcc_copying', $expires_on );
+
 			$queue = mcc_get_queue_for_blog();
 
 			foreach ( $queue as $item ) {
@@ -402,7 +413,7 @@ class Multisite_Content_Copier {
 
 
 			}
-			delete_transient( 'mcc_copying' );
+			delete_option( 'mcc_copying' );
 		}
 		
 	}

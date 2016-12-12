@@ -3,7 +3,7 @@
 class MCC_Post_Meta_Box {
 
 	public function __construct() {
-		add_action( 'add_meta_boxes', array( &$this, 'add_meta_boxes' ), 10, 2 );
+		add_action( 'add_meta_boxes', array( &$this, 'add_meta_boxes' ), 10, 1 );
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
 		//add_action( 'edit_form_top', array( &$this, 'maybe_sync_post' ) );
 		//add_action( 'save_post', array( &$this, 'process_sync_form' ), 10, 3 );
@@ -22,7 +22,7 @@ class MCC_Post_Meta_Box {
 		}
 	}
 
-	public function add_meta_boxes( $post_type, $post ) {
+	public function add_meta_boxes( $post_type ) {
 
 		if ( ! is_super_admin() )
 			return;

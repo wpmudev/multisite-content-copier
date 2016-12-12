@@ -112,10 +112,9 @@ class MCC_Sites_List_Table extends WP_List_Table {
 	}
 
 	function get_columns() {
-		$blogname_columns = ( is_subdomain_install() ) ? __( 'Domain' ) : __( 'Path' );
 		$sites_columns = array(
 			'cb'          => '<input type="checkbox" />',
-			'blogname'    => $blogname_columns,
+			'blogname'    => __( 'URL' ),
 			'groups'	  => __( 'Groups', MULTISTE_CC_LANG_DOMAIN )
 		);
 
@@ -128,9 +127,7 @@ class MCC_Sites_List_Table extends WP_List_Table {
 	}
 
 	function column_blogname( $item ) {
-		global $current_site;
-
-		$blogname = ( is_subdomain_install() ) ? str_replace( '.'.$current_site->domain, '', $item['domain'] ) : $item['path'];
+		$blogname = untrailingslashit( $item['domain'] . $item['path'] );
 		return $blogname;
 	}
 
@@ -149,11 +146,6 @@ class MCC_Sites_List_Table extends WP_List_Table {
 		return implode( '<br/>', $return );
 	}
 
-	function get_sortable_columns() {
-		return array(
-			'blogname' => array('blogname',false)
-		);
-	}
 
 	function extra_tablenav( $which ) {
         if ( 'top' == $which) {

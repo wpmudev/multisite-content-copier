@@ -60,7 +60,7 @@ class MCC_Post_Meta_Box {
 		$model = mcc_get_model();
 		
 
-		if ( ! in_array( $post->post_status, array( 'publish', 'draft', 'pending' ) ) ) {
+		if ( ! in_array( $post->post_status, array( 'publish', 'draft', 'pending', 'future' ) ) ) {
 			echo '<p>' . __( 'Please save this post if you would like to copy it.', MULTISTE_CC_LANG_DOMAIN ) . '</p>';
 
 		}

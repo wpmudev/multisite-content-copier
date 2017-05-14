@@ -7,6 +7,7 @@ if(!class_exists('WP_List_Table')){
 class MCC_Plugins_List_Table extends WP_List_Table {
 
     private $data;
+    private $current_selected_plugins;
 
 	function __construct(){
         //Set parent defaults
@@ -47,14 +48,13 @@ class MCC_Plugins_List_Table extends WP_List_Table {
     function display_tablenav( $which ) {
 
     }
- 
- 
 
-    function prepare_items( $selected ) {
 
-        if ( empty( $selected ) )
-            $selected = array();
-        
+    function prepare_items() {
+
+        if ( empty( $this->current_selected_plugins ) )
+            $this->current_selected_plugins = array();
+
         $all_plugins = get_plugins();
 
         $per_page = 10000;
@@ -66,7 +66,7 @@ class MCC_Plugins_List_Table extends WP_List_Table {
 					'slug' => $plugin_file,
 					'name' => $plugin['Name'],
 					'description' => $plugin['Description'],
-					'checked' => in_array( $plugin_file, $selected )
+					'checked' => in_array( $plugin_file, $this->current_selected_plugins )
 				);
 			}
 		}

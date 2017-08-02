@@ -631,12 +631,14 @@ class Multisite_Content_Copier_Network_Main_Menu extends Multisite_Content_Copie
 	private function render_plugin_selector() {
 		$current_selected_plugins = $this->wizard->get_value( 'plugins' );
 
-		require_once( MULTISTE_CC_ADMIN_DIR . 'tables/network-plugins-list.php' );
-		$table = new MCC_Plugins_List_Table();
-		$table->prepare_items( $current_selected_plugins );
-
 		if ( ! is_array( $current_selected_plugins ) )
 			$current_selected_plugins = array();
+
+		require_once( MULTISTE_CC_ADMIN_DIR . 'tables/network-plugins-list.php' );
+
+		$table = new MCC_Plugins_List_Table();
+		$table->current_selected_plugins = $current_selected_plugins;
+		$table->prepare_items();
 
 		?>
 			<h3><?php _e( 'Select the plugins you want to activate', MULTISTE_CC_LANG_DOMAIN ); ?></h3>

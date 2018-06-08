@@ -452,6 +452,8 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
 		$images_as_attachments = $all_media['attachments'];
 		$images_as_no_attachments = $all_media['no_attachments'];
 
+		require_once( ABSPATH . 'wp-admin/includes/image.php' );
+
 		foreach ( $images_as_attachments as $key => $image ) {
 
 			switch_to_blog( $this->orig_blog_id );
@@ -484,8 +486,6 @@ class Multisite_Content_Copier_Post_Type_Copier extends Multisite_Content_Copier
             $new_attachment['post_parent'] = $new_post_id;
 
             $new_attachment['guid'] = $upload['url'];
-
-            require_once( ABSPATH . 'wp-admin/includes/image.php' );
 
             // Generate the new attachment
             $new_attachment_id = wp_insert_attachment( $new_attachment, $upload['file'] );
